@@ -1,0 +1,52 @@
+<html>
+<head>
+  <script>
+
+    // *********************************************************************
+    // getWacomPlugin
+    //   Returns correct plugin instance depending on whether running on
+    //   Internet Explorer or Firefox (and similar: Chrome, Safari, Opera).
+    //
+    function getWacomPlugin() {
+      var plugin = document.getElementById('wtPlugin');
+      console.log('plugin: ' + plugin);
+      return plugin;
+    }
+
+    /* window events */
+
+    window.onload = function() {
+      console.log('here');
+      startRead();
+    };
+
+    /* read pressure */
+
+    function startRead() {
+      timeoutID = window.setTimeout(returnRead, 1000);
+    }
+
+    function returnRead() {
+      console.log('pressure: ' + getWacomPlugin().penAPI.pressure);
+      startRead();
+    }
+  </script>
+</head>
+
+<body>
+  <!--[if IE]>
+
+  <object id='wtPlugin' classid='CLSID:092dfa86-5807-5a94-bf3b-5a53ba9e5308'>
+  </object>
+
+  <![endif]--><!--[if !IE]> <-->
+
+  <object id="wtPlugin" type="application/x-wacomtabletplugin">
+        <param name="onload" value="pluginLoaded" />
+
+  </object>
+
+  <!--> <![endif]-->
+</body>
+
+</html>
