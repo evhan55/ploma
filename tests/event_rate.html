@@ -1,0 +1,37 @@
+<html>
+<head>
+  <script>
+    var count = 0;
+
+    /* window events */
+
+    window.onload = function() {
+      startCount();
+    };
+
+    window.onmousemove = function() {
+      count++;
+    };
+
+    window.onmozpressure = function() {
+      console.log('pressure?');
+      count++;
+    };
+
+    /* counters */
+
+    function startCount() {
+      count = 0;
+      timeoutID = window.setTimeout(returnCount, 1000);
+    }
+
+    function returnCount() {
+      console.log(count);
+      startCount();
+    }
+  </script>
+</head>
+
+<body>
+</body>
+</html>
