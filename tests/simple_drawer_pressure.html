@@ -1,8 +1,13 @@
 <html>
   <head>
+    <!-- FONT -->
+    <link rel="stylesheet" type="text/css" href="http://assets.tumblr.com/fonts/bodonirecutfs/stylesheet.css?v=3"><link rel="stylesheet" type="text/css" href="http://assets.tumblr.com/fonts/newsgothicfs/stylesheet.css?v=3">
 
     <!-- CSS -->
     <style>
+      h1, h3 {
+        font-family:'Bodoni Recut FS', serif;
+      }
       canvas {
         border: 1px solid black;
         cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
@@ -42,6 +47,8 @@
   </head>
 
   <body>
+    <!-- HEADER -->
+    <h1>Ploma</h1>
     
     <!-- CANVAS -->
     <canvas id="c" width="500" height="300"></canvas>
@@ -63,18 +70,21 @@
 
     el.onmousedown = function(e) {
       isDrawing = true;
-      oldX = e.clientX;
-      oldY = e.clientY;
+      oldX = e.clientX - el.offsetLeft + 8;
+      oldY = e.clientY - el.offsetTop + 8;
     };
     el.onmousemove = function(e) {
       if (isDrawing) {
-        ctx.beginPath(); // resets the current path
+        ctx.beginPath(); // begins the current path
         ctx.moveTo(oldX, oldY);
-        ctx.lineTo(e.clientX, e.clientY);
+        ctx.lineTo(
+          e.clientX - el.offsetLeft + 8,
+          e.clientY - el.offsetTop + 8
+        );
         ctx.stroke();
         ctx.closePath(); // closes the current path
-        oldX = e.clientX;
-        oldY = e.clientY;
+        oldX = e.clientX - el.offsetLeft + 8;
+        oldY = e.clientY - el.offsetTop + 8;
       }
     };
     el.onmouseup = function() {
