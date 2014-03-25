@@ -1,0 +1,85 @@
+<html>
+  <head>
+
+    <!-- CSS -->
+    <style>
+      canvas {
+        border: 1px solid black;
+        cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
+      }
+      object {
+        background: white;
+        border: 1px solid black;
+        opacity: 0;
+      }
+    </style>
+
+    <!-- WACOM JS -->
+    <script>
+      window.onload = function() {
+        startRead();
+      };
+      function getWacomPlugin() {
+        var plugin = document.getElementById('wtPlugin');
+        return plugin;
+      }
+      function startRead() {
+        timeoutID = window.setTimeout(returnRead, 500);
+      }
+      function returnRead() {
+        var p = getWacomPlugin().penAPI.pressure;
+        var el = document.getElementById('c');
+        console.log('pressure: ' + p);
+        console.log('canvas: ' + el);
+        if(el) {
+          var ctx = el.getContext('2d');
+          ctx.setStrokeColor(0, 0, 0, p);
+        }
+        startRead();
+      }
+    </script>
+
+  </head>
+
+  <body>
+    
+    <!-- CANVAS -->
+    <canvas id="c" width="500" height="300"></canvas>
+
+    <!-- WACOM PLUGIN -->
+    <object id="wtPlugin" type="application/x-wacomtabletplugin">
+      <param name="onload" value="pluginLoaded" />
+    </object>
+
+  </body>
+
+  <!-- CANVAS JS -->
+  <script>
+    var el = document.getElementById('c');
+    var ctx = el.getContext('2d');
+    var isDrawing;
+    var oldX;
+    var oldY;
+
+    el.onmousedown = function(e) {
+      isDrawing = true;
+      oldX = e.clientX;
+      oldY = e.clientY;
+    };
+    el.onmousemove = function(e) {
+      if (isDrawing) {
+        ctx.beginPath(); // resets the current path
+        ctx.moveTo(oldX, oldY);
+        ctx.lineTo(e.clientX, e.clientY);
+        ctx.stroke();
+        ctx.closePath(); // closes the current path
+        oldX = e.clientX;
+        oldY = e.clientY;
+      }
+    };
+    el.onmouseup = function() {
+      isDrawing = false;
+    };
+  </script>
+
+</html>
