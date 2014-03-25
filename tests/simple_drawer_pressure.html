@@ -24,13 +24,20 @@
       window.onload = function() {
         startRead();
       };
+
+      // Get the Wacom plugin
       function getWacomPlugin() {
         var plugin = document.getElementById('wtPlugin');
         return plugin;
       }
+
+      // Set a timer to read the Wacom pressure
       function startRead() {
         timeoutID = window.setTimeout(returnRead, 500);
       }
+
+      // Read the Wacom pressure
+      // Set the canvas stroke color based on the pressure
       function returnRead() {
         var p = getWacomPlugin().penAPI.pressure;
         var el = document.getElementById('c');
@@ -68,11 +75,19 @@
     var oldX;
     var oldY;
 
+    // Set isDrawing to true
+    // Record the mouse position
     el.onmousedown = function(e) {
       isDrawing = true;
       oldX = e.clientX - el.offsetLeft + 8;
       oldY = e.clientY - el.offsetTop + 8;
     };
+
+    // Start a path
+    // Move to old mouse position
+    // Draw line to new mouse position
+    // Close the path and stroke
+    // Reset the old mouse position to new mouse position
     el.onmousemove = function(e) {
       if (isDrawing) {
         ctx.beginPath(); // begins the current path
@@ -87,6 +102,8 @@
         oldY = e.clientY - el.offsetTop + 8;
       }
     };
+
+    // Set isDrawing to false
     el.onmouseup = function() {
       isDrawing = false;
     };
