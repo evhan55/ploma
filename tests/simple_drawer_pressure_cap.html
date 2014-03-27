@@ -1,0 +1,113 @@
+<html>
+  <head>
+    <!-- FONT -->
+    <link rel="stylesheet" type="text/css" href="http://assets.tumblr.com/fonts/bodonirecutfs/stylesheet.css?v=3"><link rel="stylesheet" type="text/css" href="http://assets.tumblr.com/fonts/newsgothicfs/stylesheet.css?v=3">
+
+    <!-- CSS -->
+    <style>
+      h1, h3 {
+        font-family:'Bodoni Recut FS', serif;
+      }
+      canvas {
+        border: 1px solid black;
+        cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
+      }
+      object {
+        background: white;
+        border: 1px solid black;
+        opacity: 0;
+      }
+    </style>
+
+    <!-- WACOM JS -->
+    <script>
+      // Get the Wacom plugin
+      function getWacomPlugin() {
+        var plugin = document.getElementById('wtPlugin');
+        return plugin;
+      }
+    </script>
+
+  </head>
+
+  <body>
+    <!-- HEADER -->
+    <h1>Ploma</h1>
+    
+    <!-- CANVAS -->
+    <canvas id="c" width="650" height="600"></canvas>
+
+    <!-- WACOM PLUGIN -->
+    <object id="wtPlugin" type="application/x-wacomtabletplugin">
+      <param name="onload" value="pluginLoaded" />
+    </object>
+
+  </body>
+
+  <!-- CANVAS JS -->
+  <script>
+
+    //***********************
+    // Helpers
+
+    function cursorOffset(e, el) {
+      var pt = {};
+      pt.x = e.clientX - el.offsetLeft + 8;
+      pt.y = e.clientY - el.offsetTop + 8;
+      return pt;
+    }
+
+    function mapWidth(v) {
+      return 3*v;
+    }
+
+    //***********************
+    // Canvas Drawing
+
+    var el = document.getElementById('c');
+    var ctx = el.getContext('2d');
+    var isDrawing;
+    var oldX;
+    var oldY;
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // Set isDrawing to true
+    // Record the mouse position
+    el.onmousedown = function(e) {
+      isDrawing = true;
+      oldX = cursorOffset(e, el).x;
+      oldY = cursorOffset(e, el).y;
+    };
+
+    // Start a path
+    // Move to old mouse position
+    // Draw line to new mouse position
+    // Close the path and stroke
+    // Reset the old mouse position to new mouse position
+    el.onmousemove = function(e) {
+      if (isDrawing) {
+        var pressure = getWacomPlugin().penAPI.pressure;
+        ctx.beginPath(); // begins the current path
+        ctx.moveTo(oldX, oldY);
+        ctx.lineTo(
+          cursorOffset(e, el).x,
+          cursorOffset(e, el).y
+        );
+        ctx.setLineWidth(mapWidth(pressure));
+        ctx.setStrokeColor(0, 0, 0, pressure);
+        ctx.stroke();
+        ctx.closePath(); // closes the current path
+        oldX = cursorOffset(e, el).x;
+        oldY = cursorOffset(e, el).y;
+      }
+    };
+
+    // Set isDrawing to false
+    el.onmouseup = function() {
+      isDrawing = false;
+    };
+  </script>
+
+</html>

@@ -1,0 +1,111 @@
+<html>
+  <head>
+    <!-- FONT -->
+    <link rel="stylesheet" type="text/css" href="http://assets.tumblr.com/fonts/bodonirecutfs/stylesheet.css?v=3"><link rel="stylesheet" type="text/css" href="http://assets.tumblr.com/fonts/newsgothicfs/stylesheet.css?v=3">
+
+    <!-- CSS -->
+    <style>
+      h1, h3 {
+        font-family:'Bodoni Recut FS', serif;
+      }
+      canvas {
+        border: 1px solid black;
+        cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
+      }
+      object {
+        background: white;
+        border: 1px solid black;
+        opacity: 0;
+      }
+    </style>
+
+    <!-- WACOM JS -->
+    <script>
+      // Get the Wacom plugin
+      function getWacomPlugin() {
+        var plugin = document.getElementById('wtPlugin');
+        return plugin;
+      }
+    </script>
+
+  </head>
+
+  <body>
+    <!-- HEADER -->
+    <h1>Ploma</h1>
+    
+    <!-- CANVAS -->
+    <canvas id="c" width="500" height="300"></canvas>
+
+    <!-- WACOM PLUGIN -->
+    <object id="wtPlugin" type="application/x-wacomtabletplugin">
+      <param name="onload" value="pluginLoaded" />
+    </object>
+
+  </body>
+
+  <!-- CANVAS JS -->
+  <script>
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getCursorOffset(e, el) {
+      var pt = {};
+      pt.x = e.clientX - el.offsetLeft + 8;
+      pt.y = e.clientY - el.offsetTop + 8;
+      return pt;
+    }
+
+    var el = document.getElementById('c');
+    var ctx = el.getContext('2d');
+
+    ctx.lineJoin = ctx.lineCap = 'round';
+    /*ctx.shadowBlur = 10;
+    ctx.shadowColor = 'rgb(0, 0, 0)';*/
+
+    var isDrawing, points = [ ];
+
+    el.onmousedown = function(e) {
+      isDrawing = true;
+      var p = getWacomPlugin().penAPI.pressure;
+      points.push({ 
+        x: getCursorOffset(e, el).x, 
+        y: getCursorOffset(e, el).y,
+        width: p,
+        color: [0, 0, 0, p]
+      });
+    };
+
+    el.onmousemove = function(e) {
+      if (!isDrawing) return;
+
+      //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      var p = getWacomPlugin().penAPI.pressure;
+      points.push({ 
+        x: getCursorOffset(e, el).x, 
+        y: getCursorOffset(e, el).y,
+        width: p,
+        color: [0, 0, 0, p]
+      });
+
+      for (var i = 1; i < points.length; i++) {
+        var pt = points[i];
+        ctx.beginPath();
+        ctx.moveTo(points[i-1].x, points[i-1].y);
+        ctx.lineWidth = pt.width;
+        ctx.lineTo(pt.x, pt.y);
+        ctx.setStrokeColor(pt.color[0], pt.color[1], pt.color[2], pt.color[3]);
+        ctx.stroke();
+        ctx.closePath();
+      }
+    };
+
+    el.onmouseup = function() {
+      isDrawing = false;
+      points.length = 0;
+    };
+  </script>
+
+</html>
