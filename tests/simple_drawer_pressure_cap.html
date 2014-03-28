@@ -75,7 +75,6 @@
     // Keyboard presses
 
     window.onkeypress = function(e) {
-      console.log(e.charCode);
       // 'c' clears canvas
       if (e.charCode === 99) {
         clearCanvas();
@@ -83,8 +82,6 @@
 
       // 'i' saves canvas image
       if (e.charCode === 105) {
-        console.log('i');
-        // save canvas image as data url (png format by default)
         window.open(el.toDataURL());
       }
     }
