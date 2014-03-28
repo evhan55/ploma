@@ -72,6 +72,24 @@
     }
 
     //***********************
+    // Keyboard presses
+
+    window.onkeypress = function(e) {
+      console.log(e.charCode);
+      // 'c' clears canvas
+      if (e.charCode === 99) {
+        clearCanvas();
+      }
+
+      // 'i' saves canvas image
+      if (e.charCode === 105) {
+        console.log('i');
+        // save canvas image as data url (png format by default)
+        window.open(el.toDataURL());
+      }
+    }
+
+    //***********************
     // Canvas Drawing
 
     var el = document.getElementById('c');
@@ -89,13 +107,6 @@
     //ctx.shadowColor = shadowColor;
     ctx.strokeStyle = penColor;
     clearCanvas();
-
-    // Clear the canvas when 'c' pressed
-    window.onkeypress = function(e) {
-      if (e.charCode === 99) {
-        clearCanvas();
-      }
-    }
 
     // Set isDrawing to true
     // Record the mouse position
