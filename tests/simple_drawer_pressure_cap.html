@@ -9,13 +9,11 @@
         font-family:'Bodoni Recut FS', serif;
       }
       canvas {
-        border: 1px solid black;
         cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
       }
       object {
-        background: white;
-        border: 1px solid black;
-        opacity: 0;
+        width: 0;
+        height: 0;
       }
     </style>
 
@@ -37,6 +35,9 @@
     <!-- CANVAS -->
     <canvas id="c" width="650" height="600"></canvas>
 
+    <!-- SAMPLE SCAN -->
+    <img src="a_square_notebook.png">
+
     <!-- WACOM PLUGIN -->
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
@@ -52,13 +53,22 @@
 
     function cursorOffset(e, el) {
       var pt = {};
-      pt.x = e.clientX - el.offsetLeft + 8;
-      pt.y = e.clientY - el.offsetTop + 8;
+      pt.x = e.pageX - el.offsetLeft + 8;
+      pt.y = e.pageY - el.offsetTop + 8;
       return pt;
     }
 
     function mapWidth(v) {
-      return 3*v;
+      //var r = Math.random()*1;
+      var result = 3*v;
+      return result;
+    }
+
+    // Clear canvas and fill background
+    function clearCanvas() {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = paperColor;
+      ctx.fillRect(0, 0, 650, 600);
     }
 
     //***********************
@@ -69,9 +79,23 @@
     var isDrawing;
     var oldX;
     var oldY;
+    var paperColor = "rgba(255, 255, 220, 0.99);";
+    var penColor = "rgb(20, 5, 0);";
+    var shadowColor = "rgba(255, 225, 100, 0.5);";
 
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+    //ctx.lineCap = "round";
+    //ctx.lineJoin = "round";
+    //ctx.shadowBlur = 5;
+    //ctx.shadowColor = shadowColor;
+    ctx.strokeStyle = penColor;
+    clearCanvas();
+
+    // Clear the canvas when 'c' pressed
+    window.onkeypress = function(e) {
+      if (e.charCode === 99) {
+        clearCanvas();
+      }
+    }
 
     // Set isDrawing to true
     // Record the mouse position
@@ -96,7 +120,6 @@
           cursorOffset(e, el).y
         );
         ctx.setLineWidth(mapWidth(pressure));
-        ctx.setStrokeColor(0, 0, 0, pressure);
         ctx.stroke();
         ctx.closePath(); // closes the current path
         oldX = cursorOffset(e, el).x;
