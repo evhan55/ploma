@@ -1,7 +1,7 @@
 ploma
 =====
 
-Ploma is a research project exploring pen and ink drawing simulation on Wacom interactive display tablets.
+Ploma is a research project exploring pen and paper drawing simulation using Wacom interactive display tablets.
 
 [evhan55.github.io/ploma.html](http://evhan55.github.io/ploma.html)  
 [plomaproject.tumblr.com](http://plomaproject.tumblr.com)
