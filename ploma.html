@@ -1,19 +1,35 @@
 <html>
   <head>
-    <!-- FONT -->
-    <link rel="stylesheet" type="text/css" href="http://assets.tumblr.com/fonts/bodonirecutfs/stylesheet.css?v=3"><link rel="stylesheet" type="text/css" href="http://assets.tumblr.com/fonts/newsgothicfs/stylesheet.css?v=3">
 
     <!-- CSS -->
     <style>
-      h1, h3 {
-        font-family:'Bodoni Recut FS', serif;
-      }
       canvas {
         cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
+        border-top-right-radius: 25px;
+        border-bottom-right-radius: 25px;
+        border-top: 1px solid #DDC;
+        border-bottom: 1px solid #DDC;
+        border-right: 1px solid #DDC;
+        margin-left: -4px;
+      }
+      img {
+        border-left: 1px solid #DDC;
+        border-top: 1px solid #DDC;
+        border-bottom: 1px solid #DDC;
+        border-top-left-radius: 25px;
+        border-bottom-left-radius: 25px;
       }
       object {
         width: 0;
         height: 0;
+      }
+      div#book {
+        background-color: #553456;
+        border-radius: 5px;
+        width: calc(790px * 2);
+        height: 881px;
+        margin-left: auto;
+        margin-right: auto;
       }
     </style>
 
@@ -29,14 +45,14 @@
   </head>
 
   <body>
-    <!-- HEADER -->
-    <h1>Ploma</h1>
-    
-    <!-- CANVAS -->
-    <canvas id="c" width="650" height="600"></canvas>
 
-    <!-- SAMPLE SCAN -->
-    <img src="a_square_notebook.png">
+    <div id="book">
+      <!-- SAMPLE SCAN -->
+      <img src="notebook.png">
+      
+      <!-- CANVAS -->
+      <canvas id="c" width="789px" height="879px"></canvas>
+    </div>
 
     <!-- WACOM PLUGIN -->
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
@@ -47,6 +63,28 @@
 
   <!-- CANVAS JS -->
   <script>
+
+    //***********************
+    // Max Window
+    // http://stackoverflow.com/questions/1125084/how-to-make-in-javascript-full-screen-windows-stretching-all-over-the-screen
+
+    window.onload = maxWindow;
+
+    function maxWindow() {
+        window.moveTo(0, 0);
+
+
+        if (document.all) {
+            top.window.resizeTo(screen.availWidth, screen.availHeight);
+        }
+
+        else if (document.layers || document.getElementById) {
+            if (top.window.outerHeight < screen.availHeight || top.window.outerWidth < screen.availWidth) {
+                top.window.outerHeight = screen.availHeight;
+                top.window.outerWidth = screen.availWidth;
+            }
+        }
+    }
 
     //***********************
     // Helpers
@@ -68,7 +106,7 @@
     function clearCanvas() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.fillStyle = paperColor;
-      ctx.fillRect(0, 0, 650, 600);
+      ctx.fillRect(0, 0, 789, 879);
     }
 
     //***********************
@@ -94,7 +132,7 @@
     var isDrawing;
     var oldX;
     var oldY;
-    var paperColor = "rgba(255, 255, 220, 0.99);";
+    var paperColor = "rgb(253, 253, 240);";
     var penColor = "rgb(20, 5, 0);";
     var shadowColor = "rgba(255, 225, 100, 0.5);";
 
