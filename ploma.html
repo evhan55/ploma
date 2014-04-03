@@ -26,8 +26,8 @@
       div#book {
         background-color: #553456;
         border-radius: 5px;
-        width: calc(790px * 2);
-        height: 881px;
+        width: calc(787px * 2);
+        height: 1003px;
         margin-left: auto;
         margin-right: auto;
       }
@@ -51,7 +51,7 @@
       <img src="notebook.png">
       
       <!-- CANVAS -->
-      <canvas id="c" width="789px" height="879px"></canvas>
+      <canvas id="c" width="786px" height="1001px"></canvas>
     </div>
 
     <!-- WACOM PLUGIN -->
@@ -106,7 +106,7 @@
     function clearCanvas() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.fillStyle = paperColor;
-      ctx.fillRect(0, 0, 789, 879);
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
 
     //***********************
