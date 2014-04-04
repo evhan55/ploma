@@ -33,24 +33,14 @@
       }
     </style>
 
-    <!-- WACOM JS -->
-    <script>
-      // Get the Wacom plugin
-      function getWacomPlugin() {
-        var plugin = document.getElementById('wtPlugin');
-        return plugin;
-      }
-    </script>
-
   </head>
 
+  <!-- HTML ELEMENTS -->
   <body>
 
+    <!-- NOTEBOOK -->
     <div id="book">
-      <!-- SAMPLE SCAN -->
       <img src="notebook.png">
-      
-      <!-- CANVAS -->
       <canvas id="c" width="786px" height="1001px"></canvas>
     </div>
 
@@ -61,8 +51,16 @@
 
   </body>
 
-  <!-- CANVAS JS -->
+  <!-- JS -->
   <script>
+
+    //***********************
+    // Wacom Plugin
+    //
+    function getWacomPlugin() {
+      var plugin = document.getElementById('wtPlugin');
+      return plugin;
+    }
 
     //***********************
     // Max Window
@@ -97,12 +95,10 @@
     }
 
     function mapWidth(v) {
-      //var r = Math.random()*1;
       var result = 3*v;
       return result;
     }
 
-    // Clear canvas and fill background
     function clearCanvas() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.fillStyle = paperColor;
@@ -124,8 +120,9 @@
       }
     }
 
+    
     //***********************
-    // Canvas Drawing
+    // Canvas Drawing: Separate Paths
 
     var el = document.getElementById('c');
     var ctx = el.getContext('2d');
@@ -177,6 +174,87 @@
     el.onmouseup = function() {
       isDrawing = false;
     };
+
+    /*//***********************
+    // Canvas Drawing: Bezier Curves
+
+    function midPointBtw(p1, p2) {
+      return {
+        x: p1.x + (p2.x - p1.x) / 2,
+        y: p1.y + (p2.y - p1.y) / 2
+      };
+    }
+
+    var el = document.getElementById('c');
+    var ctx = el.getContext('2d');
+
+    //ctx.lineWidth = 10;
+    ctx.lineJoin = ctx.lineCap = 'round';
+
+    var isDrawing, points = [ ];
+    var paperColor = "rgb(253, 253, 240);";
+    var penColor = "rgb(20, 5, 0);";
+    var shadowColor = "rgba(255, 225, 100, 0.5);";
+    ctx.shadowBlur = 1;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    clearCanvas();
+
+    el.onmousedown = function(e) {
+      isDrawing = true;
+      points.push({
+        x: cursorOffset(e, el).x,
+        y: cursorOffset(e, el).y,
+        p: getWacomPlugin().penAPI.pressure
+      });
+    };
+
+    el.onmousemove = function(e) {
+      if (!isDrawing) return;
+      
+      points.push({
+        x: cursorOffset(e, el).x,
+        y: cursorOffset(e, el).y,
+        p: getWacomPlugin().penAPI.pressure
+      });
+
+      //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      //clearCanvas();
+      
+      var p1 = points[0];
+      var p2 = points[1];
+      
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      //console.log(points);
+
+      for (var i = 1, len = points.length; i < len; i++) {
+        // we pick the point between pi+1 & pi+2 as the
+        // end point and p1 as our control point
+        //if(i > 1) {
+        //  ctx.beginPath();
+        //}
+        var midPoint = midPointBtw(p1, p2);
+        ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
+        //ctx.setLineWidth(mapWidth(p1.p)); // pressure
+        //ctx.stroke();
+        //ctx.closePath();
+        p1 = points[i];
+        p2 = points[i+1];
+      }
+      // Draw last line as a straight line while
+      // we wait for the next point to be able to calculate
+      // the bezier control point
+      //ctx.beginPath();
+      ctx.lineTo(p1.x, p1.y);
+      ctx.setLineWidth(mapWidth(p1.p)); // pressure
+      ctx.stroke();
+      //ctx.closePath();
+    };
+
+    el.onmouseup = function() {
+      isDrawing = false;
+      points.length = 0;
+    };*/
   </script>
 
 </html>
