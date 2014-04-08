@@ -1,0 +1,165 @@
+<html>
+  <head>
+
+    <!-- CSS -->
+    <style>
+      canvas {
+        cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
+        border-radius: 25px;
+        border: 1px solid #EED;
+        margin-top: 20px;
+      }
+      object {
+        width: 0;
+        height: 0;
+      }
+      a {
+        background: #DB5;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-left: 8px;
+        cursor: pointer;
+      }
+    </style>
+
+  </head>
+
+  <!-- HTML ELEMENTS -->
+  <body id="content">
+
+    <!-- NOTEBOOK -->
+    <br id='b'>
+    <canvas id="c" width="1000px" height="1000px"></canvas>
+
+    <!-- WACOM PLUGIN -->
+    <object id="wtPlugin" type="application/x-wacomtabletplugin">
+      <param name="onload" value="pluginLoaded" />
+    </object>
+
+  </body>
+
+  <!-- JS -->
+  <script>
+
+    //***********************
+    // Wacom Plugin
+    //
+    function getWacomPlugin() {
+      var plugin = document.getElementById('wtPlugin');
+      return plugin;
+    }
+
+    //***********************
+    // Window onload
+    //
+    window.onload = function() {
+      var a = document.createElement('a');
+      var b = document.getElementById('b');
+      var c = document.getElementById('content');
+      a.textContent = "Capture";
+      a.id = "a";
+      c.insertBefore(a, b);
+
+      a.onclick = capture;
+    };
+
+    //***********************
+    // Helpers
+    //
+    function cursorOffset(e, el) {
+      var pt = {};
+      pt.x = e.pageX - el.offsetLeft + 0;
+      pt.y = e.pageY - el.offsetTop + 0;
+      return pt;
+    }
+
+    function mapWidth(v) {
+      var result = 3*v;
+      return result;
+    }
+
+    //***********************
+    // Capture
+    //
+    function capture() {
+      var a = document.getElementById('a');
+      var json = JSON.stringify(points);
+      var blob = new Blob([json], {type: "application/json"});
+      var url  = URL.createObjectURL(blob);
+      a.download = "capture_"+Date.now()+".json";
+      a.href = url;
+
+      // Clear canvas and points array
+      clearCanvas();
+      points.length = 0;
+    }
+    
+    //***********************
+    // Canvas Drawing: Separate Paths
+    //
+    function clearCanvas() {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = paperColor;
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+
+    var el = document.getElementById('c');
+    var ctx = el.getContext('2d');
+    var isDrawing;
+    var oldX;
+    var oldY;
+    var paperColor = "rgb(255, 255, 250);";
+    var penColor = "rgb(190, 190, 190);";
+    var shadowColor = "rgba(255, 225, 100, 0.5);";
+    var points = [];
+    ctx.strokeStyle = penColor;
+
+    // Start with fresh canvas
+    clearCanvas();
+
+    // Set isDrawing to true
+    // Record the mouse position
+    el.onmousedown = function(e) {
+      isDrawing = true;
+      oldX = cursorOffset(e, el).x;
+      oldY = cursorOffset(e, el).y;
+    };
+
+    // Start a path
+    // Move to old mouse position
+    // Draw line to new mouse position
+    // Close the path and stroke
+    // Reset the old mouse position to new mouse position
+    el.onmousemove = function(e) {
+      if (isDrawing) {
+        var penX = cursorOffset(e, el).x;
+        var penY = cursorOffset(e, el).y;
+        var penPressure = getWacomPlugin().penAPI.pressure;
+        var point = {
+          x:  penX,
+          y: penY,
+          p: penPressure,
+          t: Date.now()
+        };
+        points.push(point);
+
+        ctx.beginPath(); // begins the current path
+        ctx.moveTo(oldX, oldY);
+        ctx.lineTo(penX, penY);
+        ctx.setLineWidth(mapWidth(penPressure));
+        ctx.stroke();
+        ctx.closePath(); // closes the current path
+        oldX = penX;
+        oldY = penY;
+      }
+    };
+
+    // Set isDrawing to false
+    el.onmouseup = function() {
+      isDrawing = false;
+    };
+  </script>
+
+</html>
