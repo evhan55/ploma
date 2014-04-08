@@ -1,0 +1,107 @@
+<html>
+  <head>
+
+    <!-- CSS -->
+    <style>
+      canvas {
+        cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
+        border-radius: 25px;
+        border: 1px solid #EED;
+        margin-top: 20px;
+      }
+      object {
+        width: 0;
+        height: 0;
+      }
+      a {
+        background: #DB5;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-left: 8px;
+        cursor: pointer;
+      }
+    </style>
+
+  </head>
+
+  <!-- HTML ELEMENTS -->
+  <body id="content">
+
+    <!-- NOTEBOOK -->
+    <canvas id="c" width="1000px" height="1000px"></canvas>
+
+  </body>
+
+  <!-- FILE I/O -->
+  <script src="file:///home/evhan55/Desktop/capture_1396972923837.jsonp"></script>
+
+  <!-- JS -->
+  <script type="text/javascript">
+    var el = document.getElementById('c');
+    var ctx = el.getContext('2d');
+    var oldX;
+    var oldY;
+    var paperColor = "rgb(255, 255, 250);";
+    var penColor = "rgb(190, 190, 190);";
+    var shadowColor = "rgba(255, 225, 100, 0.5);";
+    var capture;
+
+    //***********************
+    // Window onload
+    //
+    window.onload = function(){
+      capture = JSON.parse(jsonstr);
+      console.log(capture);
+      replay();
+    }
+
+    //***********************
+    // Helpers
+    //
+    function cursorOffset(e, el) {
+      var pt = {};
+      pt.x = e.pageX - el.offsetLeft + 0;
+      pt.y = e.pageY - el.offsetTop + 0;
+      return pt;
+    }
+
+    function mapWidth(v) {
+      var result = 3*v;
+      return result;
+    }
+    
+    //***********************
+    // Canvas Drawing: Separate Paths
+    //
+    function clearCanvas() {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = paperColor;
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+    ctx.strokeStyle = penColor;
+
+    // Start with fresh canvas
+    clearCanvas();
+
+    // replay
+    function replay() {
+      oldX = capture[0].x;
+      oldY = capture[0].y;
+      for(var i = 1; i < capture.length; i++) {
+        var point = capture[i];
+        ctx.beginPath(); // begins the current path
+        ctx.moveTo(oldX, oldY);
+        ctx.lineTo(point.x, point.y);
+        ctx.setLineWidth(mapWidth(point.p));
+        ctx.stroke();
+        ctx.closePath(); // closes the current path
+        oldX = point.x;
+        oldY = point.y;
+      }
+    }
+
+  </script>
+
+</html>
