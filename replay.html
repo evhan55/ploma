@@ -9,7 +9,6 @@
         color: #555;
       }
       canvas {
-        cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
         border-radius: 25px;
         border: 1px solid #EED;
         margin-top: 20px;
@@ -19,17 +18,8 @@
         width: 0;
         height: 0;
       }
-      /*a {
-        background: #DB5;
-        color: white;
-        padding: 4px 10px;
-        border-radius: 5px;
-        text-decoration: none;
-        margin-left: 8px;
-        cursor: pointer;
-      }*/
       #panel {
-        width: 300px;
+        width: 255px;
         height: 300px;
         float: left;
         margin-left: 20px;
@@ -38,20 +28,28 @@
         padding: 10px;
         border: 1px solid #EED;
       }
+      /* inputs */
       #tension input{
         width: 40px;
       }
-      #tension-input-2-value {
-        float: right;
+      /* input controls and readouts */
+      .control {
+        height: 30px;
+        vertical-align: middle;
       }
-      a {
-        padding: 5px 10px;
-        background-color: rgb(107, 137, 255);
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
+      .label {
+        height: 30px;
+        width: 80px;
+        line-height: 30px;
         float: left;
-        margin-top: 10px;
+      }
+      .control input {
+        margin-top: 5px;
+      }
+      .readout {
+        height: 30px;
+        line-height: 30px;
+        float: right;
       }
     </style>
 
@@ -61,17 +59,41 @@
   <body id="content">
 
     <!-- NOTEBOOK -->
-    <canvas id="c" width="1000px" height="1000px"></canvas>
+    <canvas id="c" width="1000px" height="700px"></canvas>
 
     <!-- CONTROL PANEL -->
     <div id="panel">
-      <div id="tension">
-        Tension <input id="tension-input" value="0.33"></input>
+
+      <h3>Curve Fitting</h3>
+      <div class="control">
+        <div class="label">Tension</div>
+        <input id="tension-input" value="0.33" type="range" min="0" max="1" step="0.01"></input>
+        <div class="readout" id="tension-readout"></div>
       </div>
-      <div id="tension2">
-        Tension <input id="tension-input-2" value="0.33" type="range" min="0" max="1" step="0.01"></input><div id="tension-input-2-value"></div>
+
+      <h3>Line</h3>
+      <div class="control">
+        <div class="label">Thickness</div>
+        <input id="thickness-input" value="1" type="range" min="0" max="10" step="0.05"></input>
+        <div class="readout" id="thickness-readout"></div>
       </div>
-      <a id="redraw">Draw</a>
+      <div class="control">
+        <div class="label">Darkness</div>
+        <input id="darkness-input" value="0.5" type="range" min="0" max="1" step="0.01"></input>
+        <div class="readout" id="darkness-readout"></div>
+      </div>
+      <h3>Shadow</h3>
+      <div class="control">
+        <div class="label">Blur</div>
+        <input id="blur-input" value="3" type="range" min="0" max="10" step="0.05"></input>
+        <div class="readout" id="blur-readout"></div>
+      </div>
+      <div class="control">
+        <div class="label">Darkness</div>
+        <input id="shadow-darkness-input" value="0.5" type="range" min="0" max="1" step="0.01"></input>
+        <div class="readout" id="shadow-darkness-readout"></div>
+      </div>
+
     </div>
 
   </body>
@@ -86,15 +108,25 @@
     var oldX;
     var oldY;
     var paperColor = "rgb(255, 255, 250);";
-    var penColor = "rgb(190, 190, 190);";
-    var shadowColor = "rgba(255, 225, 100, 0.5);";
     var capture;
 
     var tension;
-    var tension2;
+    var thickness;
+    var darkness;
+    var blur;
+    var shadowDarkness;
+
     var tensionInput;
-    var tensionInput2;
-    var tensionInput2Value;
+    var thicknessInput;
+    var darknessInput;
+    var blurInput;
+    var shadowDarknessInput;
+
+    var tensionReadout;
+    var thicknessReadout;
+    var darknessReadout;
+    var blurReadout;
+    var shadowDarknessReadout;
 
     //***********************
     // Window onload
@@ -103,23 +135,58 @@
       // load capture file points
       capture = JSON.parse(jsonstr);
 
-      // bind events
+      // tension input
       tensionInput = document.getElementById("tension-input");
+      tensionReadout = document.getElementById("tension-readout");
       tension = tensionInput.value;
-      tensionInput.onkeypress = function(e) {
-        console.log(e);
-      };
-      tensionInput2 = document.getElementById("tension-input-2");
-      tensionInput2Value = document.getElementById("tension-input-2-value");
-      tension2 = tensionInput2.value;
-      tensionInput2Value.innerHTML = tensionInput2.value;
-      tensionInput2.onchange = function(e) {
-        tensionInput2Value.innerHTML = tensionInput2.value;
+      tensionReadout.innerHTML = tension;
+      tensionInput.onchange = function(e) {
+        tension = tensionInput.value;
+        tensionReadout.innerHTML = tension;
         redraw();
       }
-      var redrawButton = document.getElementById("redraw");
-      redrawButton.onmouseup = function(e) {
-        console.log(e);
+
+      // thickness input
+      thicknessInput = document.getElementById("thickness-input");
+      thicknessReadout = document.getElementById("thickness-readout");
+      thickness = thicknessInput.value;
+      thicknessReadout.innerHTML = thickness;
+      thicknessInput.onchange = function(e) {
+        thickness = thicknessInput.value;
+        thicknessReadout.innerHTML = thickness;
+        redraw();
+      }
+
+      // darkness input
+      darknessInput = document.getElementById("darkness-input");
+      darknessReadout = document.getElementById("darkness-readout");
+      darkness = darknessInput.value;
+      darknessReadout.innerHTML = darkness;
+      darknessInput.onchange = function(e) {
+        darkness = darknessInput.value;
+        darknessReadout.innerHTML = darkness;
+        redraw();
+      }
+
+      // blur input
+      blurInput = document.getElementById("blur-input");
+      blurReadout = document.getElementById("blur-readout");
+      blur = blurInput.value;
+      blurReadout.innerHTML = blur;
+      blurInput.onchange = function(e) {
+        blur = blurInput.value;
+        blurReadout.innerHTML = blur;
+        redraw();
+      }
+
+      // shadow darkness input
+      shadowDarknessInput = document.getElementById("shadow-darkness-input");
+      shadowDarknessReadout = document.getElementById("shadow-darkness-readout");
+      shadowDarkness = shadowDarknessInput.value;
+      shadowDarknessReadout.innerHTML = shadowDarkness;
+      shadowDarknessInput.onchange = function(e) {
+        shadowDarkness = shadowDarknessInput.value;
+        shadowDarknessReadout.innerHTML = shadowDarkness;
         redraw();
       }
 
@@ -150,51 +217,20 @@
       ctx.fillStyle = paperColor;
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
-    ctx.strokeStyle = penColor;
-
-    // Start with fresh canvas
-    clearCanvas();
-
-    // replay
-    function replay() {
-      oldX = capture[0].x;
-      oldY = capture[0].y;
-      for(var i = 1; i < capture.length; i++) {
-        var point = capture[i];
-        ctx.beginPath(); // begins the current path
-        ctx.moveTo(oldX, oldY);
-        ctx.lineTo(point.x, point.y);
-        ctx.setLineWidth(mapWidth(point.p));
-        ctx.stroke();
-        ctx.closePath(); // closes the current path
-        oldX = point.x;
-        oldY = point.y;
-      }
-    }
 
     function redraw() {
       // clear canvas
       clearCanvas();
 
-      // points
+      // collect points
       var points = [];
       for (var i = 0; i < capture.length; i+=2) {
         points.push(capture[i].x);
         points.push(capture[i].y);
       }
 
-      // tension
-      //if(tensionInput.value){
-      //  tension = tensionInput.value;
-      //}
-
-      // tension2
-      if(tensionInput2.value){
-        tension2 = tensionInput2.value;
-      }
-
-      //drawSpline(ctx,[20,50,100,100,150,50,200,150,250,50,300,70,310,130,380,30],t,false);
-      drawSpline(ctx,points,tension2,false);
+      // draw spline
+      drawSpline(ctx, points, tension, thickness, darkness, blur, shadowDarkness, false);
     }
 
     //************************
@@ -225,9 +261,11 @@
       return [p1x,p1y,p2x,p2y]
     }
 
-    function drawSpline(ctx,pts,t,closed){
-      //showDetails=document.getElementById('details').checked;
-      ctx.lineWidth=4;
+    function drawSpline(ctx,pts,t,th,d,b,sh,closed){
+      ctx.lineWidth=th;
+      ctx.strokeStyle = "rgba(0, 0, 0, "+d+")";
+      ctx.shadowBlur = b;
+      ctx.shadowColor = "rgba(0, 0, 0, "+sh+")";
       ctx.save();
       var cp=[];   // array of control points, as x0,y0,x1,y1,...
       var n=pts.length;
@@ -241,20 +279,13 @@
               cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
           }
           cp=cp.concat(cp[0],cp[1]);   
-          for(var i=2;i<n+2;i+=2){
-              //var color=HSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
-              //if(!showDetails){color="#555555"}
-              //ctx.strokeStyle=hexToCanvasColor(color,0.75);    
+          for(var i=2;i<n+2;i+=2){  
               ctx.strokestyle="rgb(190, 190, 190);";   
               ctx.beginPath();
               ctx.moveTo(pts[i],pts[i+1]);
               ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
               ctx.stroke();
               ctx.closePath();
-              //if(showDetails){
-              //   drawControlLine(ctx,pts[i],pts[i+1],cp[2*i-2],cp[2*i-1]);
-              //   drawControlLine(ctx,pts[i+2],pts[i+3],cp[2*i],cp[2*i+1]);
-              //}
           }
       }else{  
           // Draw an open curve, not connected at the ends
@@ -262,24 +293,14 @@
               cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
           }    
           for(var i=2;i<pts.length-5;i+=2){
-              //var color=HSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
-              //if(!showDetails){color="#555555"}
-              //ctx.strokeStyle=hexToCanvasColor(color,0.75);
               ctx.strokestyle="rgb(190, 190, 190);";     
               ctx.beginPath();
               ctx.moveTo(pts[i],pts[i+1]);
               ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
               ctx.stroke();
               ctx.closePath();
-              //if(showDetails){
-              //    drawControlLine(ctx,pts[i],pts[i+1],cp[2*i-2],cp[2*i-1]);
-              //    drawControlLine(ctx,pts[i+2],pts[i+3],cp[2*i],cp[2*i+1]);
-              //}
           }
           //  For open curves the first and last arcs are simple quadratics.
-          //var color=HSVtoRGB(40,0.4,0.4);  // brown
-          //if(!showDetails){color="#555555"}
-          //ctx.strokeStyle=hexToCanvasColor(color,0.75);
           ctx.strokeStyle=ctx.strokestyle="rgb(190, 190, 190);";
           ctx.beginPath();
           ctx.moveTo(pts[0],pts[1]);
@@ -287,27 +308,14 @@
           ctx.stroke();
           ctx.closePath();
           
-          //var color=HSVtoRGB(240,0.8,0.8); // indigo
-          //if(!showDetails){color="#555555"}
-          //ctx.strokeStyle=hexToCanvasColor(color,0.75);
           ctx.strokestyle="rgb(190, 190, 190);";
           ctx.beginPath();
           ctx.moveTo(pts[n-2],pts[n-1]);
           ctx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
           ctx.stroke();
           ctx.closePath();
-          //if(showDetails){
-          //    drawControlLine(ctx,pts[2],pts[3],cp[0],cp[1]);
-          //    drawControlLine(ctx,pts[n-4],pts[n-3],cp[2*n-10],cp[2*n-9]);
-          //}
       }
       ctx.restore();
-      
-      //if(showDetails){   //   Draw the knot points.
-      //  for(var i=0;i<n;i+=2){
-      //    drawPoint(ctx,pts[i],pts[i+1],2.5,"#ffff00");
-      //  }
-      //}
     }
 
   </script>
