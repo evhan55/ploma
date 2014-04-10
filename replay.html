@@ -3,17 +3,23 @@
 
     <!-- CSS -->
     <style>
+      body {
+        font-family: sans-serif;
+        font-size: 13px;
+        color: #555;
+      }
       canvas {
         cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
         border-radius: 25px;
         border: 1px solid #EED;
         margin-top: 20px;
+        float: left;
       }
       object {
         width: 0;
         height: 0;
       }
-      a {
+      /*a {
         background: #DB5;
         color: white;
         padding: 4px 10px;
@@ -21,6 +27,31 @@
         text-decoration: none;
         margin-left: 8px;
         cursor: pointer;
+      }*/
+      #panel {
+        width: 300px;
+        height: 300px;
+        float: left;
+        margin-left: 20px;
+        margin-top: 20px;
+        border-radius: 10px;
+        padding: 10px;
+        border: 1px solid #EED;
+      }
+      #tension input{
+        width: 40px;
+      }
+      #tension-input-2-value {
+        float: right;
+      }
+      a {
+        padding: 5px 10px;
+        background-color: rgb(107, 137, 255);
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        float: left;
+        margin-top: 10px;
       }
     </style>
 
@@ -31,6 +62,17 @@
 
     <!-- NOTEBOOK -->
     <canvas id="c" width="1000px" height="1000px"></canvas>
+
+    <!-- CONTROL PANEL -->
+    <div id="panel">
+      <div id="tension">
+        Tension <input id="tension-input" value="0.33"></input>
+      </div>
+      <div id="tension2">
+        Tension <input id="tension-input-2" value="0.33" type="range" min="0" max="1" step="0.01"></input><div id="tension-input-2-value"></div>
+      </div>
+      <a id="redraw">Draw</a>
+    </div>
 
   </body>
 
@@ -48,13 +90,41 @@
     var shadowColor = "rgba(255, 225, 100, 0.5);";
     var capture;
 
+    var tension;
+    var tension2;
+    var tensionInput;
+    var tensionInput2;
+    var tensionInput2Value;
+
     //***********************
     // Window onload
     //
     window.onload = function(){
+      // load capture file points
       capture = JSON.parse(jsonstr);
-      console.log(capture);
-      replay();
+
+      // bind events
+      tensionInput = document.getElementById("tension-input");
+      tension = tensionInput.value;
+      tensionInput.onkeypress = function(e) {
+        console.log(e);
+      };
+      tensionInput2 = document.getElementById("tension-input-2");
+      tensionInput2Value = document.getElementById("tension-input-2-value");
+      tension2 = tensionInput2.value;
+      tensionInput2Value.innerHTML = tensionInput2.value;
+      tensionInput2.onchange = function(e) {
+        tensionInput2Value.innerHTML = tensionInput2.value;
+        redraw();
+      }
+      var redrawButton = document.getElementById("redraw");
+      redrawButton.onmouseup = function(e) {
+        console.log(e);
+        redraw();
+      }
+
+      // draw curve with default values
+      redraw();
     }
 
     //***********************
@@ -100,6 +170,144 @@
         oldX = point.x;
         oldY = point.y;
       }
+    }
+
+    function redraw() {
+      // clear canvas
+      clearCanvas();
+
+      // points
+      var points = [];
+      for (var i = 0; i < capture.length; i+=2) {
+        points.push(capture[i].x);
+        points.push(capture[i].y);
+      }
+
+      // tension
+      //if(tensionInput.value){
+      //  tension = tensionInput.value;
+      //}
+
+      // tension2
+      if(tensionInput2.value){
+        tension2 = tensionInput2.value;
+      }
+
+      //drawSpline(ctx,[20,50,100,100,150,50,200,150,250,50,300,70,310,130,380,30],t,false);
+      drawSpline(ctx,points,tension2,false);
+    }
+
+    //************************
+    // Draw Spline
+    // from scaledinnovation.com/splines.html
+    //
+    function getControlPoints(x0,y0,x1,y1,x2,y2,t){
+      //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
+      //  x2,y2 is the next knot -- not connected here but needed to calculate p2
+      //  p1 is the control point calculated here, from x1 back toward x0.
+      //  p2 is the next control point, calculated here and returned to become the 
+      //  next segment's p1.
+      //  t is the 'tension' which controls how far the control points spread.
+      
+      //  Scaling factors: distances from this knot to the previous and following knots.
+      var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
+      var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
+     
+      var fa=t*d01/(d01+d12);
+      var fb=t-fa;
+    
+      var p1x=x1+fa*(x0-x2);
+      var p1y=y1+fa*(y0-y2);
+
+      var p2x=x1-fb*(x0-x2);
+      var p2y=y1-fb*(y0-y2);  
+      
+      return [p1x,p1y,p2x,p2y]
+    }
+
+    function drawSpline(ctx,pts,t,closed){
+      //showDetails=document.getElementById('details').checked;
+      ctx.lineWidth=4;
+      ctx.save();
+      var cp=[];   // array of control points, as x0,y0,x1,y1,...
+      var n=pts.length;
+
+      if(closed){
+          //   Append and prepend knots and control points to close the curve
+          pts.push(pts[0],pts[1],pts[2],pts[3]);
+          pts.unshift(pts[n-1]);
+          pts.unshift(pts[n-1]);
+          for(var i=0;i<n;i+=2){
+              cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
+          }
+          cp=cp.concat(cp[0],cp[1]);   
+          for(var i=2;i<n+2;i+=2){
+              //var color=HSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
+              //if(!showDetails){color="#555555"}
+              //ctx.strokeStyle=hexToCanvasColor(color,0.75);    
+              ctx.strokestyle="rgb(190, 190, 190);";   
+              ctx.beginPath();
+              ctx.moveTo(pts[i],pts[i+1]);
+              ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
+              ctx.stroke();
+              ctx.closePath();
+              //if(showDetails){
+              //   drawControlLine(ctx,pts[i],pts[i+1],cp[2*i-2],cp[2*i-1]);
+              //   drawControlLine(ctx,pts[i+2],pts[i+3],cp[2*i],cp[2*i+1]);
+              //}
+          }
+      }else{  
+          // Draw an open curve, not connected at the ends
+          for(var i=0;i<n-4;i+=2){
+              cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
+          }    
+          for(var i=2;i<pts.length-5;i+=2){
+              //var color=HSVtoRGB(Math.floor(240*(i-2)/(n-2)),0.8,0.8);
+              //if(!showDetails){color="#555555"}
+              //ctx.strokeStyle=hexToCanvasColor(color,0.75);
+              ctx.strokestyle="rgb(190, 190, 190);";     
+              ctx.beginPath();
+              ctx.moveTo(pts[i],pts[i+1]);
+              ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
+              ctx.stroke();
+              ctx.closePath();
+              //if(showDetails){
+              //    drawControlLine(ctx,pts[i],pts[i+1],cp[2*i-2],cp[2*i-1]);
+              //    drawControlLine(ctx,pts[i+2],pts[i+3],cp[2*i],cp[2*i+1]);
+              //}
+          }
+          //  For open curves the first and last arcs are simple quadratics.
+          //var color=HSVtoRGB(40,0.4,0.4);  // brown
+          //if(!showDetails){color="#555555"}
+          //ctx.strokeStyle=hexToCanvasColor(color,0.75);
+          ctx.strokeStyle=ctx.strokestyle="rgb(190, 190, 190);";
+          ctx.beginPath();
+          ctx.moveTo(pts[0],pts[1]);
+          ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
+          ctx.stroke();
+          ctx.closePath();
+          
+          //var color=HSVtoRGB(240,0.8,0.8); // indigo
+          //if(!showDetails){color="#555555"}
+          //ctx.strokeStyle=hexToCanvasColor(color,0.75);
+          ctx.strokestyle="rgb(190, 190, 190);";
+          ctx.beginPath();
+          ctx.moveTo(pts[n-2],pts[n-1]);
+          ctx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
+          ctx.stroke();
+          ctx.closePath();
+          //if(showDetails){
+          //    drawControlLine(ctx,pts[2],pts[3],cp[0],cp[1]);
+          //    drawControlLine(ctx,pts[n-4],pts[n-3],cp[2*n-10],cp[2*n-9]);
+          //}
+      }
+      ctx.restore();
+      
+      //if(showDetails){   //   Draw the knot points.
+      //  for(var i=0;i<n;i+=2){
+      //    drawPoint(ctx,pts[i],pts[i+1],2.5,"#ffff00");
+      //  }
+      //}
     }
 
   </script>
