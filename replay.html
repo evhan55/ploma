@@ -14,18 +14,21 @@
       var capture;
 
       var tension;
+      var sample;
       var thickness;
       var darkness;
       var blur;
       var shadowDarkness;
 
       var tensionInput;
+      var sampleInput;
       var thicknessInput;
       var darknessInput;
       var blurInput;
       var shadowDarknessInput;
 
       var tensionReadout;
+      var sampleReadout;
       var thicknessReadout;
       var darknessReadout;
       var blurReadout;
@@ -51,6 +54,17 @@
         tensionInput.oninput = function(e) {
           tension = tensionInput.value;
           tensionReadout.innerHTML = tension;
+          redraw();
+        }
+
+        // sample input
+        sampleInput = document.getElementById('sample-input');
+        sampleReadout = document.getElementById('sample-readout');
+        sample = sampleInput.value;
+        sampleReadout.innerHTML = sample;
+        sampleInput.oninput = function(e) {
+          sample = sampleInput.value;
+          sampleReadout.innerHTML = sample;
           redraw();
         }
 
@@ -141,10 +155,14 @@
       //   those processed points.
       //
       function redraw() {
-        clearCanvas();
+
         var curves = [];
+        var sampledCurves = [];
         var count = 0;
         curves[count] = [];
+
+        clearCanvas();
+
         // Collect points into distinct curves
         for (var i = 0; i < capture.length; i++) {
           if(capture[i].break) {
@@ -154,11 +172,28 @@
           curves[count].push(capture[i].canvasX);
           curves[count].push(capture[i].canvasY);
         }
+
+        // Sample points down
+        if(sample > 1) {
+          count = 0;
+          for (var i = 0; i < curves.length; i++) {
+            var curve = curves[i];
+            sampledCurves[count] = [];
+            for (var j = 0; j < curve.length; j+=Number(sample)) {
+              sampledCurves[count].push(curve[j]);
+            }
+            count++;
+          }
+        } else {
+          sampledCurves = curves;
+        }
+
         // Render curves separately
-        for (var i = 0; i < curves.length; i++) {
-          var pts = curves[i];
+        for (var i = 0; i < sampledCurves.length; i++) {
+          var pts = sampledCurves[i];
           drawSpline(ctx, pts, tension, thickness, darkness, blur, shadowDarkness, false);
         }
+
       }
 
       // *********************************************************************
@@ -305,11 +340,16 @@
     <canvas id='canvas' width='1000px' height='1000px'></canvas>
     <!-- CONTROL PANEL -->
     <div id='panel'>
-      <h3>Curve Fitting</h3>
+      <h3>Curve</h3>
       <div class='control'>
         <div class='label'>Tension</div>
         <input id='tension-input' value='0.33' type='range' min='0' max='1' step='0.01'></input>
         <div class='readout' id='tension-readout'></div>
+      </div>
+      <div class='control'>
+        <div class='label'>Sample</div>
+        <input id='sample-input' value='1' type='range' min='1' max='20' step='2'></input>
+        <div class='readout' id='sample-readout'></div>
       </div>
       <h3>Line</h3>
       <div class='control'>
