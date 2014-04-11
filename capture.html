@@ -103,10 +103,12 @@
 
         // *********************************************************************
         // canvas.onmouseup
-        //   Sets isDrawing to false.
+        //   Sets isDrawing to false and insert a breakpoint into the points
+        //   array.
         //
         canvas.onmouseup = function() {
           isDrawing = false;
+          points.push({break: true});
         };
       };
 
