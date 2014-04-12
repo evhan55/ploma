@@ -1,0 +1,35 @@
+Todo
+- change capture/replay pages to yellow
+- unify capture/replay pages somehow?
+- use pressure data in replay
+- add pressure sensitivity to replay
+- think through demo for all-hands
+  - capturing the humanity of touch
+  - not trying to generalize, because that doesn't make sense for something as sensitive as touch
+  - instead focusing as much as possible on one person, touch, pen, paper, ink
+  - to see what that approach is like, and if that's what is takes?
+  - maybe software could use more calibration?
+- study Scratch curve fitting algorithm
+- use Scratch curve fitting instead
+- write 'output' button/functionality for replay to output panel values
+- figure out MVVM solution for panel code
+
+Rendering
+- non-linear rendering of black
+  - based on time/speed
+  - based on pressure
+  - based on visual comparison
+- non-linear application of pressure
+  - based on time/speed
+  - based on visual comparison
+- non-linear rendering of thickness
+  - based on time/speed
+  - based on pressure
+  - based on visual comparison
+- spattering of ink on paper?
+- ink blots?
+
+Optimization
+- only use curve fitting when there are too many points?
+- only use curve fitting when there are not enough points?
+- others??
