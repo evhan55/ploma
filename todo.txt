@@ -1,13 +1,11 @@
 Todo
-Monday:
-- change capture/replay pages to yellow
-- unify capture/replay pages somehow?
-- use pressure data in replay
-- add pressure sensitivity to replay
-- study Scratch curve fitting algorithm
-- use Scratch curve fitting instead
+Wednesday:
+- watch Ryan Lester's work videos
 
-Tuesday:
+Plane:
+- change capture/replay pages to yellow
+- unify capture/replay pages with alan's notebook sample, too
+- auto-save capture.json with jsonstr var
 - think through demo for all-hands
   - capturing the humanity of touch
   - not trying to generalize, because that doesn't make sense for something as sensitive as touch
@@ -19,6 +17,9 @@ Tuesday:
   - have to depend on irregularites in both touch and vision
 
 Later:
+- add time sensitivity to replay
+- use Scratch curve fitting via radio option
+- use curve fitting as you go
 - write 'output' button/functionality for replay to output panel values
 - figure out MVVM solution for panel code
 

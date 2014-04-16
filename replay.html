@@ -10,7 +10,7 @@
       var ctx;
       var oldX;
       var oldY;
-      var paperColor = 'rgb(255, 255, 250);';
+      var paperColor = "rgb(253, 253, 240);";
       var capture;
 
       var tension;
@@ -19,6 +19,7 @@
       var darkness;
       var blur;
       var shadowDarkness;
+      var pressure;
 
       var tensionInput;
       var sampleInput;
@@ -26,6 +27,7 @@
       var darknessInput;
       var blurInput;
       var shadowDarknessInput;
+      var pressureInput;
 
       var tensionReadout;
       var sampleReadout;
@@ -33,6 +35,7 @@
       var darknessReadout;
       var blurReadout;
       var shadowDarknessReadout;
+      var pressureReadout;
 
       // *********************************************************************
       // window.onload
@@ -112,6 +115,17 @@
           redraw();
         }
 
+        // pressure input
+        pressureInput = document.getElementById('pressure-input');
+        pressureReadout = document.getElementById('pressure-readout');
+        pressure = pressureInput.value;
+        pressureReadout.innerHTML = pressure;
+        pressureInput.oninput = function(e) {
+          pressure = pressureInput.value;
+          pressureReadout.innerHTML = pressure;
+          redraw();
+        }
+
         // draw curve with default control values
         redraw();
       }
@@ -135,6 +149,15 @@
       //
       function mapWidth(v) {
         var result = 3*v;
+        return result;
+      }
+
+      // *********************************************************************
+      // pressureSensitivity
+      //   Remap pressure value based on sensitivity input between 0 and 1.
+      //
+      function mapPressure(p) {
+        var result = 1 - pressure*(1 - p);
         return result;
       }
       
@@ -169,8 +192,7 @@
             count++;
             curves[count] = [];
           }
-          curves[count].push(capture[i].canvasX);
-          curves[count].push(capture[i].canvasY);
+          curves[count].push([capture[i].canvasX, capture[i].canvasY, capture[i].pressure]);
         }
 
         // Sample points down
@@ -188,10 +210,18 @@
           sampledCurves = curves;
         }
 
-        // Render curves separately
+        // Draw points and send pressure array
         for (var i = 0; i < sampledCurves.length; i++) {
-          var pts = sampledCurves[i];
-          drawSpline(ctx, pts, tension, thickness, darkness, blur, shadowDarkness, false);
+          var pts = [];
+          var prs = [];
+          for (var j = 0; j < sampledCurves[i].length; j++) {
+            pts.push(sampledCurves[i][j][0]);
+            pts.push(sampledCurves[i][j][1]);
+            prs.push(sampledCurves[i][j][2]);
+            prs.push(sampledCurves[i][j][2]);
+          }
+          console.log(prs);
+          drawSpline(ctx, pts, prs, tension, thickness, darkness, blur, shadowDarkness);
         }
 
       }
@@ -228,60 +258,51 @@
       // drawSpline
       //   Source: http://scaledinnovation.com/analytics/splines/splines.html
       //
-      function drawSpline(ctx,pts,t,th,d,b,sh,closed){
-        ctx.lineWidth=th;
-        ctx.strokeStyle = 'rgba(0, 0, 0, '+d+')';
+      function drawSpline(ctx,pts,prs,t,th,d,b,sh){
+        //ctx.lineWidth = th;
         ctx.shadowBlur = b;
-        ctx.shadowColor = 'rgba(0, 0, 0, '+sh+')';
         ctx.save();
-        var cp=[];   // array of control points, as x0,y0,x1,y1,...
-        var n=pts.length;
+        var cp = [];   // array of control points, as x0,y0,x1,y1,...
+        var n = pts.length;
 
-        if(closed){
-          //   Append and prepend knots and control points to close the curve
-          pts.push(pts[0],pts[1],pts[2],pts[3]);
-          pts.unshift(pts[n-1]);
-          pts.unshift(pts[n-1]);
-          for(var i=0;i<n;i+=2){
-            cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
-          }
-          cp=cp.concat(cp[0],cp[1]);   
-          for(var i=2;i<n+2;i+=2){  
-            ctx.strokestyle='rgb(190, 190, 190);';   
-            ctx.beginPath();
-            ctx.moveTo(pts[i],pts[i+1]);
-            ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
-            ctx.stroke();
-            ctx.closePath();
-          }
-        }else{  
-          // Draw an open curve, not connected at the ends
-          for(var i=0;i<n-4;i+=2){
-            cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
-          }    
-          for(var i=2;i<pts.length-5;i+=2){
-            ctx.strokestyle='rgb(190, 190, 190);';     
-            ctx.beginPath();
-            ctx.moveTo(pts[i],pts[i+1]);
-            ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
-            ctx.stroke();
-            ctx.closePath();
-          }
-          //  For open curves the first and last arcs are simple quadratics.
-          ctx.strokeStyle=ctx.strokestyle='rgb(190, 190, 190);';
+        // Draw an open curve, not connected at the ends
+        for(var i=0;i<n-4;i+=2){
+          cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
+        }    
+        for(var i=2;i<pts.length-5;i+=2){
+          var pressureCoefficient = pressure*prs[i];
+          ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
+          ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
+          ctx.lineWidth = mapPressure(prs[i])*th;
           ctx.beginPath();
-          ctx.moveTo(pts[0],pts[1]);
-          ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
-          ctx.stroke();
-          ctx.closePath();
-          
-          ctx.strokestyle='rgb(190, 190, 190);';
-          ctx.beginPath();
-          ctx.moveTo(pts[n-2],pts[n-1]);
-          ctx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
+          ctx.moveTo(pts[i],pts[i+1]);
+          ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
           ctx.stroke();
           ctx.closePath();
         }
+
+        // For open curves the first and last arcs are simple quadratics.
+
+        // First arc
+        ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
+        ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
+        ctx.lineWidth = mapPressure(prs[0])*th;
+        ctx.beginPath();
+        ctx.moveTo(pts[0],pts[1]);
+        ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
+        ctx.stroke();
+        ctx.closePath();
+        
+        // Last arc
+        ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
+        ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
+        ctx.lineWidth = mapPressure(prs[n-1])*th;
+        ctx.beginPath();
+        ctx.moveTo(pts[n-2],pts[n-1]);
+        ctx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
+        ctx.stroke();
+        ctx.closePath();
+        
         ctx.restore();
       }
 
@@ -342,12 +363,12 @@
       <h3>Curve</h3>
       <div class='control'>
         <div class='label'>Tension</div>
-        <input id='tension-input' value='0.33' type='range' min='0' max='1' step='0.01'></input>
+        <input id='tension-input' value='0.33' type='range' min='0' max='2' step='0.01'></input>
         <div class='readout' id='tension-readout'></div>
       </div>
       <div class='control'>
         <div class='label'>Sample</div>
-        <input id='sample-input' value='1' type='range' min='1' max='20' step='2'></input>
+        <input id='sample-input' value='1' type='range' min='1' max='20' step='1'></input>
         <div class='readout' id='sample-readout'></div>
       </div>
       <h3>Line</h3>
@@ -371,6 +392,12 @@
         <div class='label'>Darkness</div>
         <input id='shadow-darkness-input' value='0.5' type='range' min='0' max='1' step='0.01'></input>
         <div class='readout' id='shadow-darkness-readout'></div>
+      </div>
+      <h3>Pressure</h3>
+      <div class='control'>
+        <div class='label'>Sensitivity</div>
+        <input id='pressure-input' value='0' type='range' min='0' max='1' step='0.01'></input>
+        <div class='readout' id='pressure-readout'></div>
       </div>
     </div>
   </body>
