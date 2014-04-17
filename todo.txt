@@ -3,9 +3,6 @@ Wednesday:
 - watch Ryan Lester's work videos
 
 Plane:
-- change capture/replay pages to yellow
-- unify capture/replay pages with alan's notebook sample, too
-- auto-save capture.json with jsonstr var
 - think through demo for all-hands
   - capturing the humanity of touch
   - not trying to generalize, because that doesn't make sense for something as sensitive as touch
@@ -19,12 +16,14 @@ Plane:
 Later:
 - add time sensitivity to replay
 - use Scratch curve fitting via radio option
-- use curve fitting as you go
+- optimize curve fitting as you go
+
+Later Later:
 - write 'output' button/functionality for replay to output panel values
 - figure out MVVM solution for panel code
 
 Rendering
-- non-linear rendering of black
+- non-linear rendering of darkness
   - based on time/speed
   - based on pressure
   - based on visual comparison
