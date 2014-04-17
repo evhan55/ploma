@@ -1,4 +1,7 @@
-Todo
+------------------------------
+TODO
+------------------------------
+
 Wednesday:
 - watch Ryan Lester's work videos
 
@@ -8,9 +11,9 @@ Plane:
   - not trying to generalize, because that doesn't make sense for something as sensitive as touch
   - instead focusing as much as possible on: one person, one touch, one pen, one paper, one ink
   - to see what that approach is like, and if that's what is takes?
-  - maybe software could use more calibration?
+  - maybe drawing software on the market could use more calibration?
   - ballpoint is lubricated, and smooth, friction matters
-  - being 'accurate' is not enough
+  - being 'accurate' is not enough, what does 'accurate' mean
   - have to depend on irregularites in both touch and vision
 
 Later:
@@ -22,7 +25,10 @@ Later Later:
 - write 'output' button/functionality for replay to output panel values
 - figure out MVVM solution for panel code
 
-Rendering
+------------------------------
+RENDERING
+------------------------------
+
 - non-linear rendering of darkness
   - based on time/speed
   - based on pressure
@@ -34,10 +40,19 @@ Rendering
   - based on time/speed
   - based on pressure
   - based on visual comparison
-- spattering of ink on paper?
-- ink blots?
+- non-linear application of alpha blending
+  - based on intersections?
+  - based on pressure?
+- misc
+  - spattering of ink on paper?
+  - ink blots? => okay to be randomly lookup?
 
-Optimization
+------------------------------
+OPTIMIZATION
+------------------------------
+
 - only use curve fitting when there are too many points?
 - only use curve fitting when there are not enough points?
+- if time is fast, then don't optimize
+- if time is slow and there are many points, optimize
 - others??

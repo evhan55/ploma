@@ -27,9 +27,10 @@
       var oldX;
       var oldY;
       var isDrawing;
-      var paperColor = "rgb(253, 254, 239);";
-      var curves = [];
-      var currentCurve = 0;
+      var paperColor = "rgb(248, 254, 238);";
+      var curve = [];
+      var curveWindow = 5;
+      //var currentCurve = 0;
 
       var tension;
       var sample;
@@ -67,9 +68,6 @@
 
         // clear canvas
         clearCanvas();
-
-        // begin curves
-        curves[currentCurve] = [];
 
         // tension input
         tensionInput = document.getElementById('tension-input');
@@ -186,18 +184,19 @@
               canvasY      : penCanvasY,
               //time         : Date.now()
             };
-            curves[currentCurve].push([point.canvasX, point.canvasY, point.pressure]);
+            curve.push([point.canvasX, point.canvasY, point.pressure]);
 
             // Draw line
-            redraw();
+            if(curve.length > curveWindow) {
+              redraw();
+              curve.length = 0;
+            }
           }
         };
 
         // canvas mouse up
         canvas.onmouseup = function() {
           isDrawing = false;
-          currentCurve++;
-          curves[currentCurve] = [];
         };
       }
 
@@ -210,17 +209,17 @@
       window.onkeypress = function(e) {
         if (e.charCode === 99) {
           clearCanvas();
-          curves.length = 0;
+          curve.length = 0;
         }
         if (e.charCode === 105) {
           window.open(canvas.toDataURL());
         }
-        if (e.charCode === 106) {
+        /*if (e.charCode === 106) {
           var json = JSON.stringify(curves);
           var blob = new Blob([json], {type: 'application/json'});
           var url  = URL.createObjectURL(blob);
           window.open(url);
-        }
+        }*/
       }
 
       //**********************************************************************
@@ -290,36 +289,15 @@
       //   those processed curves.
       //
       function redraw() {
-
-        var sampledCurves = [];
-
-        clearCanvas();
-
-        // Sample points down
-        if (sample > 1) {
-          for (var i = 0; i < curves.length; i++) {
-            sampledCurves[i] = [];
-            for (var j = 0; j < curves[i].length; j+=Number(sample)) {
-              sampledCurves[i].push(curves[i][j]);
-            }
-          }
-        } else {
-          sampledCurves = curves;
+        var pts = [];
+        var prs = [];
+        for (var i = 0; i < curve.length; i++) {
+          pts.push(curve[i][0]);
+          pts.push(curve[i][1]);
+          prs.push(curve[i][2]);
+          prs.push(curve[i][2]);
         }
-
-        // Draw points and send pressure array
-        for (var i = 0; i < sampledCurves.length; i++) {
-          var pts = [];
-          var prs = [];
-          for (var j = 0; j < sampledCurves[i].length; j++) {
-            pts.push(sampledCurves[i][j][0]);
-            pts.push(sampledCurves[i][j][1]);
-            prs.push(sampledCurves[i][j][2]);
-            prs.push(sampledCurves[i][j][2]);
-          }
-          drawSpline(ctx, pts, prs, tension, thickness, darkness, blur, shadowDarkness);
-        }
-
+        drawSpline(ctx, pts, prs, tension, thickness, darkness, blur, shadowDarkness);
       }
 
       // *********************************************************************
@@ -381,8 +359,8 @@
         // First arc
         ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[0])+')';
         ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[0])+')';
-        //ctx.lineWidth = Math.max(mapPressure(prs[0])*th,0.01);
-        ctx.lineWidth = 0.5;
+        ctx.lineWidth = Math.max(mapPressure(prs[0])*th,0.01);
+        //ctx.lineWidth = 0.5;
         ctx.beginPath();
         ctx.moveTo(pts[0],pts[1]);
         ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
@@ -391,8 +369,8 @@
         // Last arc
         ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[n-2])+')';
         ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[n-2])+')';
-        //ctx.lineWidth = Math.max(mapPressure(prs[n-2])*th,0.01);
-        ctx.lineWidth = 0.5;
+        ctx.lineWidth = Math.max(mapPressure(prs[n-2])*th,0.01);
+        //ctx.lineWidth = 0.5;
         ctx.beginPath();
         ctx.moveTo(pts[n-2],pts[n-1]);
         ctx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
@@ -478,14 +456,14 @@
       <div id='panel'>
         <h3>Curve</h3>
         <div class='control'>
-          <div class='label'>Sample</div>
-          <input id='sample-input' value='1' type='range' min='1' max='20' step='1'></input>
-          <div class='readout' id='sample-readout'></div>
-        </div>
-        <div class='control'>
           <div class='label'>Tension</div>
           <input id='tension-input' value='0.33' type='range' min='0' max='2' step='0.01'></input>
           <div class='readout' id='tension-readout'></div>
+        </div>
+        <div class='control'>
+          <div class='label'>Sample</div>
+          <input id='sample-input' value='1' type='range' min='1' max='20' step='1'></input>
+          <div class='readout' id='sample-readout'></div>
         </div>
         <h3>Line</h3>
         <div class='control'>
