@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Arc Fitting</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="apple-touch-icon" href="assets/icon.png"/>
+
+<style type="text/css">
+html, body {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  font-family: optima;
+  font-size: 13px;
+  color: #333;
+}
+canvas {
+  width: 100%;
+  height: 100%;
+}
+#main {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+}
+</style>
+</head>
+<body>
+
+<div id="main">
+  <canvas id="c" touch-action="none"></canvas>
+</div>
+
+<script src="vendor/underscore-min.js"></script>
+<script src="vendor/pointerevents.min.js"></script>
+<script src="vendor/numeric-1.2.6.min.js"></script>
+<script src="project.js"></script>
+
+</body>
+</html>
