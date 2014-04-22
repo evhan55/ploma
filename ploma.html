@@ -71,6 +71,15 @@
         // begin curves
         curves[currentCurve] = [];
 
+        var button = document.getElementById('clear');
+        button.onmouseup = function(e) {
+          clearCanvas();
+          curves.length = 0;
+          currentCurve = 0;
+          curves[currentCurve] = [];
+        };
+        console.log(button);
+
         // tension input
         tensionInput = document.getElementById('tension-input');
         tensionReadout = document.getElementById('tension-readout');
@@ -424,6 +433,22 @@
         width: 0;
         height: 0;
       }
+      a {
+        padding: 10px 20px;
+        background: #AA0000;
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      #right {
+        float: left;
+      }
+      div.desc {
+        float: left;
+        font-size: 30px;
+        width: 250px;
+        padding: 20px;
+      }
       #content {
         width: 1864px;
       }
@@ -475,6 +500,10 @@
         <canvas id="canvas" width="786px" height="1001px"></canvas>
       </div>
       <!-- CONTROL PANEL -->
+      <div id="right">
+        <div class="desc">
+          Controls
+        </div><br>
       <div id='panel'>
         <h3>Curve</h3>
         <div class='control'>
@@ -512,10 +541,15 @@
         <h3>Pressure</h3>
         <div class='control'>
           <div class='label'>Sensitivity</div>
-          <input id='pressure-input' value='0' type='range' min='0' max='1' step='0.01'></input>
+          <input id='pressure-input' value='0.8' type='range' min='0' max='1' step='0.01'></input>
           <div class='readout' id='pressure-readout'></div>
         </div>
+      </div><br>
+      <div class="desc">
+        This is a diagnostic app to collect data.<br><br><br>
+        <a id="clear">Clear page</a>
       </div>
+    </div>
       <br clear="both">
     </div>
     <!-- WACOM PLUGIN -->
