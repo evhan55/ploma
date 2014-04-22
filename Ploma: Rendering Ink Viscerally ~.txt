@@ -1,7 +1,0 @@
-Ploma: Rendering Ink Viscerally ~
-
-What happens when you design a drawing app aimed at emulating a single type of paper, a single type of pen and a single user's writing?
-
-Too often software is designed generally, robustly, to work for everyone.
-
-Art and expression don't really work that way.  Expressive language comes from the individual, so this is an app to explore how sketching software on a tablet can be more 'accurate' in the expressive sense.
