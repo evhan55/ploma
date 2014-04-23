@@ -7,28 +7,34 @@
       font-size:12px;
     }
     body {
-        background-color: #fff;
-        margin: 0px;
-        overflow: hidden;
+      background-color: #fff;
+      margin: 0px;
+      overflow: hidden;
+    }
+    #c {
+      cursor: url('../../cursor.cur'), crosshair;
     }
     hr {
-        border: 0;
-        background-color: #ddd;
-        height: 1px;
+      border: 0;
+      background-color: #ddd;
+      height: 1px;
     }
     #info {
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        width: 120px;
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 120px;
     }
     #menu {
-        background-color: #ddd;
-        padding: 5px;
-        text-align: center;
+      background-color: #ddd;
+      padding: 5px;
+      text-align: center;
+    }
+    #texture {
+      /*display: none;*/
     }
     input {
-        width: 50%
+      width: 50%
     }
     </style>
   </head>
@@ -47,6 +53,7 @@
           <input id="clear" type="button" value="Clear" />
         </p>
       </div>
+      <img id="texture" src="rubbing5.jpg"/>
     </div>
     <div id="container"></div>
     <!-- WACOM PLUGIN -->

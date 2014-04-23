@@ -12,10 +12,15 @@
 //
 
 // ADJUST THESE FOR DIFFERENT EFFECTS
-var curmass     = 0.1;    // [0,1] 
-var curdrag     = 0.7;    // [0,1] 
-var WIDTH       = 0.5;   // of the pen
-var FIXED_ANGLE = 0;      // 1=fixed, 0=variable
+var curmass     = 0.1;    // [0,1] 0.1
+var curdrag     = 0.7;    // [0,1] 0.7
+var WIDTH       = 0.09;   // of the pen 0.01
+var FIXED_ANGLE = 0;      // 1=fixed, 0=variable 0
+
+var curmass     = 0.05;    // [0,1] 0.1
+var curdrag     = 0.7;    // [0,1] 0.7
+var WIDTH       = 0.03;   // of the pen 0.01
+var FIXED_ANGLE = 0;      // 1=fixed, 0=variable 0
 
 var MIN_MASS = 1.0;
 var MAX_MASS = 160.0;
@@ -27,7 +32,7 @@ var ysize = window.innerHeight;
 var xyratio = xsize / ysize;
 var mouse = new Filter();
 var odelx, odely;
-var container, canvas, context;
+var container, canvas, context, texture;
 var save, clear;
 var isMouseDown = false;
 
@@ -110,10 +115,11 @@ function init() {
   container = document.getElementById('container');
 
   canvas = document.createElement("canvas");
+  canvas.id = "c";
   canvas.width = xsize;
   canvas.height = ysize;
-  canvas.style.cursor = 'crosshair';
   container.appendChild(canvas);
+  texture = document.getElementById("texture");
 
   context = canvas.getContext("2d");
   onClear();
@@ -178,7 +184,9 @@ function draw() {
   //pp = 1;
 
   wid = 0.04 - mouse.vel;
-  wid = wid * WIDTH;
+  wid = wid * WIDTH * pp;
+  //console.log(wid);
+  //console.log(pp);
   if (wid < 0.00001) wid = 0.00001;
   delx = mouse.angx * wid;
   dely = mouse.angy * wid;
@@ -191,12 +199,16 @@ function draw() {
   context.beginPath();
   context.moveTo(xsize * (px + odelx) / xyratio, ysize * (py + odely));
   context.lineTo(xsize * (px - odelx) / xyratio, ysize * (py - odely));
-  context.stroke();
+  //context.stroke();
   context.lineTo(xsize * (nx - delx) / xyratio, ysize * (ny - dely));
   context.lineTo(xsize * (nx + delx) / xyratio, ysize * (ny + dely));
   context.closePath();
-  //context.fill(); // change to context.stroke(); to see what is being drawn
-  context.stroke();
+  var rand = Math.floor(Math.random()*40);
+  console.log(rand % 5 === 0);
+  context.globalAlpha = Math.max(0.7, (rand % 5 === 0) ? 1 : pp);
+  //context.globalAlpha = Math.max(0.7, pp);
+  context.fill(); // change to context.stroke(); to see what is being drawn
+  //context.stroke();
 
   odelx = delx;
   odely = dely;
@@ -207,15 +219,18 @@ function onSave() {
 }
 
 function onClear() {
-  context.fillStyle = "rgb(250, 250, 250)";
+  context.fillStyle = "rgb(255, 255, 255)";
   context.fillRect(0, 0, xsize, ysize);
   setStyle();
 }
 
 function setStyle() {
-  context.lineWidth = 1.0;
+  context.lineWidth = 1;
   context.strokeStyle = "rgba(0,0,0,1.00)";
   context.fillStyle = "rgba(0,0,0,1.00)";
+  context.fillStyle = context.createPattern(texture, "repeat");
+  //context.shadowColor = "rgba(0,0,0,1.00)";
+  //context.shadowBlur = 1;
 }
 
 function getWacomPlugin() {
