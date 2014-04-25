@@ -17,9 +17,9 @@ var curdrag     = 0.7;    // [0,1] 0.7
 var WIDTH       = 0.09;   // of the pen 0.01
 var FIXED_ANGLE = 0;      // 1=fixed, 0=variable 0
 
-var curmass     = 0.05;    // [0,1] 0.05
+var curmass     = 0.05;    // [0,1] 0.1
 var curdrag     = 0.7;    // [0,1] 0.7
-var WIDTH       = 0.01;   // of the pen 0.01
+var WIDTH       = 0.03;   // of the pen 0.01
 var FIXED_ANGLE = 0;      // 1=fixed, 0=variable 0
 
 var MIN_MASS = 1.0;
@@ -119,7 +119,7 @@ function init() {
   canvas.width = xsize;
   canvas.height = ysize;
   container.appendChild(canvas);
-  //texture = document.getElementById("texture");
+  texture = document.getElementById("texture");
 
   context = canvas.getContext("2d");
   onClear();
@@ -141,7 +141,6 @@ function init() {
   } // avoid text selection
 
   setInterval("doTimer()", 5);
-  //doTimer();
 }
 
 function onMouseDown(e) {
@@ -166,7 +165,6 @@ function onMouseMove(e) {
 }
 
 function doTimer() {
-  //requestAnimationFrame(doTimer);
   if (isMouseDown && mouse.apply(mx, my)) {
     draw();
   }
@@ -177,14 +175,13 @@ function startStroke() {
 }
 
 function draw() {
-  if(mouse.vel > 0.0001){
   var delx, dely;
   var wid;
   var px, py, nx, ny;
   var pp;
 
-  //pp = getWacomPlugin().penAPI.pressure;
-  pp = 1;
+  pp = getWacomPlugin().penAPI.pressure;
+  //pp = 1;
 
   wid = 0.04 - mouse.vel;
   wid = wid * WIDTH * pp;
@@ -207,7 +204,7 @@ function draw() {
   context.lineTo(xsize * (nx + delx) / xyratio, ysize * (ny + dely));
   context.closePath();
   var rand = Math.floor(Math.random()*40);
-  //console.log(rand % 5 === 0);
+  console.log(rand % 5 === 0);
   context.globalAlpha = Math.max(0.7, (rand % 5 === 0) ? 1 : pp);
   //context.globalAlpha = Math.max(0.7, pp);
   context.fill(); // change to context.stroke(); to see what is being drawn
@@ -215,7 +212,6 @@ function draw() {
 
   odelx = delx;
   odely = dely;
-  }
 }
 
 function onSave() {
@@ -232,7 +228,7 @@ function setStyle() {
   context.lineWidth = 1;
   context.strokeStyle = "rgba(0,0,0,1.00)";
   context.fillStyle = "rgba(0,0,0,1.00)";
-  //context.fillStyle = context.createPattern(texture, "repeat");
+  context.fillStyle = context.createPattern(texture, "repeat");
   //context.shadowColor = "rgba(0,0,0,1.00)";
   //context.shadowBlur = 1;
 }
