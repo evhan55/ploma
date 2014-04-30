@@ -3,7 +3,7 @@
     <style>
       canvas {
         border: 1px solid #999;
-        cursor: crosshair;
+        cursor: url('cursor.cur'), crosshair;
       }
       img {
         display: none;
@@ -13,8 +13,8 @@
 
   <body>
     <canvas id="c" width="1000" height="1000"></canvas>
-    <img src="PencilTextures2.jpg" id="rubbing"/>
-    <!-- WACOM PLUGIN -->
+    <img src="PencilTextures2.jpg" id="img1"/>
+    <img src="PencilTextures3.jpg" id="img2"/>
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -22,16 +22,23 @@
 
   <script>
     var el = document.getElementById('c');
-    var img = document.getElementById("rubbing");
+    var img1 = document.getElementById("img2");
+    var img2 = document.getElementById("img2");
+    var plugin = document.getElementById('wtPlugin');
     var ctx = el.getContext('2d');
-    var pat = ctx.createPattern(img,"repeat");
-    var isDrawing;
+    var pat1 = ctx.createPattern(img1,"repeat");
+    var pat2 = ctx.createPattern(img2,"repeat");
+    var cursorOffsetX = 12;
+    var cursorOffsetY = 8;
+    var isDrawing = false;
+    var isSkipping = false;
+    var skipCounter = 0;
+    var penDownFrame = 0;
     var px;
     var py;
     var x;
     var y;
 
-    ctx.strokeStyle = pat;
     //ctx.globalAlpha = 0.5;
     ctx.globalCompositeOperation = 'darker';
     //ctx.lineCap = 'square';
@@ -41,27 +48,31 @@
 
     el.onmousedown = function(e) {
       isDrawing = true;
-      x = e.clientX - 8;
-      y = e.clientY - 8;
+      x = e.clientX - cursorOffsetX;
+      y = e.clientY - cursorOffsetY;
       px = x;
       py = y;
+      penDownFrame = 0;
     };
 
     el.onmousemove = function(e) {
       if (isDrawing) {
-        x = e.clientX - 8;
-        y = e.clientY - 8;
-        var minx = Math.min(x, px);
-        var miny = Math.min(y, py);
-        var pressure = getWacomPlugin().penAPI.pressure;
-        //ctx.globalAlpha = (Math.floor(Math.random()*30)) === 2 ? 1 : pressure;
-        ctx.globalAlpha = pressure - 0.3;
-        ctx.lineWidth = 1.2*pressure + 1;
-        //if (pressure < 0.5) {
-        //  ctx.lineWidth = 0.3;
-       // }
-        //ctx.lineWidth = 3;
-        //console.log(pressure);
+        var minx;
+        var miny;
+        var pressure;
+
+        x = e.clientX - cursorOffsetX;
+        y = e.clientY - cursorOffsetY;
+        minx = Math.min(x, px);
+        miny = Math.min(y, py);
+        pressure = plugin.penAPI.pressure;
+
+        // set stroke and size according to pressure
+        ctx.lineWidth = calcLineWidth(pressure);
+        ctx.globalAlpha = calcGlobalAlpha(pressure);
+        ctx.strokeStyle = calcStrokeStyle(pressure);
+
+        // stroke line in offset canvas
         ctx.translate(minx, miny);
         ctx.beginPath();
         ctx.moveTo(px - minx, py - miny);
@@ -69,16 +80,18 @@
         ctx.stroke();
         ctx.closePath();
         ctx.translate(-minx, -miny);
+
         px = x;
         py = y;
       }
+
+      penDownFrame++;
     };
 
     el.onmouseup = function() {
       isDrawing = false;
     };
 
-    // Clear canvas and fill background
     function clearCanvas() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.fillStyle = 'rgb(253, 253, 240)';
@@ -86,10 +99,51 @@
       ctx.fillRect(0, 0, 1000, 1000);
     }
 
-    function getWacomPlugin() {
-      var plugin = document.getElementById('wtPlugin');
-      return plugin;
+    function calcGlobalAlpha(p) {
+      var alpha;
+
+      if(!isSkipping) {
+        alpha = 1;
+        if((penDownFrame < 20) && ((Math.floor(Math.random()*50)) === 2)) {
+          isSkipping = true;
+        }
+      } else {
+        alpha = 0.3;
+        skipCounter++;
+        if(skipCounter > 50) {
+          isSkipping = false;
+          skipCounter = 0;
+        }
+      }
+      
+      return alpha;
     }
+
+    function calcLineWidth(p) {
+      var width = p;
+
+      if (p > 0.8) {
+        width = 2;
+      }
+      //ctx.lineWidth = 3;
+      //ctx.globalAlpha = (Math.floor(Math.random()*30)) === 2 ? 1 : pressure;
+      //ctx.globalAlpha = pressure - 0.3;
+
+      return width;
+    }
+
+    function calcStrokeStyle(p) {
+      var style;
+
+      if(p > 0.9 || p < 0.3) {
+        style = pat2;
+      } else {
+        style = pat1;
+      }
+
+      return style;
+    }
+
   </script>
 
 </html>

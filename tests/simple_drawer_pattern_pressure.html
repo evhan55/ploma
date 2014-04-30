@@ -9,8 +9,8 @@
 
   <body>
     <canvas id="c" width="500" height="300"></canvas>
-    <img src="PencilTextures.jpg" id="rubbing"/>
-    <!-- WACOM PLUGIN -->
+    <img src="PencilTextures2.jpg" id="img1"/>
+    <img src="PencilTextures3.jpg" id="img2"/>
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -18,16 +18,17 @@
 
   <script>
     var el = document.getElementById('c');
-    var img = document.getElementById("rubbing");
+    var img1 = document.getElementById("img1");
+    var img2 = document.getElementById("img2");
+    var pat1 = ctx.createPattern(img1, "repeat");
+    var pat2 = ctx.createPattern(img2, "repeat");
     var ctx = el.getContext('2d');
-    var pat = ctx.createPattern(img,"repeat");
     var isDrawing;
     var px;
     var py;
     var x;
     var y;
 
-    ctx.strokeStyle = pat;
     ctx.globalAlpha = 0.9;
     ctx.globalCompositeOperation = 'darker';
     //ctx.lineCap = 'square';
@@ -50,11 +51,16 @@
         var minx = Math.min(x, px);
         var miny = Math.min(y, py);
         var pressure = getWacomPlugin().penAPI.pressure;
+
+        // set stroke and size based on pressure
         //ctx.globalAlpha = (Math.floor(Math.random()*30)) === 2 ? 1 : pressure;
         //ctx.globalAlpha = pressure;
         ctx.lineWidth = pressure;
         //ctx.lineWidth = 3;
-        //console.log(pressure);
+        ctx.strokeStyle = (pressure > 0.8) ? pat2 : pat1;
+        console.log(pressure);
+
+        // stroke line in offset canvas
         ctx.translate(minx, miny);
         ctx.beginPath();
         ctx.moveTo(px - minx, py - miny);
@@ -62,6 +68,7 @@
         ctx.stroke();
         ctx.closePath();
         ctx.translate(-minx, -miny);
+
         px = x;
         py = y;
       }
@@ -71,7 +78,6 @@
       isDrawing = false;
     };
 
-    // Clear canvas and fill background
     function clearCanvas() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.fillStyle = 'rgb(253, 253, 240)';
@@ -83,6 +89,7 @@
       var plugin = document.getElementById('wtPlugin');
       return plugin;
     }
+
   </script>
 
 </html>
