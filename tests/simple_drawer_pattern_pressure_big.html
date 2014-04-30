@@ -34,6 +34,7 @@
     var isSkipping = false;
     var skipCounter = 0;
     var penDownFrame = 0;
+    var emptyInk = true;
     var px;
     var py;
     var x;
@@ -99,16 +100,25 @@
       ctx.fillRect(0, 0, 1000, 1000);
     }
 
+    // ALPHA
+
     function calcGlobalAlpha(p) {
       var alpha;
 
       if(!isSkipping) {
         alpha = 1;
-        if((penDownFrame < 20) && ((Math.floor(Math.random()*50)) === 2)) {
+        // is ink empty?
+        // did the pen just go down recently?
+        // add some randomization
+        if(emptyInk &&
+          (penDownFrame < 5) &&
+          ((Math.floor(Math.random()*50)) === 2)) {
           isSkipping = true;
+          emptyInk = false;
+          window.setTimeout(resetEmptyInk, 30000);
         }
       } else {
-        alpha = 0.3;
+        alpha = 0.2;
         skipCounter++;
         if(skipCounter > 50) {
           isSkipping = false;
@@ -118,6 +128,13 @@
       
       return alpha;
     }
+
+    function resetEmptyInk() {
+      console.log('reset empty ink!!!');
+      emptyInk = true;
+    }
+
+    // LINE WIDTH
 
     function calcLineWidth(p) {
       var width = p;
@@ -131,6 +148,8 @@
 
       return width;
     }
+
+    // STROKE STYLE
 
     function calcStrokeStyle(p) {
       var style;
