@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <style>
+      canvas {
+        cursor: crosshair;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="c" width="500" height="300"></canvas>
+    <img src="PencilTextures.jpg" id="rubbing"/>
+    <!-- WACOM PLUGIN -->
+    <object id="wtPlugin" type="application/x-wacomtabletplugin">
+      <param name="onload" value="pluginLoaded" />
+    </object>
+  </body>
+
+  <script>
+    var el = document.getElementById('c');
+    var img = document.getElementById("rubbing");
+    var ctx = el.getContext('2d');
+    var pat = ctx.createPattern(img,"repeat");
+    var isDrawing;
+    var px;
+    var py;
+    var x;
+    var y;
+
+    ctx.strokeStyle = pat;
+    ctx.globalAlpha = 0.9;
+    ctx.globalCompositeOperation = 'darker';
+    //ctx.lineCap = 'square';
+    ctx.lineWidth = 2;
+
+    clearCanvas();
+
+    el.onmousedown = function(e) {
+      isDrawing = true;
+      x = e.clientX - 8;
+      y = e.clientY - 8;
+      px = x;
+      py = y;
+    };
+
+    el.onmousemove = function(e) {
+      if (isDrawing) {
+        x = e.clientX - 8;
+        y = e.clientY - 8;
+        var minx = Math.min(x, px);
+        var miny = Math.min(y, py);
+        var pressure = getWacomPlugin().penAPI.pressure;
+        //ctx.globalAlpha = (Math.floor(Math.random()*30)) === 2 ? 1 : pressure;
+        //ctx.globalAlpha = pressure;
+        ctx.lineWidth = pressure;
+        //ctx.lineWidth = 3;
+        //console.log(pressure);
+        ctx.translate(minx, miny);
+        ctx.beginPath();
+        ctx.moveTo(px - minx, py - miny);
+        ctx.lineTo(x - minx, y - miny);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.translate(-minx, -miny);
+        px = x;
+        py = y;
+      }
+    };
+
+    el.onmouseup = function() {
+      isDrawing = false;
+    };
+
+    // Clear canvas and fill background
+    function clearCanvas() {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = 'rgb(253, 253, 240)';
+      ctx.fillStyle = 'rgb(255, 255, 255)';
+      ctx.fillRect(0, 0, 500, 300);
+    }
+
+    function getWacomPlugin() {
+      var plugin = document.getElementById('wtPlugin');
+      return plugin;
+    }
+  </script>
+
+</html>
