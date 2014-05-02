@@ -13,8 +13,8 @@
 
   <body>
     <canvas id="c" width="1000" height="1000"></canvas>
-    <img src="PencilTextures2.jpg" id="img1"/>
-    <img src="PencilTextures3.jpg" id="img2"/>
+    <img src="PencilTextures3.jpg" id="img1"/><!-- dark ? -->
+    <img src="PencilTextures3.jpg" id="img2"/><!-- light? -->
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -22,7 +22,7 @@
 
   <script>
     var el = document.getElementById('c');
-    var img1 = document.getElementById("img2");
+    var img1 = document.getElementById("img1");
     var img2 = document.getElementById("img2");
     var plugin = document.getElementById('wtPlugin');
     var ctx = el.getContext('2d');
@@ -41,9 +41,11 @@
     var y;
 
     //ctx.globalAlpha = 0.5;
-    ctx.globalCompositeOperation = 'darker';
+    //ctx.globalCompositeOperation = 'darker';
     //ctx.lineCap = 'square';
-    ctx.lineWidth = 2;
+    ctx.shadowBlur = 1;
+    //ctx.shadowColor = 'rgb(0, 0, 0)';
+    //ctx.lineWidth = 2;
 
     clearCanvas();
 
@@ -107,6 +109,9 @@
 
       if(!isSkipping) {
         alpha = 1;
+        if(p < 0.5) {
+          alpha = 0.1;
+        }
         // is ink empty?
         // did the pen just go down recently?
         // add some randomization
@@ -140,16 +145,19 @@
 
       if (p > 0.8) {
         width = 2;
-      } else if (p < 0.1) {
-        width = 0.001;
+      } else if (p < 0.6) {
+        width = 0.5;
       } else {
         width = p * 1.2;
       }
+
+      //console.log(p);
       //ctx.lineWidth = 3;
       //ctx.globalAlpha = (Math.floor(Math.random()*30)) === 2 ? 1 : pressure;
       //ctx.globalAlpha = pressure - 0.3;
 
-      return width;
+      //return width;
+      return 2;
     }
 
     // STROKE STYLE
