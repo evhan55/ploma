@@ -96,7 +96,7 @@
     function clearCanvas() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.fillStyle = 'rgb(253, 253, 240)';
-      ctx.fillStyle = 'rgb(255, 255, 255)';
+      //ctx.fillStyle = 'rgb(255, 255, 255)';
       ctx.fillRect(0, 0, 1000, 1000);
     }
 
@@ -115,7 +115,7 @@
           ((Math.floor(Math.random()*50)) === 2)) {
           isSkipping = true;
           emptyInk = false;
-          window.setTimeout(resetEmptyInk, 30000);
+          //window.setTimeout(resetEmptyInk, 30000);
         }
       } else {
         alpha = 0.2;
@@ -130,7 +130,6 @@
     }
 
     function resetEmptyInk() {
-      console.log('reset empty ink!!!');
       emptyInk = true;
     }
 
@@ -141,6 +140,10 @@
 
       if (p > 0.8) {
         width = 2;
+      } else if (p < 0.1) {
+        width = 0.001;
+      } else {
+        width = p * 1.2;
       }
       //ctx.lineWidth = 3;
       //ctx.globalAlpha = (Math.floor(Math.random()*30)) === 2 ? 1 : pressure;
