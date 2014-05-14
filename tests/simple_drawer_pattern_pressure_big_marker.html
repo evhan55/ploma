@@ -13,8 +13,8 @@
 
   <body>
     <canvas id="c" width="1000" height="1000"></canvas>
-    <img src="transparency70b2.png" id="img1"/><!-- dark ? -->
-    <img src="transparency70b.png" id="img2"/><!-- light? -->
+    <img src="transparency50.png" id="img1"/><!-- dark ? -->
+    <img src="transparency50.png" id="img2"/><!-- light? -->
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -118,14 +118,14 @@
         // did the pen just go down recently?
         // add some randomization
         if(emptyInk &&
-          (penDownFrame < 5) ){ //&&
-          //((Math.floor(Math.random()*2)) === 2)) {
+          (penDownFrame < 5) &&
+          ((Math.floor(Math.random()*20)) === 2)) {
           isSkipping = true;
           emptyInk = false;
-          window.setTimeout(resetEmptyInk, 5000);
+          window.setTimeout(resetEmptyInk, 15000);
         }
       } else {
-        alpha = 0.5;
+        alpha = 0.2;
         skipCounter++;
         if(skipCounter > 50) {
           isSkipping = false;
@@ -143,16 +143,16 @@
     // LINE WIDTH
 
     function calcLineWidth(p) {
-      var maxWidth = 2;
+      var maxWidth = 3;
       var width = p;
 
       if (p > 0.8) {
         width = maxWidth;
       } else if (p < 0.6) {
-        width = 1;
+        width = 0.5;
       } else {
         //width = p * 1.2;
-        width = p * maxWidth;
+        width = p * 3;
       }
 
       return width;

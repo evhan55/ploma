@@ -13,8 +13,8 @@
 
   <body>
     <canvas id="c" width="1000" height="1000"></canvas>
-    <img src="transparency70b2.png" id="img1"/><!-- dark ? -->
-    <img src="transparency70b.png" id="img2"/><!-- light? -->
+    <img src="transparency2.png" id="img1"/><!-- dark ? -->
+    <img src="transparency3.png" id="img2"/><!-- light? -->
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -42,7 +42,8 @@
 
     //ctx.globalAlpha = 0.5;
     //ctx.globalCompositeOperation = 'darker';
-    ctx.lineCap = 'square';
+    //ctx.lineCap = 'round';
+    ctx.lineWidth = 15;
     //ctx.shadowBlur = 1;
     //ctx.shadowColor = 'rgb(0, 0, 0)';
     //ctx.lineWidth = 2;
@@ -66,25 +67,24 @@
 
         x = e.clientX - cursorOffsetX;
         y = e.clientY - cursorOffsetY;
-        minx = Math.min(x, px) + Math.random()*50;
-        miny = Math.min(y, py) + Math.random()*50;
-        pressure = plugin.penAPI.pressure;
+        //minx = Math.min(x, px);
+        //miny = Math.min(y, py);
+        //pressure = plugin.penAPI.pressure;
 
         //console.log(pressure);
 
         // set stroke and size according to pressure
-        ctx.lineWidth = calcLineWidth(pressure);
-        ctx.globalAlpha = calcGlobalAlpha(pressure);
-        ctx.strokeStyle = calcStrokeStyle(pressure);
+        //ctx.globalAlpha = calcGlobalAlpha(pressure);
+        //ctx.strokeStyle = calcStrokeStyle(pressure);
 
         // stroke line in offset canvas
-        ctx.translate(minx, miny);
+        //ctx.translate(minx, miny);
         ctx.beginPath();
-        ctx.moveTo(px - minx, py - miny);
-        ctx.lineTo(x - minx, y - miny);
+        ctx.moveTo(px, py);
+        ctx.lineTo(x, y);
         ctx.stroke();
         ctx.closePath();
-        ctx.translate(-minx, -miny);
+        //ctx.translate(-minx, -miny);
 
         px = x;
         py = y;
@@ -102,74 +102,6 @@
       ctx.fillStyle = 'rgb(253, 253, 240)';
       //ctx.fillStyle = 'rgb(255, 255, 255)';
       ctx.fillRect(0, 0, 1000, 1000);
-    }
-
-    // ALPHA
-
-    function calcGlobalAlpha(p) {
-      var alpha;
-
-      if(!isSkipping) {
-        alpha = 1;
-        if(p < 0.5) {
-          alpha = 0.9;
-        }
-        // is ink empty?
-        // did the pen just go down recently?
-        // add some randomization
-        if(emptyInk &&
-          (penDownFrame < 5) ){ //&&
-          //((Math.floor(Math.random()*2)) === 2)) {
-          isSkipping = true;
-          emptyInk = false;
-          window.setTimeout(resetEmptyInk, 5000);
-        }
-      } else {
-        alpha = 0.5;
-        skipCounter++;
-        if(skipCounter > 50) {
-          isSkipping = false;
-          skipCounter = 0;
-        }
-      }
-      
-      return alpha;
-    }
-
-    function resetEmptyInk() {
-      emptyInk = true;
-    }
-
-    // LINE WIDTH
-
-    function calcLineWidth(p) {
-      var maxWidth = 2;
-      var width = p;
-
-      if (p > 0.8) {
-        width = maxWidth;
-      } else if (p < 0.6) {
-        width = 1;
-      } else {
-        //width = p * 1.2;
-        width = p * maxWidth;
-      }
-
-      return width;
-    }
-
-    // STROKE STYLE
-
-    function calcStrokeStyle(p) {
-      var style;
-
-      if(p < 0.9) {
-        style = pat2;
-      } else {
-        style = pat1;
-      }
-
-      return style;
     }
 
   </script>

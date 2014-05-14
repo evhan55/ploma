@@ -13,8 +13,8 @@
 
   <body>
     <canvas id="c" width="1000" height="1000"></canvas>
-    <img src="transparency70b2.png" id="img1"/><!-- dark ? -->
-    <img src="transparency70b.png" id="img2"/><!-- light? -->
+    <img src="transparency2.png" id="img1"/><!-- dark ? -->
+    <img src="transparency3.png" id="img2"/><!-- light? -->
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -39,17 +39,75 @@
     var py;
     var x;
     var y;
+    var points = [];
 
     //ctx.globalAlpha = 0.5;
     //ctx.globalCompositeOperation = 'darker';
-    ctx.lineCap = 'square';
+    //ctx.lineCap = 'square';
     //ctx.shadowBlur = 1;
     //ctx.shadowColor = 'rgb(0, 0, 0)';
     //ctx.lineWidth = 2;
+    ctx.lineJoin = ctx.lineCap = 'round';
 
     clearCanvas();
 
+    function midPointBtw(p1, p2) {
+      return {
+        x: p1.x + (p2.x - p1.x) / 2,
+        y: p1.y + (p2.y - p1.y) / 2
+      };
+    }
+
     el.onmousedown = function(e) {
+      isDrawing = true;
+      points.push({ x: e.clientX, y: e.clientY });
+    };
+
+    el.onmousemove = function(e) {
+      if (!isDrawing) return;
+      
+      pressure = plugin.penAPI.pressure;
+      points.push({ x: e.clientX, y: e.clientY });
+
+      //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.lineWidth = calcLineWidth(pressure);
+      ctx.globalAlpha = calcGlobalAlpha(pressure);
+      ctx.strokeStyle = calcStrokeStyle(pressure);
+      
+      var p1 = points[0];
+      var p2 = points[1];
+      
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      //console.log(points);
+
+      for (var i = 1, len = points.length; i < len; i++) {
+        // we pick the point between pi+1 & pi+2 as the
+        // end point and p1 as our control point
+        var midPoint = midPointBtw(p1, p2);
+        ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
+        p1 = points[i];
+        p2 = points[i+1];
+      }
+      // Draw last line as a straight line while
+      // we wait for the next point to be able to calculate
+      // the bezier control point
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+      ctx.closePath();
+      resetPoints();
+    };
+
+    el.onmouseup = function() {
+      resetPoints();
+    };
+
+    function resetPoints() {
+      isDrawing = false;
+      points.length = 0;
+    }
+
+    /*el.onmousedown = function(e) {
       isDrawing = true;
       x = e.clientX - cursorOffsetX;
       y = e.clientY - cursorOffsetY;
@@ -66,8 +124,8 @@
 
         x = e.clientX - cursorOffsetX;
         y = e.clientY - cursorOffsetY;
-        minx = Math.min(x, px) + Math.random()*50;
-        miny = Math.min(y, py) + Math.random()*50;
+        minx = Math.min(x, px);
+        miny = Math.min(y, py);
         pressure = plugin.penAPI.pressure;
 
         //console.log(pressure);
@@ -95,7 +153,7 @@
 
     el.onmouseup = function() {
       isDrawing = false;
-    };
+    };*/
 
     function clearCanvas() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -112,20 +170,20 @@
       if(!isSkipping) {
         alpha = 1;
         if(p < 0.5) {
-          alpha = 0.9;
+          alpha = 0.5;
         }
         // is ink empty?
         // did the pen just go down recently?
         // add some randomization
         if(emptyInk &&
-          (penDownFrame < 5) ){ //&&
-          //((Math.floor(Math.random()*2)) === 2)) {
+          (penDownFrame < 5) &&
+          ((Math.floor(Math.random()*20)) === 2)) {
           isSkipping = true;
           emptyInk = false;
           window.setTimeout(resetEmptyInk, 5000);
         }
       } else {
-        alpha = 0.5;
+        alpha = 0.2;
         skipCounter++;
         if(skipCounter > 50) {
           isSkipping = false;
@@ -143,19 +201,18 @@
     // LINE WIDTH
 
     function calcLineWidth(p) {
-      var maxWidth = 2;
       var width = p;
 
       if (p > 0.8) {
-        width = maxWidth;
+        width = 3;
       } else if (p < 0.6) {
         width = 1;
       } else {
         //width = p * 1.2;
-        width = p * maxWidth;
+        width = p * 3;
       }
 
-      return width;
+      return 15;
     }
 
     // STROKE STYLE
@@ -163,7 +220,7 @@
     function calcStrokeStyle(p) {
       var style;
 
-      if(p < 0.9) {
+      if(p < 0.3) {
         style = pat2;
       } else {
         style = pat1;
