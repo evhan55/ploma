@@ -2,7 +2,7 @@
 	<head>
 	</head>
 	<body>
-    <img src="PencilTextures6.jpg" id="image"/>
+    <img src="graphite.jpg" id="image"/>
 	</body>
   <script type="text/javascript">
     // get the image
@@ -14,8 +14,8 @@
 
       // create and customize the canvas
       var canvas = document.createElement("canvas");
-      canvas.width = 182;
-      canvas.height = 298;
+      canvas.width = 238; //182;
+      canvas.height = 193; //298;
       document.body.appendChild(canvas);
 
       // get the context
@@ -26,7 +26,7 @@
 
 
       // get the image data object
-      var image = ctx.getImageData(0, 0, 182, 298);
+      var image = ctx.getImageData(0, 0, 238, 193);
       // get the image data values
       var imageData = image.data,
       length = imageData.length;
@@ -42,9 +42,9 @@
         var hsl = rgbToHsl(r, g, b);
         var l = hsl[2];
         //console.log(l*255);
-        imageData[i] = 30;
-        imageData[i+1] = 30;
-        imageData[i+2] = 70;
+        imageData[i] = 50;
+        imageData[i+1] = 50;
+        imageData[i+2] = 80;
         imageData[i+3] = 255 - l*255;
         //console.log(imageData[i+0] + "," + imageData[i+1] + "," + imageData[i+2] + "," + imageData[i+3]);
       }

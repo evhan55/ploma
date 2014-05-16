@@ -12,9 +12,9 @@
   </head>
 
   <body>
-    <canvas id="c" width="1000" height="1000"></canvas>
-    <img src="transparency70b2.png" id="img1"/><!-- dark ? -->
-    <img src="transparency70b.png" id="img2"/><!-- light? -->
+    <canvas id="c" width="1300" height="1000"></canvas>
+    <img src="graphite80b.png" id="img1"/><!-- dark ? -->
+    <img src="transparency150b.png" id="img2"/><!-- light? -->
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -35,6 +35,7 @@
     var skipCounter = 0;
     var penDownFrame = 0;
     var emptyInk = true;
+    var penDownCounter = 0;
     var px;
     var py;
     var x;
@@ -42,20 +43,23 @@
 
     //ctx.globalAlpha = 0.5;
     //ctx.globalCompositeOperation = 'darker';
-    ctx.lineCap = 'square';
-    //ctx.shadowBlur = 1;
-    //ctx.shadowColor = 'rgb(0, 0, 0)';
+    //ctx.lineCap = 'square';
+    ctx.shadowBlur = 1;
+    ctx.shadowColor = 'rgb(109, 103, 143)';
     //ctx.lineWidth = 2;
 
     clearCanvas();
 
     el.onmousedown = function(e) {
-      isDrawing = true;
-      x = e.clientX - cursorOffsetX;
-      y = e.clientY - cursorOffsetY;
-      px = x;
-      py = y;
-      penDownFrame = 0;
+        isDrawing = true;
+      //if(penDownCounter % 50 === 0) {
+        x = e.clientX - cursorOffsetX;
+        y = e.clientY - cursorOffsetY;
+        px = x;
+        py = y;
+        penDownFrame = 0;
+      //}
+      penDownCounter++;
     };
 
     el.onmousemove = function(e) {
@@ -101,7 +105,7 @@
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.fillStyle = 'rgb(253, 253, 240)';
       //ctx.fillStyle = 'rgb(255, 255, 255)';
-      ctx.fillRect(0, 0, 1000, 1000);
+      ctx.fillRect(0, 0, 1300, 1000);
     }
 
     // ALPHA
@@ -112,20 +116,20 @@
       if(!isSkipping) {
         alpha = 1;
         if(p < 0.5) {
-          alpha = 0.9;
+          alpha = 0.8;
         }
         // is ink empty?
         // did the pen just go down recently?
         // add some randomization
-        if(emptyInk &&
-          (penDownFrame < 5) ){ //&&
-          //((Math.floor(Math.random()*2)) === 2)) {
+        if((emptyInk && (penDownFrame < 5)) ||
+           ((Math.floor(Math.random()*2)) === 0)) {
           isSkipping = true;
           emptyInk = false;
           window.setTimeout(resetEmptyInk, 5000);
         }
       } else {
-        alpha = 0.5;
+        //alpha = Math.max(0.2, Math.max(Math.random(), 0.5));
+        alpha = 0.8;
         skipCounter++;
         if(skipCounter > 50) {
           isSkipping = false;
@@ -143,7 +147,7 @@
     // LINE WIDTH
 
     function calcLineWidth(p) {
-      var maxWidth = 2;
+      var maxWidth = 7.4;
       var width = p;
 
       if (p > 0.8) {
@@ -152,7 +156,7 @@
         width = 1;
       } else {
         //width = p * 1.2;
-        width = p * maxWidth;
+        width = maxWidth;
       }
 
       return width;
@@ -161,12 +165,10 @@
     // STROKE STYLE
 
     function calcStrokeStyle(p) {
-      var style;
+      var style = pat2; // light
 
-      if(p < 0.9) {
-        style = pat2;
-      } else {
-        style = pat1;
+      if(p > 0.6) {
+        style = pat1; // dark
       }
 
       return style;
