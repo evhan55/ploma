@@ -3,7 +3,7 @@
     <style>
       canvas {
         border: 1px solid #999;
-        cursor: url('cursor.cur'), crosshair;
+        cursor: url('cursors/cursor.cur'), crosshair;
       }
       img {
         display: none;
@@ -13,8 +13,8 @@
 
   <body>
     <canvas id="c" width="1300" height="1000"></canvas>
-    <img src="graphite80b.png" id="img1"/><!-- dark ? -->
-    <img src="transparency150b.png" id="img2"/><!-- light? -->
+    <img src="transparency140b.png" id="img1"/><!-- dark ? -->
+    <img src="transparency140b.png" id="img2"/><!-- light? -->
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -43,23 +43,20 @@
 
     //ctx.globalAlpha = 0.5;
     //ctx.globalCompositeOperation = 'darker';
-    //ctx.lineCap = 'square';
-    ctx.shadowBlur = 1;
-    ctx.shadowColor = 'rgb(109, 103, 143)';
+    ctx.lineCap = 'square';
+    //ctx.shadowBlur = 1;
+    //ctx.shadowColor = 'rgb(109, 103, 143)';
     //ctx.lineWidth = 2;
 
     clearCanvas();
 
     el.onmousedown = function(e) {
-        isDrawing = true;
-      //if(penDownCounter % 50 === 0) {
-        x = e.clientX - cursorOffsetX;
-        y = e.clientY - cursorOffsetY;
-        px = x;
-        py = y;
-        penDownFrame = 0;
-      //}
-      penDownCounter++;
+      isDrawing = true;
+      x = e.clientX - cursorOffsetX;
+      y = e.clientY - cursorOffsetY;
+      px = x;
+      py = y;
+      penDownFrame = 0;
     };
 
     el.onmousemove = function(e) {
@@ -73,8 +70,6 @@
         minx = Math.min(x, px) + Math.random()*50;
         miny = Math.min(y, py) + Math.random()*50;
         pressure = plugin.penAPI.pressure;
-
-        //console.log(pressure);
 
         // set stroke and size according to pressure
         ctx.lineWidth = calcLineWidth(pressure);
@@ -103,8 +98,7 @@
 
     function clearCanvas() {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.fillStyle = 'rgb(253, 253, 240)';
-      //ctx.fillStyle = 'rgb(255, 255, 255)';
+      ctx.fillStyle = 'rgb(253, 253, 238)';
       ctx.fillRect(0, 0, 1300, 1000);
     }
 
@@ -116,20 +110,19 @@
       if(!isSkipping) {
         alpha = 1;
         if(p < 0.5) {
-          alpha = 0.8;
+          alpha = 0.9;
         }
         // is ink empty?
         // did the pen just go down recently?
         // add some randomization
-        if((emptyInk && (penDownFrame < 5)) ||
-           ((Math.floor(Math.random()*2)) === 0)) {
+        if((emptyInk && (penDownFrame < 5))) { //} ||
+           //((Math.floor(Math.random()*2)) === 0)) {
           isSkipping = true;
           emptyInk = false;
           window.setTimeout(resetEmptyInk, 5000);
         }
       } else {
-        //alpha = Math.max(0.2, Math.max(Math.random(), 0.5));
-        alpha = 0.8;
+        alpha = 0.5;
         skipCounter++;
         if(skipCounter > 50) {
           isSkipping = false;
@@ -147,15 +140,12 @@
     // LINE WIDTH
 
     function calcLineWidth(p) {
-      var maxWidth = 7.4;
+      var maxWidth = 2;
       var width = p;
 
-      if (p > 0.8) {
-        width = maxWidth;
-      } else if (p < 0.6) {
+      if (p < 0.6) {
         width = 1;
       } else {
-        //width = p * 1.2;
         width = maxWidth;
       }
 

@@ -27,7 +27,7 @@
       var oldX;
       var oldY;
       var isDrawing;
-      var paperColor = "rgb(253, 254, 239);";
+      var paperColor = "rgb(253, 254, 239)";
       var curves = [];
       var currentCurve = 0;
 
@@ -174,7 +174,7 @@
             var penCanvasX = cursorOffset(e, canvas).x;
             var penCanvasY = cursorOffset(e, canvas).y;
             var point = {
-              /*isWacom      : getWacomPlugin().penAPI.isWacom,
+              isWacom      : getWacomPlugin().penAPI.isWacom,
               isEraser     : getWacomPlugin().penAPI.isEraser,
               posX         : getWacomPlugin().penAPI.posX,
               posY         : getWacomPlugin().penAPI.posY,
@@ -189,13 +189,13 @@
               tangPressure : getWacomPlugin().penAPI.tangentialPressure,
               version      : getWacomPlugin().penAPI.version,
               pointerType  : getWacomPlugin().penAPI.pointerType,
-              tabletModel  : getWacomPlugin().penAPI.tabletModel,*/
+              tabletModel  : getWacomPlugin().penAPI.tabletModel,
               pressure     : getWacomPlugin().penAPI.pressure,
               canvasX      : penCanvasX,
               canvasY      : penCanvasY,
-              //time         : Date.now()
+              time         : Date.now()
             };
-            curves[currentCurve].push([point.canvasX, point.canvasY, point.pressure]);
+            curves[currentCurve].push(point);
 
             // Draw line
             redraw();
@@ -321,10 +321,10 @@
           var pts = [];
           var prs = [];
           for (var j = 0; j < sampledCurves[i].length; j++) {
-            pts.push(sampledCurves[i][j][0]);
-            pts.push(sampledCurves[i][j][1]);
-            prs.push(sampledCurves[i][j][2]);
-            prs.push(sampledCurves[i][j][2]);
+            pts.push(sampledCurves[i][j].canvasX);
+            pts.push(sampledCurves[i][j].canvasY);
+            prs.push(sampledCurves[i][j].pressure);
+            prs.push(sampledCurves[i][j].pressure);
           }
           drawSpline(ctx, pts, prs, tension, thickness, darkness, blur, shadowDarkness);
         }

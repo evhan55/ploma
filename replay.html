@@ -2,13 +2,13 @@
   <head>
 
     <!-- INPUT FILE -->
-    <script src='capture.json'></script>
+    <script src='capture2.json'></script>
     <!-- END INPUT FILE -->
 
     <script type='text/javascript'>
       var canvas;
       var ctx;
-      var paperColor = "rgb(253, 253, 240);";
+      var paperColor = "rgb(253, 253, 240)";
       var capture;
 
       var tension;
@@ -322,6 +322,9 @@
         width: 0;
         height: 0;
       }
+      img {
+        display: none;
+      }
       #panel {
         width: 255px;
         float: left;
@@ -354,6 +357,8 @@
   </head>
 
   <body>
+    <!-- TEXTURE -->
+    <img src="tests/img/transparency140b.png" id="img"/>
     <!-- NOTEBOOK -->
     <canvas id='canvas' width='1000px' height='1000px'></canvas>
     <!-- CONTROL PANEL -->
@@ -372,7 +377,7 @@
       <h3>Line</h3>
       <div class='control'>
         <div class='label'>Thickness</div>
-        <input id='thickness-input' value='1' type='range' min='0' max='10' step='0.05'></input>
+        <input id='thickness-input' value='2' type='range' min='0' max='10' step='0.05'></input>
         <div class='readout' id='thickness-readout'></div>
       </div>
       <div class='control'>
@@ -383,12 +388,12 @@
       <h3>Shadow</h3>
       <div class='control'>
         <div class='label'>Blur</div>
-        <input id='blur-input' value='3' type='range' min='0' max='10' step='0.05'></input>
+        <input id='blur-input' value='0' type='range' min='0' max='10' step='0.05'></input>
         <div class='readout' id='blur-readout'></div>
       </div>
       <div class='control'>
         <div class='label'>Darkness</div>
-        <input id='shadow-darkness-input' value='0.5' type='range' min='0' max='1' step='0.01'></input>
+        <input id='shadow-darkness-input' value='0' type='range' min='0' max='1' step='0.01'></input>
         <div class='readout' id='shadow-darkness-readout'></div>
       </div>
       <h3>Pressure</h3>

@@ -1,0 +1,575 @@
+
+<!DOCTYPE HTML>
+<!-- ************************************************************************
+* WacomPluginTableCanvasDemo.html
+*   Shows Wacom tablet data in a web page using a javascript 
+*       canvas object.
+*
+* Copyright (c) Wacom Technology, Inc.
+*
+* Note:
+*    This demo works on Internet Explorer because of ExplorerCanvas, which 
+*    can be obtained from http://excanvas.sourceforge.net.  Simply include
+*    the file excanvas.js as the javascript source (see below).  This file
+*    also supports the Netscape browsers (Firefox, Safari, Chrome).
+*
+*    Be forewarned, however, that IE performance is worse than the
+*    Netscape browsers.  (So you may want to consider using Silverlight 
+*    instead of the canvas object.)
+*
+* Requires installation of Wacom tablet driver software.
+* See Plugin Documentation at http://www.wacomeng.com/web/index.html
+*
+* Note: Plugin built from Firebreath framework (http://www.firebreath.org)
+************************************************************************** -->
+<html lang="en">
+   <head>
+  <title>Wacom Demo Plugin</title>
+  <style type="text/css">
+  .draggable {cursor:hand}
+  </style>
+
+        <!--[if lt IE 9]>
+        <script src="excanvas.js">
+        <p>Using the excanvas.js wrapper for canvas.</p>
+        </script><![endif]-->
+
+      <script type="text/javascript">
+
+  // *********************************************************************
+  // Global javascript variables.
+  var _canvasSize = {width:500, height:400};
+  var _lastX = 0.0;
+  var _lastY = 0.0;
+  var _posUpX = 0.0;
+  var _posUpY = 0.0;
+
+  var _foreground = "rgb(0, 0, 255)"; // blue
+  var _background = "rgb(51,153,255)";
+
+  // Indicates whether the Wacom tablet driver (service) is installed.
+  var _docIsWacom      = 0;
+
+  // Indicates if eraser end of pen is touching the tablet.
+  var _docIsEraser     = 0;
+
+  // Indicates how much pressure (0-100%) applied by user to pen.
+  var _docPressure     = 0;
+
+  // Low-res X and Y display position of pen relative to system surface (pixels).
+  var _docPosX      = 0;
+  var _docPosY      = 0;
+
+  // High-res X and Y display position of pen relative to system surface (pixels).
+  var _docSysX      = 0;
+  var _docSysY      = 0;
+
+  // X and Y position of pen relative to tablet surface in (tablet coordinates).
+  var _docTabX      = 0;
+  var _docTabY      = 0;
+  
+  // X and Y tilt (in degrees) of pen to vertical axis.
+  var _docTiltX        = 0;
+  var _docTiltY        = 0;
+
+  // Rotation (degrees or radians) of pen relative to top edge of tablet.
+  // Controlled by rotating an art pen.  Eg: Intuos3 6D Art Pen.
+  var _docRotationDeg  = 0;
+  var _docRotationRad  = 0;
+
+  // Tangential pressure, controlled by the adjustment wheel on an airbrush pen 
+  // (transducer).  Eg: Intuos3 Airbrush
+  var _docTangPressure = 0;
+  var _docPointerType  = 0;
+
+  // *********************************************************************
+  // getWacomPlugin
+  //   Returns correct plugin instance depending on whether running on
+  //   Internet Explorer or Firefox (and similar: Chrome, Safari, Opera).
+  //
+  function getWacomPlugin()
+        {
+    return document.getElementById('wtPlugin');
+        }
+
+  // *********************************************************************
+  // getMousePos
+  //   Find current cursor position.
+  //
+  function getMousePos(canvas, evt) 
+  {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: Math.floor(evt.clientX - rect.left),
+      y: Math.floor(evt.clientY - rect.top)
+    };
+  }
+
+    
+  // *********************************************************************
+  // canvasInit
+  //   Initialize the drawing surface.
+  //
+  function canvasInit()
+  {
+    //alert("canvasInit()");
+    // Initialize canvas attributes.
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    context.fillStyle = _background;
+    context.fillRect(0,0, _canvasSize.width, _canvasSize.height);
+
+    // Draw the initial cursor square in the center of canvas.
+    _posUpX = _canvasSize.width/2;
+    _posUpY = _canvasSize.height/2;
+    drawCursor(_posUpX, _posUpY, _foreground);
+  }
+
+  // *********************************************************************
+  // mouseenter
+  //   Respond to mouse enter canvas event.
+  //
+  function mouseenter()
+  {
+    //console.log("mouseenter");
+    updatePenType(true);
+  }
+
+  // *********************************************************************
+  // mouseleave
+  //   Respond to mouse leave from canvas event.
+  //
+  function mouseleave()
+  {
+    // Note - we don't try to query for pen type from the tablet 
+    // because once the pen goes out of prox, we can't do the query.
+    // In this case, let the function deal with what gets displayed.
+    //console.log("mouseleave");
+    updatePenType(false);
+  }
+
+  // *********************************************************************
+  // mousedown
+  //   Respond to mouse down event.
+  //
+  function mousedown(evt)
+  {
+    var mousePos;
+    var isForeground = 0;
+    var canvas = document.getElementById('canvas');
+    canvas.onmousemove=mousedrag;
+    
+    //console.log("mousedown");
+    if (!evt) 
+    {
+      var evt = window.event; // IE does not pass evt as a parameter.
+    }
+
+    mousePos = getMousePos(canvas, evt);
+    _lastX = mousePos.x;
+    _lastY = mousePos.y;
+
+    // Erase the previous square position.
+    drawCursor(_posUpX, _posUpY, _background);
+  }
+
+  // *********************************************************************
+  // mouseup
+  //   Respond to mouse up event.
+  //
+  function mouseup()
+  {
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext("2d");
+    canvas.onmousemove=null;
+
+    //console.log("mouseup");
+    // Save position when pen was raised.
+    _posUpX = _lastX;
+    _posUpY = _lastY;
+  }
+  
+  // *********************************************************************
+  // mouseDrag
+  //   Respond to mouse drag event.
+  //
+  function mousedrag(evt)
+  {
+    var mousePos;
+    var canvas = document.getElementById('canvas');
+    var curX, curY;
+
+    //console.log("mousedrag");
+    if (!evt) 
+    {
+      var evt = window.event;
+    }
+
+    mousePos = getMousePos(canvas, evt);
+    curX = mousePos.x;
+    curY = mousePos.y;
+    
+    if (canvas.getContext) 
+    {
+      var context = canvas.getContext("2d");
+      drawCursor(_lastX, _lastY, _background);
+      drawCursor(curX, curY, getPressureColor());
+      displayMousePosition(curX, curY);
+    }
+    
+    _lastX = curX;
+    _lastY = curY;
+
+    displayWacomPenData();
+  }
+
+
+  // *********************************************************************
+  // getPressureColor
+  //   Compute red, green, blue color values based on pressure.
+  //
+  function getPressureColor()
+  {
+    var redVal = blueVal = greenVal = 0;
+    var pressure = getWacomPlugin() ? getWacomPlugin().penAPI.pressure : 1.0;
+    var color = "";
+
+    if ( pressure >=0 && pressure < 0.5 )
+    {
+      blueVal = Math.round( 255 * ( 1 - 2 * pressure ));
+      greenVal = Math.round( 255 * ( 2 * pressure ));
+    }
+    else if ( pressure >= 0.5 && pressure <= 1.0 )
+    {
+      greenVal = Math.round( 255 * 2 * ( 1.0 - pressure ));
+      redVal = Math.round( 255 * (2 * pressure - 1.0 ));
+    }
+
+    color = "rgb("+String(redVal)+","+String(greenVal)+","+String(blueVal)+")";
+
+    return color;
+  }
+
+
+  // *********************************************************************
+  // drawCursor
+  //   Draws a colored ball at cursor position, where color indicates 
+  //   pen pressure.
+  //
+  function drawCursor( posX, posY, color )
+  {
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext("2d");
+    var pointerType  = getWacomPlugin().penAPI.pointerType;
+
+    if ( 3 == pointerType )   // eraser type
+    {
+      var offset = 10;
+      var sqrWidth = 2 * offset;
+
+      ctx.beginPath();
+      ctx.moveTo(posX, posY);
+      ctx.fillStyle = color;
+      ctx.fillRect(posX-offset,posY-offset,sqrWidth,sqrWidth);
+      ctx.closePath();
+    }
+    else        // assume anything else is pen 
+    {
+      var radius = 10;
+
+      // This is a hack to make sure old cursor erased.
+      if ( color == _background ) { radius += 4; }
+
+      ctx.beginPath();
+      ctx.moveTo(posX, posY);
+      ctx.fillStyle = color;
+      ctx.arc(posX,posY,radius,0,Math.PI*2,true);
+      ctx.fill();
+      ctx.closePath();
+    }
+  }
+
+ 
+      // *********************************************************************
+      // isPluginLoaded
+      //   Returns loaded status as plugin version string (eg: "2.0.0.2"),
+      //   or an empty string if plugin can't be loaded or found.
+      //
+      function isPluginLoaded()
+      {
+    var retVersion = "";
+    var pluginVersion = getWacomPlugin().version;
+    //alert("pluginVersion: [" + pluginVersion + "]");
+
+    if ( pluginVersion != undefined )
+    {
+            retVersion = pluginVersion;
+    }
+
+    return retVersion;
+      }
+
+  // *********************************************************************
+  // onLoad
+  //   Called when page is loaded.  Function checks to see if the plugin 
+  //   is loaded, and displays an appropriate prompt if found or not.
+  //   If loaded, page elements are initialized with penAPI data.
+  //
+  function onLoad()
+  {
+    var loadVersion = isPluginLoaded();
+    //alert("loadVersion: [" + loadVersion + "]");
+
+    if ( loadVersion != "" )
+    {
+      alert("Loaded webplugin: " + loadVersion);
+    }
+    else
+    {
+      alert("webplugin is NOT Loaded (or undiscoverable)");
+      return;
+    }
+
+    // Init drawing canvas.
+    canvasInit();
+
+      // These values only have to be set once.
+    _docIsWacom      = document.getElementById('docIsWacomCell');
+    _docIsEraser     = document.getElementById('docIsEraserCell');
+    _docPressure     = document.getElementById('docPressureCell');
+      _docPosX         = document.getElementById('docPosXCell');
+      _docPosY         = document.getElementById('docPosYCell');
+      _docSysX         = document.getElementById('docSysXCell');
+      _docSysY         = document.getElementById('docSysYCell');
+      _docTabX         = document.getElementById('docTabXCell');
+      _docTabY         = document.getElementById('docTabYCell');
+    _docTiltX        = document.getElementById('docTiltXCell');
+    _docTiltY        = document.getElementById('docTiltYCell');
+    _docRotationDeg  = document.getElementById('docRotationDegCell');
+    _docRotationRad  = document.getElementById('docRotationRadCell');
+    _docTangPressure = document.getElementById('docTangPressureCell');
+    _docPointerType  = document.getElementById('docPointerTypeCell');
+    _docVersion      = document.getElementById('docVersionCell');
+    _docTabletModel  = document.getElementById('docTabletModelCell');
+
+    //alert("getting tablet data...");
+
+    // Try to display some initial pen data.  
+    // If plugin not installed, then this is a NO-OP.
+      displayWacomPenData();
+
+    // If plugin not loaded, alert the user.
+    if ( loadedPlugin == 0 )
+    {
+      alert("WARNING: WacomPlugin could not be loaded!");
+    }
+
+    //DOTHIS_TEST_ONLY Test data path for setting TabletConfig.
+    //DOTHIS_TEST_ONLY getWacomPlugin().penAPI.TabletConfig = "<foo>stuff</foo>";
+  }
+
+  // *********************************************************************
+  // Reset the plugin status flag and display an error message.
+  // TBD - how to see the actual error.
+  function clearLoadedPluginFlag()
+  {
+    alert("WARNING: could not load WacomIE.cab file.");
+    loadedPlugin = 0;
+  }
+
+
+  // *********************************************************************
+  // These are the mouse coordinates; not Wacom tablet coordinates.
+  function displayMousePosition( mouseX, mouseY )
+  {
+    document.getElementById('docMouseXCell').innerHTML = String(mouseX);
+    document.getElementById('docMouseYCell').innerHTML = String(mouseY);
+  }
+
+
+  // *********************************************************************
+  // Update displayed pen type.
+  function updatePenType( bQueryForPenType)
+  {
+    var pointerTypeStr = "";
+
+    if ( bQueryForPenType )
+    {
+      var pointerType  = getWacomPlugin().penAPI.pointerType;
+      //console.log(pointerType);
+  
+      switch( pointerType )
+      {
+        case 1:
+          pointerTypeStr = String(pointerType) + " [pen]";
+          break;
+        case 2:
+          pointerTypeStr = String(pointerType) + " [puck]";
+          break;
+        case 3:
+          pointerTypeStr = String(pointerType) + " [eraser]";
+          break;
+        case 0:
+        default:
+          // Out of proximity
+          pointerTypeStr = String(pointerType) + " [mouse]";
+          break;
+      }
+    }
+    else
+    {
+      pointerTypeStr = "[Pointer has left the canvas.]";
+    }
+
+    _docPointerType.innerHTML  = pointerTypeStr;
+  }
+
+  // *********************************************************************
+  // Get Wacom pen data and display on web page.
+  function displayWacomPenData()
+  {
+    var pointerTypeStr = "";
+
+    //alert("displayWacomPenData");
+
+    // Get data values from Wacom plugin.
+    var isWacom      = getWacomPlugin().penAPI.isWacom;
+    var isEraser     = getWacomPlugin().penAPI.isEraser;
+    var pressure     = getWacomPlugin().penAPI.pressure;
+    var posX         = getWacomPlugin().penAPI.posX;
+    var posY         = getWacomPlugin().penAPI.posY;
+
+      var sysX         = getWacomPlugin().penAPI.sysX;
+      var sysY         = getWacomPlugin().penAPI.sysY;
+      var tabX         = getWacomPlugin().penAPI.tabX;
+      var tabY         = getWacomPlugin().penAPI.tabY;
+    var rotationDeg  = getWacomPlugin().penAPI.rotationDeg;
+    var rotationRad  = getWacomPlugin().penAPI.rotationRad;
+    var tiltX        = getWacomPlugin().penAPI.tiltX;
+    var tiltY        = getWacomPlugin().penAPI.tiltY;
+    var tangPressure = getWacomPlugin().penAPI.tangentialPressure;
+    var version      = getWacomPlugin().penAPI.version;
+    var pointerType  = getWacomPlugin().penAPI.pointerType;
+    var tabletModel  = getWacomPlugin().penAPI.tabletModel;
+
+    // Display data values in table.
+    if (isWacom == undefined)
+    {
+    loadedPlugin = 0;
+    _docIsWacom.innerHTML = "Can't find/load plugin!";
+    }
+    else
+    {
+      loadedPlugin = 1;
+      // CONNECTED: plugin found Wacom tablet service.
+      // NOT CONNECTED: plugin loaded, but could not connect to the tablet service.
+      _docIsWacom.innerHTML  = 
+        (isWacom ? String(isWacom) : "0") + (isWacom ? " [CONNECTED]" : " [NOT CONNECTED]");
+    }
+
+    _docIsEraser.innerHTML     = String(isEraser);
+    _docPressure.innerHTML     = String(Math.round(pressure * 100));
+
+      _docPosX.innerHTML         = String(posX) + " pixels"; 
+      _docPosY.innerHTML         = String(posY) + " pixels"; 
+     
+      _docSysX.innerHTML         = String(Math.round(sysX * 1000)/1000) + " pixels";
+      _docSysY.innerHTML         = String(Math.round(sysY * 1000)/1000) + " pixels";
+   
+      _docTabX.innerHTML         = String(tabX) + " tablet X coords"; 
+      _docTabY.innerHTML         = String(tabY) + " tablet Y coords"; 
+   
+    _docRotationDeg.innerHTML  = String(Math.round(rotationDeg * 1000)/1000) + " deg";
+    _docRotationRad.innerHTML  = String(Math.round(rotationRad * 1000)/1000) + " rad";
+    _docTiltX.innerHTML        = String(Math.round(tiltX * 1000)/1000);
+    _docTiltY.innerHTML        = String(Math.round(tiltY * 1000)/1000);
+    _docTangPressure.innerHTML = String(Math.round(tangPressure * 1000)/1000);
+    _docVersion.innerHTML      = String(version);
+    _docTabletModel.innerHTML  = String(tabletModel);
+
+    if ( isWacom )
+    {
+      updatePenType(true);
+    }
+  }
+
+  // *********************************************************************
+  // Write a debug string to docDebugText text element.
+  function traceDebug(str)
+  {
+    var _docDebugText = document.getElementById('docDebugText');
+
+    if ( _docDebugText )
+    {
+      _docDebugText.value = str;
+    }
+  }
+
+  </script>
+
+    <style type="text/css">
+  canvas { border: 1px solid black; }
+    </style>
+
+   </head>
+   <body onload="onLoad();">
+  <font color="blue">
+  <H2>Wacom Plugin Table Values Demo</H2>
+  <H3>Drag the blue circle with your pen to see table values change.</H3>
+
+  <div style="position:relative; width: 550px; float: left;">
+
+      <canvas id="canvas" onmousedown="mousedown(event);"
+      onmouseup="mouseup(event);" onmouseout="mouseleave(event);"
+      onmouseenter="mouseenter(event);" width="500" height="400"></canvas>
+
+  </div>
+
+  <!-- Table of WinTab values -->
+  <div style="position: relative; width: 550px; float: left;">
+  <table id=valueTable border cellspacing=0 cellpadding=5>
+  <caption align=top>
+    Wacom Data Parameters
+  </caption>
+  <tr align=left> <th>Parameter</th>    <th id="docHeaderCell">----- Parameter Value -----</th></tr>
+  <tr align=left> <th>Version</th>      <td id="docVersionCell">0</td></tr>
+  <tr align=left> <th>MouseX</th>       <td id="docMouseXCell">0</td></tr>
+  <tr align=left> <th>MouseY</th>       <td id="docMouseYCell">0</td></tr>
+  <tr align=left> <th>IsWacom</th>      <td id="docIsWacomCell">0</td></tr>
+  <tr align=left> <th>IsEraser</th>     <td id="docIsEraserCell">0</td></tr>
+  <tr align=left> <th>Pressure</th>     <td id="docPressureCell">0</td></tr>
+  <tr align=left> <th>PosX</th>         <td id="docPosXCell">0</td></tr>
+  <tr align=left> <th>PosY</th>         <td id="docPosYCell">0</td></tr>
+  <tr align=left> <th>SysX</th>         <td id="docSysXCell">0</td></tr>
+  <tr align=left> <th>SysY</th>         <td id="docSysYCell">0</td></tr>
+  <tr align=left> <th>TabX</th>         <td id="docTabXCell">0</td></tr>
+  <tr align=left> <th>TabY</th>         <td id="docTabYCell">0</td></tr>
+  <tr align=left> <th>RotationDeg</th>  <td id="docRotationDegCell">0</td></tr>
+  <tr align=left> <th>RotationRad</th>  <td id="docRotationRadCell">0</td></tr>
+  <tr align=left> <th>TiltX</th>        <td id="docTiltXCell">0</td></tr>
+  <tr align=left> <th>TiltY</th>        <td id="docTiltYCell">0</td></tr>
+  <tr align=left> <th>TangPressure</th> <td id="docTangPressureCell">0</td></tr>
+  <tr align=left> <th>PointerType</th>  <td id="docPointerTypeCell">0</td></tr>
+  <tr align=left> <th>TabletModel</th>  <td id="docTabletModelCell">0</td></tr>
+  </table>
+
+  </div>
+
+    <!--[if IE]>
+
+    <object id='wtPlugin' classid='CLSID:092dfa86-5807-5a94-bf3b-5a53ba9e5308'>
+    </object>
+
+    <![endif]--><!--[if !IE]> <-->
+
+    <object id="wtPlugin" type="application/x-wacomtabletplugin">
+          <param name="onload" value="pluginLoaded" />
+
+    </object>
+
+    <!--> <![endif]-->
+
+   </body>
+</html>
+
+
