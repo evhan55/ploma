@@ -8,6 +8,8 @@
     <script type='text/javascript'>
       var canvas;
       var ctx;
+      var img;
+      var pat;
       var paperColor = "rgb(253, 253, 240)";
       var capture;
 
@@ -42,7 +44,10 @@
       //
       window.onload = function(){
         canvas = document.getElementById('canvas');
+        img = document.getElementById("img");
         ctx = canvas.getContext('2d');
+        pat = ctx.createPattern(img,"repeat");
+        ctx.strokeStyle = pat;
 
         // load capture file points
         capture = JSON.parse(jsonstr);
@@ -218,7 +223,7 @@
             prs.push(sampledCurves[i][j][2]);
             prs.push(sampledCurves[i][j][2]);
           }
-          console.log(prs);
+          //console.log(prs);
           drawSpline(ctx, pts, prs, tension, thickness, darkness, blur, shadowDarkness);
         }
 
@@ -262,6 +267,9 @@
         ctx.save();
         var cp = [];   // array of control points, as x0,y0,x1,y1,...
         var n = pts.length;
+        var minpt;
+        var minx;
+        var miny;
 
         // Draw an open curve, not connected at the ends
         for(var i=0;i<n-4;i+=2){
@@ -269,39 +277,78 @@
         }    
         for(var i=2;i<pts.length-5;i+=2){
           var pressureCoefficient = pressure*prs[i];
-          ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
-          ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
+          //ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
+          //ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
           ctx.lineWidth = mapPressure(prs[i])*th;
+          minpt = getMinPt(pts[i],pts[i+1],cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
+          minx = minpt.x;
+          miny = minpt.y;
+          ctx.translate(minx, miny);
           ctx.beginPath();
-          ctx.moveTo(pts[i],pts[i+1]);
-          ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
+          ctx.moveTo(pts[i] - minx, pts[i+1] - miny);
+          ctx.bezierCurveTo(
+            cp[2*i-2] - minx,
+            cp[2*i-1] - miny,
+            cp[2*i] - minx,
+            cp[2*i+1] - miny,
+            pts[i+2] - minx,
+            pts[i+3] - miny
+          );
           ctx.stroke();
           ctx.closePath();
+          ctx.translate(-minx, -miny);
         }
 
         // For open curves the first and last arcs are simple quadratics.
 
         // First arc
-        ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
-        ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
+        //ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
+        //ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
         ctx.lineWidth = mapPressure(prs[0])*th;
+        minpt = getMinPt(pts[0],pts[1],cp[0],cp[1],pts[2],pts[3],Infinity,Infinity);
+        minx = minpt.x;
+        miny = minpt.y;
+        ctx.translate(minx, miny);
         ctx.beginPath();
-        ctx.moveTo(pts[0],pts[1]);
-        ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
+        ctx.moveTo(pts[0] - minx, pts[1] - miny);
+        ctx.quadraticCurveTo(
+          cp[0] - minx,
+          cp[1] - miny,
+          pts[2] - minx,
+          pts[3] - miny
+        );
         ctx.stroke();
         ctx.closePath();
+        ctx.translate(-minx, -miny);
         
         // Last arc
-        ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
-        ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
+        //ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
+        //ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
         ctx.lineWidth = mapPressure(prs[n-1])*th;
+        minpt = getMinPt(pts[n-2],pts[n-1],cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3],Infinity,Infinity);
+        minx = minpt.x;
+        miny = minpt.y;
+        ctx.translate(minx, miny);
         ctx.beginPath();
-        ctx.moveTo(pts[n-2],pts[n-1]);
-        ctx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
+        ctx.moveTo(pts[n-2] - minx, pts[n-1] - miny);
+        ctx.quadraticCurveTo(
+          cp[2*n-10] - minx,
+          cp[2*n-9] - miny,
+          pts[n-4] - minx,
+          pts[n-3] - miny
+        );
         ctx.stroke();
         ctx.closePath();
+        ctx.translate(-minx, -miny);
         
         ctx.restore();
+      }
+
+      function getMinPt(x1, y1, x2, y2, x3, y3, x4, y4) {
+        var minx = Math.min(x1, x2, x3, x4) + Math.random()*50;
+        var miny = Math.min(y1, y2, y3, y4) + Math.random()*50;
+
+        return {x: minx, y: miny};
       }
 
     </script>

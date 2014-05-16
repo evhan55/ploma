@@ -37,10 +37,14 @@
     var px;
     var py;
 
-    ctx.lineCap = 'square';
+    // clear canvas
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.fillStyle = 'rgb(252, 252, 238)';
     ctx.fillRect(0, 0, 1300, 950);
+
+    // set global rendering properties
+    ctx.lineCap = 'square';
+    ctx.strokeStyle = pat;
 
     el.onmousedown = function(e) {
       isDrawing = true;
@@ -94,7 +98,7 @@
 
       // set stroke and size according to pressure
       ctx.lineWidth = calcLineWidth(point.pressure);
-      ctx.strokeStyle = calcStrokeStyle(point.pressure);
+      //ctx.strokeStyle = calcStrokeStyle(point.pressure);
       ctx.globalAlpha = calcGlobalAlpha(point.pressure);
 
       // stroke line in offset canvas
