@@ -13,8 +13,8 @@
 
   <body>
     <canvas id="c" width="1300" height="1000"></canvas>
-    <img src="transparency140b.png" id="img1"/><!-- dark ? -->
-    <img src="transparency140b.png" id="img2"/><!-- light? -->
+    <img src="img/transparency140b.png" id="img1"/><!-- dark ? -->
+    <img src="img/transparency140b.png" id="img2"/><!-- light? -->
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -40,13 +40,6 @@
     var py;
     var x;
     var y;
-
-    //ctx.globalAlpha = 0.5;
-    //ctx.globalCompositeOperation = 'darker';
-    ctx.lineCap = 'square';
-    //ctx.shadowBlur = 1;
-    //ctx.shadowColor = 'rgb(109, 103, 143)';
-    //ctx.lineWidth = 2;
 
     clearCanvas();
 

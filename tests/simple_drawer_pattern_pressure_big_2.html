@@ -12,18 +12,18 @@
 
   <body>
     <canvas id="c" width="1300" height="950"></canvas>
-    <img src="img/transparency140b.png" id="img"/>
+    <img src="img/transparency100b.png" id="img"/>
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
   </body>
 
   <script>
-    var el = document.getElementById('c');
-    var img = document.getElementById("img");
-    var plugin = document.getElementById('wtPlugin');
-    var ctx = el.getContext('2d');
-    var pat = ctx.createPattern(img,"repeat");
+    var el;
+    var img;
+    var plugin;
+    var ctx;
+    var pat;
     var cursorOffsetX = 12;
     var cursorOffsetY = 8;
     var isDrawing = false;
@@ -31,126 +31,158 @@
     var skipCounter = 0;
     var penDownFrame = 0;
     var emptyInk = true;
-    var points = [];
     var x;
     var y;
     var px;
     var py;
+    var points = [];
 
-    // clear canvas
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = 'rgb(252, 252, 238)';
-    ctx.fillRect(0, 0, 1300, 950);
+    //**********************************************************************
+    // window.onload
+    //
+    window.onload = function() {
+      el = document.getElementById('c');
+      img = document.getElementById("img");
+      plugin = document.getElementById('wtPlugin');
+      ctx = el.getContext('2d');
+      pat = ctx.createPattern(img,"repeat");
 
-    // set global rendering properties
-    ctx.lineCap = 'square';
-    ctx.strokeStyle = pat;
+      // clear canvas
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = 'rgb(252, 252, 238)';
+      ctx.fillRect(0, 0, 1300, 950);
 
-    el.onmousedown = function(e) {
-      isDrawing = true;
-      x = e.clientX - cursorOffsetX;
-      y = e.clientY - cursorOffsetY;
-      px = x;
-      py = y;
-      penDownFrame = 0;
-    };
+      // set global rendering properties
+      ctx.strokeStyle = pat;
 
-    el.onmousemove = function(e) {
-      var minx;
-      var miny;
-      var pressure;
-      var point;
+      el.onmousedown = function(e) {
+        isDrawing = true;
 
-      penDownFrame++;
+        x = e.clientX - cursorOffsetX;
+        y = e.clientY - cursorOffsetY;
+        px = x;
+        py = y;
 
-      if (!isDrawing) {
-        return;
-      }
+        point = {
+          isWacom      : plugin.penAPI.isWacom,
+          isEraser     : plugin.penAPI.isEraser,
+          posX         : plugin.penAPI.posX,
+          posY         : plugin.penAPI.posY,
+          sysX         : plugin.penAPI.sysX,
+          sysY         : plugin.penAPI.sysY,
+          tabX         : plugin.penAPI.tabX,
+          tabY         : plugin.penAPI.tabY,
+          rotationDeg  : plugin.penAPI.rotationDeg,
+          rotationRad  : plugin.penAPI.rotationRad,
+          tiltX        : plugin.penAPI.tiltX,
+          tiltY        : plugin.penAPI.tiltY,
+          tangPressure : plugin.penAPI.tangentialPressure,
+          version      : plugin.penAPI.version,
+          pointerType  : plugin.penAPI.pointerType,
+          tabletModel  : plugin.penAPI.tabletModel,
+          pressure     : plugin.penAPI.pressure,
+          canvasX      : x,
+          canvasY      : y,
+          time         : Date.now()
+        };
+        points.push(point);
 
-      x = e.clientX - cursorOffsetX;
-      y = e.clientY - cursorOffsetY;
-      minx = Math.min(x, px) + Math.random()*50;
-      miny = Math.min(y, py) + Math.random()*50;
-
-      point = {
-        isWacom      : plugin.penAPI.isWacom,
-        isEraser     : plugin.penAPI.isEraser,
-        posX         : plugin.penAPI.posX,
-        posY         : plugin.penAPI.posY,
-        sysX         : plugin.penAPI.sysX,
-        sysY         : plugin.penAPI.sysY,
-        tabX         : plugin.penAPI.tabX,
-        tabY         : plugin.penAPI.tabY,
-        rotationDeg  : plugin.penAPI.rotationDeg,
-        rotationRad  : plugin.penAPI.rotationRad,
-        tiltX        : plugin.penAPI.tiltX,
-        tiltY        : plugin.penAPI.tiltY,
-        tangPressure : plugin.penAPI.tangentialPressure,
-        version      : plugin.penAPI.version,
-        pointerType  : plugin.penAPI.pointerType,
-        tabletModel  : plugin.penAPI.tabletModel,
-        pressure     : plugin.penAPI.pressure,
-        canvasX      : x,
-        canvasY      : y,
-        time         : Date.now()
+        penDownFrame = 0;
       };
-      points.push(point);
 
-      // set stroke and size according to pressure
-      ctx.lineWidth = calcLineWidth(point.pressure);
-      //ctx.strokeStyle = calcStrokeStyle(point.pressure);
-      ctx.globalAlpha = calcGlobalAlpha(point.pressure);
+      el.onmousemove = function(e) {
+        var minx;
+        var miny;
+        var pressure;
+        var point;
 
-      // stroke line in offset canvas
-      ctx.translate(minx, miny);
-      ctx.beginPath();
-      ctx.moveTo(px - minx, py - miny);
-      ctx.lineTo(x - minx, y - miny);
-      ctx.stroke();
-      ctx.closePath();
-      ctx.translate(-minx, -miny);
+        penDownFrame++;
 
-      px = x;
-      py = y;
-    };
+        if (!isDrawing) {
+          return;
+        }
 
-    el.onmouseup = function() {
-      isDrawing = false;
-      points.push({break: true});
-    };
+        x = e.clientX - cursorOffsetX;
+        y = e.clientY - cursorOffsetY;
+        minx = Math.min(x, px) + Math.random()*50;
+        miny = Math.min(y, py) + Math.random()*50;
 
-    function calcLineWidth(p) {
-      return (p < 0.6) ? 1 : 2;
-    }
+        point = {
+          isWacom      : plugin.penAPI.isWacom,
+          isEraser     : plugin.penAPI.isEraser,
+          posX         : plugin.penAPI.posX,
+          posY         : plugin.penAPI.posY,
+          sysX         : plugin.penAPI.sysX,
+          sysY         : plugin.penAPI.sysY,
+          tabX         : plugin.penAPI.tabX,
+          tabY         : plugin.penAPI.tabY,
+          rotationDeg  : plugin.penAPI.rotationDeg,
+          rotationRad  : plugin.penAPI.rotationRad,
+          tiltX        : plugin.penAPI.tiltX,
+          tiltY        : plugin.penAPI.tiltY,
+          tangPressure : plugin.penAPI.tangentialPressure,
+          version      : plugin.penAPI.version,
+          pointerType  : plugin.penAPI.pointerType,
+          tabletModel  : plugin.penAPI.tabletModel,
+          pressure     : plugin.penAPI.pressure,
+          canvasX      : x,
+          canvasY      : y,
+          time         : Date.now()
+        };
+        points.push(point);
 
-    function calcStrokeStyle(p) {
-      return pat;
-    }
+        // set stroke and size according to pressure
+        ctx.lineWidth = calcLineWidth(point.pressure);
+        //ctx.strokeStyle = calcStrokeStyle(point.pressure);
+        ctx.globalAlpha = calcGlobalAlpha(point.pressure);
 
-    function calcGlobalAlpha(p) {
-      var alpha;
+        // stroke line in offset canvas
+        ctx.translate(minx, miny);
+        ctx.beginPath();
+        ctx.moveTo(px - minx, py - miny);
+        ctx.lineTo(x - minx, y - miny);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.translate(-minx, -miny);
 
-      if(isSkipping && (skipCounter > 50)) {
-        isSkipping = false;
-        skipCounter = 0;
+        px = x;
+        py = y;
+      };
+
+      el.onmouseup = function() {
+        isDrawing = false;
+        points.push({break: true});
+      };
+
+      function calcLineWidth(p) {
+        return (p < 0.6) ? 1 : 2.4;
       }
 
-      if(emptyInk && (penDownFrame < 5)) {
-        isSkipping = true;
-        emptyInk = false;
-        window.setTimeout(function() {
-          emptyInk = true;
-        }, 5000);
-      }
+      function calcGlobalAlpha(p) {
+        var alpha;
 
-      if(isSkipping) {
-        alpha = 0.5;
-        skipCounter++;
-      } else {
-        alpha = (p < 0.5) ? 0.9 : 1;
+        if(isSkipping && (skipCounter > 30)) {
+          isSkipping = false;
+          skipCounter = 0;
+        }
+
+        if(emptyInk && (penDownFrame < 5)) {
+          isSkipping = true;
+          emptyInk = false;
+          window.setTimeout(function() {
+            emptyInk = true;
+          }, 30000);
+        }
+
+        if(isSkipping) {
+          alpha = 0.5;
+          skipCounter++;
+        } else {
+          alpha = (p < 0.5) ? 0.9 : 1;
+        }
+        
+        return alpha;
       }
-      
-      return alpha;
     }
 
     //**********************************************************************
@@ -174,7 +206,6 @@
         window.open(url);
       }
     }
-
   </script>
 
 </html>
