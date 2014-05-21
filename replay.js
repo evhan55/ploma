@@ -153,6 +153,8 @@ window.onload = function(){
   }
 
   // draw curves with default control values
+  noneInput.checked = true;
+  //noneInput.changed;
   redraw();
 }
 
@@ -189,6 +191,10 @@ function redraw() {
 
   if(curveFitting === 'spline') {
     redrawSpline();
+  }
+
+  if(curveFitting === 'bezier2') {
+    redrawBezier2();
   }
 }
 
