@@ -45,7 +45,6 @@ function redrawBezier2() {
     //console.log(pts);
     drawBezier2(pts);
   }
-  console.log('sampledCurves: ' + sampledCurves.length);
 
 }
 
@@ -57,21 +56,15 @@ function drawBezier2(points) {
   var miny;
   
   if(p1) {
-    //ctx.beginPath();
+    ctx.beginPath();
     ctx.moveTo(p1.x, p1.y);
-        ctx.lineCap = 'square';
 
     for (var i = 1, len = points.length; i < len; i++) {
       // we pick the point between pi+1 & pi+2 as the
       // end point and p1 as our control point
       if(p1) {
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
         var midPoint = midPointBtw(p1, p2);
         ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
-        //ctx.lineWidth = Math.random()*10;
-        ctx.stroke();
-        ctx.closePath();
       }
       p1 = points[i];
       p2 = points[i+1];
@@ -80,44 +73,7 @@ function drawBezier2(points) {
     // we wait for the next point to be able to calculate
     // the bezier control point
     ctx.lineTo(p1.x, p1.y);
-    //ctx.lineWidth = Math.random()*10;
-    //ctx.stroke();
-  }
-}
-
-function drawBezier2B(points) {
-  var p1 = points[0] === undefined ? points[3] : points[0];
-  var p2 = points[1] === undefined ? points[4] : points[1];
-  var minpt;
-  var minx;
-  var miny;
-  
-  if(p1) {
-    //ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-        ctx.lineCap = 'square';
-
-    for (var i = 1, len = points.length; i < len; i++) {
-      // we pick the point between pi+1 & pi+2 as the
-      // end point and p1 as our control point
-      if(p1) {
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        var midPoint = midPointBtw(p1, p2);
-        ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
-        //ctx.lineWidth = Math.random()*10;
-        ctx.stroke();
-        ctx.closePath();
-      }
-      p1 = points[i];
-      p2 = points[i+1];
-    }
-    // Draw last line as a straight line while
-    // we wait for the next point to be able to calculate
-    // the bezier control point
-    ctx.lineTo(p1.x, p1.y);
-    //ctx.lineWidth = Math.random()*10;
-    //ctx.stroke();
+    ctx.stroke();
   }
 }
 

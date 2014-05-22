@@ -93,7 +93,7 @@ function drawSpline(ctx,pts,prs,t,th,d,b,sh){
     var pressureCoefficient = pressure*prs[i];
     //ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
     //ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
-    ctx.lineWidth = mapPressure(prs[i])*th;
+    //ctx.lineWidth = mapPressure(prs[i])*th;
     minpt = getMinPt(pts[i],pts[i+1],cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
     minx = minpt.x;
     miny = minpt.y;
@@ -118,7 +118,7 @@ function drawSpline(ctx,pts,prs,t,th,d,b,sh){
   // First arc
   //ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
   //ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
-  ctx.lineWidth = mapPressure(prs[0])*th;
+  //ctx.lineWidth = mapPressure(prs[0])*th;
   minpt = getMinPt(pts[0],pts[1],cp[0],cp[1],pts[2],pts[3],Infinity,Infinity);
   minx = minpt.x;
   miny = minpt.y;
@@ -138,7 +138,7 @@ function drawSpline(ctx,pts,prs,t,th,d,b,sh){
   // Last arc
   //ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
   //ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
-  ctx.lineWidth = mapPressure(prs[n-1])*th;
+  //ctx.lineWidth = mapPressure(prs[n-1])*th;
   minpt = getMinPt(pts[n-2],pts[n-1],cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3],Infinity,Infinity);
   minx = minpt.x;
   miny = minpt.y;

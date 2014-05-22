@@ -21,7 +21,8 @@ var redrawButton;
 var noneInput;
 var splineInput;
 var bezier2Input;
-var bezier3Input;
+var hybridInput;
+var hybrid2Input;
 
 var tensionInput;
 var sampleInput;
@@ -143,11 +144,20 @@ window.onload = function(){
     redraw();
   }
 
-  //curve fitting input - bezier 3
-  bezier3Input = document.getElementById('bezier3-input');
-  bezier3Input.onchange = function(e) {
-    if(bezier3Input.checked) {
-      curveFitting = 'bezier3';
+  //curve fitting input - hybrid
+  hybridInput = document.getElementById('hybrid-input');
+  hybridInput.onchange = function(e) {
+    if(hybridInput.checked) {
+      curveFitting = 'hybrid';
+    }
+    redraw();
+  }
+
+  //curve fitting input - hybrid2
+  hybrid2Input = document.getElementById('hybrid2-input');
+  hybrid2Input.onchange = function(e) {
+    if(hybrid2Input.checked) {
+      curveFitting = 'hybrid2';
     }
     redraw();
   }
@@ -195,6 +205,14 @@ function redraw() {
 
   if(curveFitting === 'bezier2') {
     redrawBezier2();
+  }
+
+  if(curveFitting === 'hybrid') {
+    redrawHybrid();
+  }
+
+  if(curveFitting === 'hybrid2') {
+    redrawHybrid2();
   }
 }
 

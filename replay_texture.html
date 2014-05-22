@@ -2,10 +2,13 @@
   <head>
 
     <script src='capture_alan.json'></script>
+    <script src='capture8.json'></script>
     <script src='replay.js'></script>
     <script src='none.js'></script>
     <script src='spline.js'></script>
     <script src='bezier2.js'></script>
+    <script src='hybrid.js'></script>
+    <script src='hybrid2.js'></script>
 
     <style>
       body {
@@ -73,16 +76,20 @@
         <input id='none-input' name='fitting' type='radio'></input>
       </div>
       <div class='control'>
-        <div class='label'>Spline</div>
+        <div class='label'>Cubic Spline</div>
         <input id='spline-input' name='fitting' type='radio'></input>
       </div>
       <div class='control'>
-        <div class='label'>Bezier 2</div>
+        <div class='label'>Quad Bezier</div>
         <input id='bezier2-input' name='fitting' type='radio'></input>
       </div>
       <div class='control'>
-        <div class='label'>Bezier 3</div>
-        <input id='bezier3-input' name='fitting' type='radio'></input>
+        <div class='label'>Hybrid</div>
+        <input id='hybrid-input' name='fitting' type='radio'></input>
+      </div>
+      <div class='control'>
+        <div class='label'>Hybrid 2</div>
+        <input id='hybrid2-input' name='fitting' type='radio'></input>
       </div>
       <h3>Curve</h3>
       <div class='control'>

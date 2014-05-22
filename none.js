@@ -52,9 +52,9 @@ function drawNone(pts, prs) {
     minpt = getMinPt(pts[i],pts[i+1],pts[i+2],pts[i+3],Infinity,Infinity,Infinity,Infinity);
     minx = minpt.x;
     miny = minpt.y;
-    ctx.lineWidth = (prs[i+2] < 0.6) ? 1.7 : 2.4;
-    ctx.strokeStyle = calcStrokeStyle(prs[i+2]);
-    ctx.globalAlpha = (prs[i+2] < 0.5) ? 0.5 : 1;
+    //ctx.lineWidth = (prs[i+2] < 0.6) ? 1.7 : 2.4;
+    //ctx.strokeStyle = calcStrokeStyle(prs[i+2]);
+    //ctx.globalAlpha = (prs[i+2] < 0.5) ? 0.5 : 1;
     ctx.translate(minx, miny);
     ctx.beginPath();
     ctx.moveTo(pts[i] - minx, pts[i+1] - miny);
