@@ -5,7 +5,6 @@ function redrawHybrid2() {
   var currentPressure;
   curves[count] = [];
   newCurves[count] = [];
-  //ctx.strokeStyle = '#000000';
 
   // Collect points into distinct curves by penup/pendown
   for (var i = 0; i < capture.length; i++) {
@@ -23,72 +22,26 @@ function redrawHybrid2() {
     }
   }
 
-  count = 0;
-  currentPressure = curves[0][0].pressure;
-
-  // Further collect points into distinct curves by pressure
-  /*for (var i = 0; i < curves.length; i++) {
-    var curve = curves[i];
-    for (var j=0; j < curve.length; j++) {
-      if(Math.abs(currentPressure - curve[j].pressure) > 0.2) {
-        count++;
-        newCurves[count] = [];
-        currentPressure = curve[j].pressure;
-      }
-      newCurves[count].push(curve[j]);
-    }
-    count++
-    newCurves[count] = [];
-  }
-  console.log(newCurves);
-  curves = newCurves;*/
-
-  // Group points into groups of 100ms
-  // If a group of points has more than
-  // 1000 points, then draw with bezier
-  // quadratics sampled down by 2, otherwise
-  // draw with no curve fitting at normal
-  // sampling rate
-
   // Draw each curve
   for (var i = 0; i < curves.length; i++) {
-    if(curves[i].length > 0) {
-      var firstPoint = curves[i][0];
-      var lastPoint = curves[i][curves[i].length-1];
+    var curve = curves[i];
+
+    if(curve.length > 2) {
+      var area = getCurveArea(curve);
+      var firstPoint = curve[0];
+      var lastPoint = curve[curve.length-1];
       var elapsed = lastPoint.time - firstPoint.time;
 
-      if(elapsed > 500) {
-        //if(curves[i].length > 20) {
-          var sampledCurve = [];
-          for (var j = 0; j < curves[i].length; j++) {
-            if(j%1 === 0) {
-              sampledCurve.push(curves[i][j]);
-            }
-          }
-          ctx.strokeStyle = pat;
-          drawHybrid2None(sampledCurve);
-        //} else {
-        //  ctx.strokeStyle = pat;
-        //  drawHybrid2None(curves[i]);
-        //}
+      if((area > 100 && curve.length > 40) || elapsed < 200) {
+        //ctx.strokeStyle = '#00FF00';
+        //ctx.strokeStyle = pat;
+        var s = curve.length < 50 ? 3 : 3;
+        ctx.strokeStyle = '#ff0000';
+        drawHybrid2Bezier(getSampledCurve(curve, 3));
       } else {
-        //if(curves[i].length > 10) {
-          var sampledCurve = [];
-          for (var j = 0; j < curves[i].length; j++) {
-            if(j%3 === 0) {
-              sampledCurve.push(curves[i][j]);
-            }
-            if(j === curves[i].length-1) {
-              sampledCurve.push(curves[i][j]);
-            }
-          }
-          ctx.strokeStyle = '#FF0000';
-          //ctx.strokeStyle = pat;
-          drawHybrid2Bezier(sampledCurve);
-        //} else {
-        //  ctx.strokeStyle = '#00FF00';
-        //  drawHybrid2Bezier(curves[i]);
-        //}
+        //ctx.strokeStyle = pat;
+        ctx.strokeStyle = '#000000';
+        drawHybrid2None(getSampledCurve(curve, 1));
       }
     }
   }
@@ -115,7 +68,7 @@ function drawHybrid2None(pts) {
     ctx.lineWidth = calcLineWidth(pts[i+1].pressure);
     //ctx.globalAlpha = calcGlobalAlpha(pts[i+1].pressure);
     //ctx.strokeStyle = calcStrokeStyle(pts[i+1].pressure);
-   // ctx.strokeStyle = '#000000';
+    //ctx.strokeStyle = '#000000';
     ctx.translate(minx, miny);
     ctx.beginPath();
     ctx.moveTo(px - minx, py - miny);
@@ -127,43 +80,35 @@ function drawHybrid2None(pts) {
 }
 
 function drawHybrid2Bezier(points) {
-  //toggleStyle();
   var p1 = points[0];
   var p2 = points[1];
   
-  if(p1) {
+  if(p1 && p2) {
     ctx.lineWidth = calcLineWidth(p2.pressure);
     ctx.lineWidth = 2;
-    //ctx.globalAlpha = calcGlobalAlpha(p1.pressure);
-    //ctx.strokeStyle = calcStrokeStyle(p1.pressure);
-    //ctx.strokeStyle = '#FF0000';
     ctx.beginPath();
     ctx.moveTo(p1.canvasX, p1.canvasY);
 
     for (var i = 1; i < points.length; i++) {
       // we pick the point between p1 & p2 as the
       // end point and p1 as our control point
-      //ctx.beginPath();
-      //ctx.moveTo(p1.canvasX, p1.canvasY);
       if(p1) {
         var midPoint = midPointBtw2(p1, p2);
-        ctx.quadraticCurveTo(p1.canvasX, p1.canvasY, midPoint.x, midPoint.y);
-        //ctx.quadraticCurveTo(midPoint.x, midPoint.y, p2.canvasX, p2.canvasY);
-        //ctx.quadraticCurveTo(midPoint.x, midPoint.y, p2.canvasX, p2.canvasY);
+        ctx.quadraticCurveTo(
+          p1.canvasX,
+          p1.canvasY,
+          midPoint.x,
+          midPoint.y
+        );
       }
       p1 = points[i];
       p2 = points[i+1];
-      //ctx.stroke();
-      //ctx.moveTo(midPoint.x, midPoint.y);
-      //toggleStyle();
-      //ctx.closePath();
     }
     // Draw last line as a straight line while
-    // we wait for the next point to be able to calculate
-    // the bezier control point
+    // we wait for the next point to be able to
+    // calculate the bezier control point
     ctx.lineTo(p1.canvasX, p1.canvasY);
     ctx.stroke();
-    ctx.closePath();
   }
 }
 
@@ -179,7 +124,6 @@ function toggleStyle(){
   var red = '#FF0000';
 
   if(ctx.strokeStyle === black) {
-    //console.log('SWITCH TO RED');
     ctx.strokeStyle = red;
   } else {
     ctx.strokeStyle = black;
@@ -209,6 +153,39 @@ function calcGlobalAlpha(p) {
   alpha = 1;
 
   return alpha;
+}
+
+function getSampledCurve(c, s) {
+  var sampledCurve = [];
+  for (var i = 0; i < c.length; i++) {
+    if(i%s === 0) {
+      sampledCurve.push(c[i]);
+    }
+    // always keep the last point
+    if(i === c.length-1) {
+      sampledCurve.push(c[i]);
+    }
+  }
+  return sampledCurve;
+}
+
+function getCurveArea(c) {
+  var minX = c[0].canvasX;
+  var minY = c[0].canvasY;
+  var maxX = c[0].canvasX;
+  var maxY = c[0].canvasY;
+  var area;
+
+  for(var i = 0; i < c.length; i++) {
+    minX = Math.min(minX, c[i].canvasX);
+    minY = Math.min(minY, c[i].canvasY);
+    maxX = Math.max(maxX, c[i].canvasX);
+    maxY = Math.max(maxY, c[i].canvasY);
+  }
+
+  area = (maxX - minX)*(maxY - minY);
+
+  return area;
 }
 
 /* function calcGlobalAlpha(p) {

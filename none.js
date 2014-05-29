@@ -40,7 +40,7 @@ function redrawNone() {
       prs.push(sampledCurves[i][j][2]);
     }
     //console.log(prs);
-    ctx.strokeStyle = pat;
+    //ctx.strokeStyle = pat;
     drawNone(pts, prs);
   }
 }

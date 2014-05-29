@@ -53,7 +53,7 @@ window.onload = function(){
   pat = ctx.createPattern(img,"repeat");
   pat2 = ctx.createPattern(img2, "repeat");
   ctx.strokeStyle = pat;
-  //ctx.strokeStyle = '#000000';
+  ctx.strokeStyle = '#000000';
   ctx.lineWidth = 2;
 
   // load capture file points
