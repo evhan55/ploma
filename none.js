@@ -14,6 +14,7 @@ function redrawNone() {
   }
 
   // Sample points down
+  sample = 1;
   if(sample > 1) {
     count = 0;
     for (var i = 0; i < curves.length; i++) {
@@ -39,6 +40,7 @@ function redrawNone() {
       prs.push(sampledCurves[i][j][2]);
     }
     //console.log(prs);
+    ctx.strokeStyle = pat;
     drawNone(pts, prs);
   }
 }
@@ -52,7 +54,7 @@ function drawNone(pts, prs) {
     minpt = getMinPt(pts[i],pts[i+1],pts[i+2],pts[i+3],Infinity,Infinity,Infinity,Infinity);
     minx = minpt.x;
     miny = minpt.y;
-    //ctx.lineWidth = (prs[i+2] < 0.6) ? 1.7 : 2.4;
+    ctx.lineWidth = (prs[i+2] < 0.6) ? 1.7 : 2.4;
     //ctx.strokeStyle = calcStrokeStyle(prs[i+2]);
     //ctx.globalAlpha = (prs[i+2] < 0.5) ? 0.5 : 1;
     ctx.translate(minx, miny);

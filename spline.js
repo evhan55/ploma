@@ -14,6 +14,7 @@ function redrawSpline() {
   }
 
   // Sample points down
+  sample = 3;
   if(sample > 1) {
     count = 0;
     for (var i = 0; i < curves.length; i++) {

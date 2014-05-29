@@ -53,6 +53,8 @@ window.onload = function(){
   pat = ctx.createPattern(img,"repeat");
   pat2 = ctx.createPattern(img2, "repeat");
   ctx.strokeStyle = pat;
+  //ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 2;
 
   // load capture file points
   capture = JSON.parse(jsonstr);
@@ -166,6 +168,28 @@ window.onload = function(){
   noneInput.checked = true;
   //noneInput.changed;
   redraw();
+}
+
+//**********************************************************************
+// window.onkeypress
+//   'i' to save out image
+//   'c' to clear canvas
+//   'j' saves points to json blob
+//
+window.onkeypress = function(e) {
+  if (e.charCode === 99) {
+    clearCanvas();
+    curves.length = 0;
+  }
+  if (e.charCode === 105) {
+    window.open(canvas.toDataURL());
+  }
+  if (e.charCode === 106) {
+    var json = JSON.stringify(curves);
+    var blob = new Blob([json], {type: 'application/json'});
+    var url  = URL.createObjectURL(blob);
+    window.open(url);
+  }
 }
 
 // *********************************************************************

@@ -156,7 +156,7 @@
       };
 
       function calcLineWidth(p) {
-        return (p < 0.6) ? 1 : 2.4;
+        return (p < 0.6) ? 1.8 : 2.4;
       }
 
       function calcGlobalAlpha(p) {
@@ -176,10 +176,10 @@
         }
 
         if(isSkipping) {
-          alpha = 0.5;
+          alpha = 1;
           skipCounter++;
         } else {
-          alpha = (p < 0.5) ? 0.9 : 1;
+          alpha = (p < 0.5) ? 1 : 1;
         }
         
         return alpha;

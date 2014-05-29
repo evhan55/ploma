@@ -57,38 +57,34 @@ function redrawHybrid2() {
       var lastPoint = curves[i][curves[i].length-1];
       var elapsed = lastPoint.time - firstPoint.time;
 
-      if(elapsed > 500) {
-        //if(curves[i].length > 20) {
+      if(curves[i].length < 10) {
+        if(curves[i].length > 20) {
           var sampledCurve = [];
           for (var j = 0; j < curves[i].length; j++) {
-            if(j%1 === 0) {
+            if(j%2 === 0) {
               sampledCurve.push(curves[i][j]);
             }
           }
-          ctx.strokeStyle = pat;
+          ctx.strokeStyle = '#000000';
           drawHybrid2None(sampledCurve);
-        //} else {
-        //  ctx.strokeStyle = pat;
-        //  drawHybrid2None(curves[i]);
-        //}
+        } else {
+          ctx.strokeStyle = '#000000';
+          drawHybrid2None(curves[i]);
+        }
       } else {
-        //if(curves[i].length > 10) {
+        if(curves[i].length > 10) {
           var sampledCurve = [];
           for (var j = 0; j < curves[i].length; j++) {
             if(j%3 === 0) {
               sampledCurve.push(curves[i][j]);
             }
-            if(j === curves[i].length-1) {
-              sampledCurve.push(curves[i][j]);
-            }
           }
           ctx.strokeStyle = '#FF0000';
-          //ctx.strokeStyle = pat;
           drawHybrid2Bezier(sampledCurve);
-        //} else {
-        //  ctx.strokeStyle = '#00FF00';
-        //  drawHybrid2Bezier(curves[i]);
-        //}
+        } else {
+          ctx.strokeStyle = '#00FF00';
+          drawHybrid2Bezier(curves[i]);
+        }
       }
     }
   }
@@ -113,7 +109,7 @@ function drawHybrid2None(pts) {
     minx = minpt.x;
     miny = minpt.y;
     ctx.lineWidth = calcLineWidth(pts[i+1].pressure);
-    //ctx.globalAlpha = calcGlobalAlpha(pts[i+1].pressure);
+    ctx.globalAlpha = calcGlobalAlpha(pts[i+1].pressure);
     //ctx.strokeStyle = calcStrokeStyle(pts[i+1].pressure);
    // ctx.strokeStyle = '#000000';
     ctx.translate(minx, miny);
@@ -127,14 +123,13 @@ function drawHybrid2None(pts) {
 }
 
 function drawHybrid2Bezier(points) {
-  //toggleStyle();
+  toggleStyle();
   var p1 = points[0];
   var p2 = points[1];
   
   if(p1) {
-    ctx.lineWidth = calcLineWidth(p2.pressure);
-    ctx.lineWidth = 2;
-    //ctx.globalAlpha = calcGlobalAlpha(p1.pressure);
+    ctx.lineWidth = calcLineWidth(p1.pressure);
+    ctx.globalAlpha = calcGlobalAlpha(p1.pressure);
     //ctx.strokeStyle = calcStrokeStyle(p1.pressure);
     //ctx.strokeStyle = '#FF0000';
     ctx.beginPath();
@@ -189,7 +184,7 @@ function toggleStyle(){
 function calcLineWidth(p) {
   var width;
 
-  width = (p < 0.6) ? 1.7 : 2.4
+  width = (p < 0.6) ? 1.9 : 2.4
 
   return width;
 }
