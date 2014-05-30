@@ -5,7 +5,6 @@ function redrawHybrid2() {
   var currentPressure;
   curves[count] = [];
   newCurves[count] = [];
-  ctx.lineCap = 'butt';
 
   // Collect points into distinct curves
   // by penup/pendown
@@ -62,8 +61,10 @@ function drawHybrid2None(pts) {
     minpt = getMinPt(px,py,x,y,Infinity,Infinity,Infinity,Infinity);
     minx = minpt.x;
     miny = minpt.y;
-    ctx.lineWidth = (pts[i+1].pressure < 0.6) ? 1.7 : 2.4;
-    ctx.globalAlpha = (pts[i+1].pressure < 0.5) ? 0.8 : 1;
+    ctx.lineWidth = (pts[i+1].pressure < 0.6) ? 2.4 : 3;
+    //ctx.lineWidth = pts[i+1].pressure*3;
+    //ctx.globalAlpha = (pts[i+1].pressure < 0.5) ? 0.9 : 1;
+    ctx.globalAlpha = calcGlobalAlpha(pts[i+1].pressure);
     ctx.strokeStyle = pat;
     ctx.translate(minx, miny);
     ctx.beginPath();
@@ -133,9 +134,9 @@ function calcLineWidth(p) {
   var width;
 
   width = (p < 0.6) ? 1.7 : 2.4
-  return p;
+  //return p;
 
-  //return width;
+  return width;
 }
 
 function calcStrokeStyle(p) {
@@ -149,8 +150,8 @@ function calcStrokeStyle(p) {
 function calcGlobalAlpha(p) {
   var alpha;
 
-  alpha = (Math.floor(Math.random()*8) === 1) ? 0.5 : 1;
-  //alpha = 1;
+  alpha = Math.floor(Math.random()*50) === 1 ? 0.5 : 1;
+
 
   return alpha;
 }
