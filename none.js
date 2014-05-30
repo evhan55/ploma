@@ -3,6 +3,7 @@ function redrawNone() {
   var sampledCurves = [];
   var count = 0;
   curves[count] = [];
+  ctx.lineCap = 'butt';
 
   // Collect points into distinct curves
   for (var i = 0; i < capture.length; i++) {
@@ -14,7 +15,6 @@ function redrawNone() {
   }
 
   // Sample points down
-  sample = 1;
   if(sample > 1) {
     count = 0;
     for (var i = 0; i < curves.length; i++) {
@@ -39,8 +39,6 @@ function redrawNone() {
       prs.push(sampledCurves[i][j][2]);
       prs.push(sampledCurves[i][j][2]);
     }
-    //console.log(prs);
-    //ctx.strokeStyle = pat;
     drawNone(pts, prs);
   }
 }
@@ -55,8 +53,8 @@ function drawNone(pts, prs) {
     minx = minpt.x;
     miny = minpt.y;
     ctx.lineWidth = (prs[i+2] < 0.6) ? 1.7 : 2.4;
-    //ctx.strokeStyle = calcStrokeStyle(prs[i+2]);
-    //ctx.globalAlpha = (prs[i+2] < 0.5) ? 0.5 : 1;
+    ctx.strokeStyle = pat;
+    ctx.globalAlpha = (prs[i+2] < 0.5) ? 0.8 : 1;
     ctx.translate(minx, miny);
     ctx.beginPath();
     ctx.moveTo(pts[i] - minx, pts[i+1] - miny);

@@ -5,6 +5,7 @@ var img2;
 var pat;
 var pat2;
 var paperColor = "rgb(253, 253, 240)";
+var paperColor = "rgb(255, 255, 245)";
 var capture;
 
 var curveFitting = 'none';
@@ -53,8 +54,6 @@ window.onload = function(){
   pat = ctx.createPattern(img,"repeat");
   pat2 = ctx.createPattern(img2, "repeat");
   ctx.strokeStyle = pat;
-  ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 2;
 
   // load capture file points
   capture = JSON.parse(jsonstr);
@@ -208,6 +207,7 @@ function mapPressure(p) {
 function clearCanvas() {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.fillStyle = paperColor;
+  ctx.globalAlpha = 1;
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 

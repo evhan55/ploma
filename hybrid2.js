@@ -5,14 +5,15 @@ function redrawHybrid2() {
   var currentPressure;
   curves[count] = [];
   newCurves[count] = [];
+  ctx.lineCap = 'butt';
 
-  // Collect points into distinct curves by penup/pendown
+  // Collect points into distinct curves
+  // by penup/pendown
   for (var i = 0; i < capture.length; i++) {
     if(capture[i].break) {
       count++;
       curves[count] = [];
     } else {
-      // Push point onto current curve
       curves[count].push({
         canvasX:    capture[i].canvasX,
         canvasY:    capture[i].canvasY,
@@ -25,6 +26,7 @@ function redrawHybrid2() {
   // Draw each curve
   for (var i = 0; i < curves.length; i++) {
     var curve = curves[i];
+    toggleStyle();
 
     if(curve.length > 2) {
       var area = getCurveArea(curve);
@@ -33,14 +35,9 @@ function redrawHybrid2() {
       var elapsed = lastPoint.time - firstPoint.time;
 
       if((area > 100 && curve.length > 40) || elapsed < 200) {
-        //ctx.strokeStyle = '#00FF00';
-        //ctx.strokeStyle = pat;
-        var s = curve.length < 50 ? 3 : 3;
-        ctx.strokeStyle = '#ff0000';
-        drawHybrid2Bezier(getSampledCurve(curve, 3));
+        var s = curve.length < 50 ? 1 : 3;
+        drawHybrid2Bezier(getSampledCurve(curve, 2));
       } else {
-        //ctx.strokeStyle = pat;
-        ctx.strokeStyle = '#000000';
         drawHybrid2None(getSampledCurve(curve, 1));
       }
     }
@@ -65,10 +62,9 @@ function drawHybrid2None(pts) {
     minpt = getMinPt(px,py,x,y,Infinity,Infinity,Infinity,Infinity);
     minx = minpt.x;
     miny = minpt.y;
-    ctx.lineWidth = calcLineWidth(pts[i+1].pressure);
-    //ctx.globalAlpha = calcGlobalAlpha(pts[i+1].pressure);
-    //ctx.strokeStyle = calcStrokeStyle(pts[i+1].pressure);
-    //ctx.strokeStyle = '#000000';
+    ctx.lineWidth = (pts[i+1].pressure < 0.6) ? 1.7 : 2.4;
+    ctx.globalAlpha = (pts[i+1].pressure < 0.5) ? 0.8 : 1;
+    ctx.strokeStyle = pat;
     ctx.translate(minx, miny);
     ctx.beginPath();
     ctx.moveTo(px - minx, py - miny);
@@ -82,40 +78,43 @@ function drawHybrid2None(pts) {
 function drawHybrid2Bezier(points) {
   var p1 = points[0];
   var p2 = points[1];
+  var from = p1;
   
   if(p1 && p2) {
-    ctx.lineWidth = calcLineWidth(p2.pressure);
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(p1.canvasX, p1.canvasY);
-
     for (var i = 1; i < points.length; i++) {
-      // we pick the point between p1 & p2 as the
-      // end point and p1 as our control point
       if(p1) {
         var midPoint = midPointBtw2(p1, p2);
-        ctx.quadraticCurveTo(
-          p1.canvasX,
-          p1.canvasY,
-          midPoint.x,
-          midPoint.y
-        );
+        drawQuadraticCurve(from, midPoint, p1);
       }
       p1 = points[i];
       p2 = points[i+1];
+      from = midPoint;
     }
-    // Draw last line as a straight line while
-    // we wait for the next point to be able to
-    // calculate the bezier control point
-    ctx.lineTo(p1.canvasX, p1.canvasY);
-    ctx.stroke();
   }
+}
+
+//http://stackoverflow.com/questions/5634460/quadratic-bezier-curve-calculate-point
+function drawQuadraticCurve(from, to, ctrl) {
+  // using canvas to draw the quadratic
+  //ctx.quadraticCurveTo(ctrl.canvasX, ctrl.canvasY, to.x, to.y);
+
+  // using segments to draw the quadratic
+  var points = [];
+  for (var t = 0; t <= 1; t += 0.5) {
+    var newPoint = {};
+    newPoint.canvasX = (1 - t) * (1 - t) * from.canvasX + 2 * (1 - t) * t * ctrl.canvasX + t * t * to.canvasX;
+    newPoint.canvasY = (1 - t) * (1 - t) * from.canvasY + 2 * (1 - t) * t * ctrl.canvasY + t * t * to.canvasY;
+    newPoint.pressure = (from.pressure + to.pressure + ctrl.pressure) / 3;
+    points.push(newPoint);
+  }
+  drawHybrid2None(points);
 }
 
 function midPointBtw2(p1, p2) {
   return {
-    x: p1.canvasX + (p2.canvasX - p1.canvasX) / 2,
-    y: p1.canvasY + (p2.canvasY - p1.canvasY) / 2
+    canvasX: p1.canvasX + (p2.canvasX - p1.canvasX) / 2,
+    canvasY: p1.canvasY + (p2.canvasY - p1.canvasY) / 2,
+    pressure: (p1.pressure + p2.pressure) / 2
   };
 }
 
@@ -134,8 +133,9 @@ function calcLineWidth(p) {
   var width;
 
   width = (p < 0.6) ? 1.7 : 2.4
+  return p;
 
-  return width;
+  //return width;
 }
 
 function calcStrokeStyle(p) {
@@ -150,7 +150,7 @@ function calcGlobalAlpha(p) {
   var alpha;
 
   alpha = (Math.floor(Math.random()*8) === 1) ? 0.5 : 1;
-  alpha = 1;
+  //alpha = 1;
 
   return alpha;
 }
