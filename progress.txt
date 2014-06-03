@@ -16,6 +16,10 @@ underneath.  That being said, it's difficult to get thin, sparse dark
 lines with a transparent texture, so have to continue playing with
 switching textures in and out.
 
+- The texture really 'reveals' itself on very long lines.  Need a way
+to make that look more organic even still.  This is not a problem for
+shorter curves with less points.
+
 - Still need to focus on how the texture looks for very light lines.
 
 Alpha:
