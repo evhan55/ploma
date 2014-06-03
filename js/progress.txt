@@ -1,0 +1,20 @@
+Discoveries so far:
+
+- A little texture goes a long way.
+- Curve fitting depends on speed, area of curve, and number of points.
+
+Texture:
+
+- Must offset the texture within the canvas so the offset into the texture is not "wallpapered" but randomized instead.  Adding a little extra randomization doesn't hurt.
+
+- Transparent textures with only black/blue pixels and transparent otherwise is the best for the alpha blending, this way the more you write the darker it gets, but there are no light pixels to obscure darker pixels underneath.  That being said, it's difficult to get thin, sparse dark lines with a transparent texture, so have to continue playing with switching textures in and out.
+
+- Still need to focus on how the texture looks for very light lines.
+
+Alpha:
+
+- Simulating ink dispersal and catching is very effective.  Having the pen run out of ink sometimes, especially when the pen has just gone down, is very effective.  This is easiest done on the fly, calculating the time as we go, or with a timer.
+
+Curve Fitting:
+
+- Need to collect lots of sample data to see which amount of curve fitting downsampling works for which speeds, areas and number of points.  I have isolated a good compromise for handwriting by AK and EE, but need to collect more types of data to build up that lookup table.

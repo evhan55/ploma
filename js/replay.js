@@ -83,7 +83,7 @@ window.onload = function(){
   sampleInput.oninput = function(e) {
     sample = sampleInput.value;
     sampleReadout.innerHTML = sample;
-    //redraw();
+    redraw();
   }
 
   // thickness input
