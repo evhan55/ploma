@@ -1,193 +1,212 @@
 <html>
   <head>
-    <script>
-      var button;
-      var canvas;
-      var ctx;
-      var isDrawing;
-      var oldX;
-      var oldY;
-      var paperColor = "rgb(253, 253, 240);";
-      var penColor = 'rgb(190, 190, 190);';
-      var points = [];
-
-      // *********************************************************************
-      // window.onload
-      //   Sets the canvas's rendering properties and binds the following
-      //   actions:
-      //     - button.onclick
-      //     - canvas.onmousedown
-      //     - canvas.onmousemove
-      //     - canvas.onmouseup
-      //
-      window.onload = function() {
-        canvas = document.getElementById('canvas');
-        button = document.getElementById('capture');
-
-        ctx = canvas.getContext('2d');
-        ctx.strokeStyle = penColor;
-
-        clearCanvas();
-
-        // *********************************************************************
-        // button.onclick
-        //   Saves the points to JSON and gives an output file to download and
-        //   then clears the canvas.
-        //
-        button.onclick = function(e) {
-          var json = JSON.stringify(points);
-          var blob = new Blob([json], {type: 'application/json'});
-          var url  = URL.createObjectURL(blob);
-          button.download = 'capture_'+Date.now()+'.json';
-          button.href = url;
-          points.length = 0;
-          clearCanvas();
-        }
-
-        // *********************************************************************
-        // canvas.onmousedown
-        //   Sets isDrawing to true and records the mouse position.
-        //
-        canvas.onmousedown = function(e) {
-          isDrawing = true;
-          oldX = cursorOffset(e, canvas).x;
-          oldY = cursorOffset(e, canvas).y;
-        };
-
-        // *********************************************************************
-        // canvas.onmousemove
-        //   Records all possible Wacom pen data into the point array and then
-        //   draws a line on the canvas based on the pen's position.
-        //
-        canvas.onmousemove = function(e) {
-          if (isDrawing) {
-            // Collect pen data
-            var penCanvasX = cursorOffset(e, canvas).x;
-            var penCanvasY = cursorOffset(e, canvas).y;
-            var penPressure = getWacomPlugin().penAPI.pressure;
-            var point = {
-              isWacom      : getWacomPlugin().penAPI.isWacom,
-              isEraser     : getWacomPlugin().penAPI.isEraser,
-              posX         : getWacomPlugin().penAPI.posX,
-              posY         : getWacomPlugin().penAPI.posY,
-              sysX         : getWacomPlugin().penAPI.sysX,
-              sysY         : getWacomPlugin().penAPI.sysY,
-              tabX         : getWacomPlugin().penAPI.tabX,
-              tabY         : getWacomPlugin().penAPI.tabY,
-              rotationDeg  : getWacomPlugin().penAPI.rotationDeg,
-              rotationRad  : getWacomPlugin().penAPI.rotationRad,
-              tiltX        : getWacomPlugin().penAPI.tiltX,
-              tiltY        : getWacomPlugin().penAPI.tiltY,
-              tangPressure : getWacomPlugin().penAPI.tangentialPressure,
-              version      : getWacomPlugin().penAPI.version,
-              pointerType  : getWacomPlugin().penAPI.pointerType,
-              tabletModel  : getWacomPlugin().penAPI.tabletModel,
-              pressure     : penPressure,
-              canvasX      : penCanvasX,
-              canvasY      : penCanvasY,
-              time         : Date.now()
-            };
-            points.push(point);
-
-            // Draw line
-            ctx.beginPath();
-            ctx.moveTo(oldX, oldY);
-            ctx.lineTo(penCanvasX, penCanvasY);
-            ctx.setLineWidth(mapWidth(penPressure));
-            ctx.stroke();
-            ctx.closePath();
-            oldX = penCanvasX;
-            oldY = penCanvasY;
-          }
-        };
-
-        // *********************************************************************
-        // canvas.onmouseup
-        //   Sets isDrawing to false and insert a breakpoint into the points
-        //   array.
-        //
-        canvas.onmouseup = function() {
-          isDrawing = false;
-          points.push({break: true});
-        };
-      };
-
-      // *********************************************************************
-      // getWacomPlugin
-      //   Returns Wacom plugin instance loaded on this page, if any.
-      //
-      function getWacomPlugin() {
-        var plugin = document.getElementById('wtPlugin');
-        return plugin;
-      }
-
-      // *********************************************************************
-      // cursorOffset
-      //   Returns the x,y position of the cursor over the given element,
-      //   taking into account any offsets into the page.
-      //
-      function cursorOffset(e, el) {
-        var pt = {};
-        pt.x = e.pageX - el.offsetLeft + 0;
-        pt.y = e.pageY - el.offsetTop + 0;
-        return pt;
-      }
-
-      // *********************************************************************
-      // mapWidth
-      //   Returns a line width based on a pen pressure value which ranges
-      //   between 0 and 1.
-      //
-      function mapWidth(p) {
-        var result = 3*p;
-        return result;
-      }
-      
-      // *********************************************************************
-      // clearCanvas
-      //   Clears the canvas and fills it with the paper color.
-      //
-      function clearCanvas() {
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.fillStyle = paperColor;
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      }
-    </script>
-
     <style>
       canvas {
-        cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
-        border-radius: 25px;
-        border: 1px solid #EED;
-        margin-top: 20px;
+        cursor: url('cursors/cursor.cur'), crosshair;
+        border: 1px solid yellow;
       }
-      object {
-        width: 0;
-        height: 0;
-      }
-      a {
-        background: #DB5;
-        color: white;
-        padding: 4px 10px;
-        border-radius: 5px;
-        text-decoration: none;
-        margin-left: 8px;
-        cursor: pointer;
+      img {
+        display: none;
       }
     </style>
-
   </head>
 
-  <body id='content'>
-    <!-- CANVAS -->
-    <a id='capture'>Capture</a>
-    <br>
-    <canvas id='canvas' width='1000px' height='1000px'></canvas>
-
-    <!-- WACOM PLUGIN -->
-    <object id='wtPlugin' type='application/x-wacomtabletplugin'>
-      <param name='onload' value='pluginLoaded'/>
+  <body>
+    <canvas id="c" width="1300" height="950"></canvas>
+    <img src="img/transparency100b_sm.png" id="img"/>
+    <object id="wtPlugin" type="application/x-wacomtabletplugin">
+      <param name="onload" value="pluginLoaded" />
     </object>
   </body>
+
+  <script>
+    var el;
+    var img;
+    var plugin;
+    var ctx;
+    var pat;
+    var cursorOffsetX = 12;
+    var cursorOffsetY = 8;
+    var isDrawing = false;
+    var isSkipping = false;
+    var skipCounter = 0;
+    var penDownFrame = 0;
+    var emptyInk = true;
+    var x;
+    var y;
+    var px;
+    var py;
+    var points = [];
+
+    //**********************************************************************
+    // window.onload
+    //
+    window.onload = function() {
+      el = document.getElementById('c');
+      img = document.getElementById("img");
+      plugin = document.getElementById('wtPlugin');
+      ctx = el.getContext('2d');
+      pat = ctx.createPattern(img,"repeat");
+
+      // clear canvas
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = 'rgb(252, 252, 238)';
+      ctx.fillRect(0, 0, 1300, 950);
+
+      // set global rendering properties
+      ctx.strokeStyle = pat;
+
+      el.onmousedown = function(e) {
+        isDrawing = true;
+
+        x = e.clientX - cursorOffsetX;
+        y = e.clientY - cursorOffsetY;
+        px = x;
+        py = y;
+
+        point = {
+          isWacom      : plugin.penAPI.isWacom,
+          isEraser     : plugin.penAPI.isEraser,
+          posX         : plugin.penAPI.posX,
+          posY         : plugin.penAPI.posY,
+          sysX         : plugin.penAPI.sysX,
+          sysY         : plugin.penAPI.sysY,
+          tabX         : plugin.penAPI.tabX,
+          tabY         : plugin.penAPI.tabY,
+          rotationDeg  : plugin.penAPI.rotationDeg,
+          rotationRad  : plugin.penAPI.rotationRad,
+          tiltX        : plugin.penAPI.tiltX,
+          tiltY        : plugin.penAPI.tiltY,
+          tangPressure : plugin.penAPI.tangentialPressure,
+          version      : plugin.penAPI.version,
+          pointerType  : plugin.penAPI.pointerType,
+          tabletModel  : plugin.penAPI.tabletModel,
+          pressure     : plugin.penAPI.pressure,
+          canvasX      : x,
+          canvasY      : y,
+          time         : Date.now()
+        };
+        points.push(point);
+
+        penDownFrame = 0;
+      };
+
+      el.onmousemove = function(e) {
+        var minx;
+        var miny;
+        var pressure;
+        var point;
+
+        penDownFrame++;
+
+        if (!isDrawing) {
+          return;
+        }
+
+        x = e.clientX - cursorOffsetX;
+        y = e.clientY - cursorOffsetY;
+        minx = Math.min(x, px) + Math.random()*50;
+        miny = Math.min(y, py) + Math.random()*50;
+
+        point = {
+          isWacom      : plugin.penAPI.isWacom,
+          isEraser     : plugin.penAPI.isEraser,
+          posX         : plugin.penAPI.posX,
+          posY         : plugin.penAPI.posY,
+          sysX         : plugin.penAPI.sysX,
+          sysY         : plugin.penAPI.sysY,
+          tabX         : plugin.penAPI.tabX,
+          tabY         : plugin.penAPI.tabY,
+          rotationDeg  : plugin.penAPI.rotationDeg,
+          rotationRad  : plugin.penAPI.rotationRad,
+          tiltX        : plugin.penAPI.tiltX,
+          tiltY        : plugin.penAPI.tiltY,
+          tangPressure : plugin.penAPI.tangentialPressure,
+          version      : plugin.penAPI.version,
+          pointerType  : plugin.penAPI.pointerType,
+          tabletModel  : plugin.penAPI.tabletModel,
+          pressure     : plugin.penAPI.pressure,
+          canvasX      : x,
+          canvasY      : y,
+          time         : Date.now()
+        };
+        points.push(point);
+
+        // set stroke and size according to pressure
+        ctx.lineWidth = calcLineWidth(point.pressure);
+        //ctx.strokeStyle = calcStrokeStyle(point.pressure);
+        ctx.globalAlpha = calcGlobalAlpha(point.pressure);
+
+        // stroke line in offset canvas
+        ctx.translate(minx, miny);
+        ctx.beginPath();
+        ctx.moveTo(px - minx, py - miny);
+        ctx.lineTo(x - minx, y - miny);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.translate(-minx, -miny);
+
+        px = x;
+        py = y;
+      };
+
+      el.onmouseup = function() {
+        isDrawing = false;
+        points.push({break: true});
+      };
+
+      function calcLineWidth(p) {
+        return (p < 0.6) ? 1.8 : 2.4;
+      }
+
+      function calcGlobalAlpha(p) {
+        var alpha;
+
+        if(isSkipping && (skipCounter > 30)) {
+          isSkipping = false;
+          skipCounter = 0;
+        }
+
+        if(emptyInk && (penDownFrame < 5)) {
+          isSkipping = true;
+          emptyInk = false;
+          window.setTimeout(function() {
+            emptyInk = true;
+          }, 30000);
+        }
+
+        if(isSkipping) {
+          alpha = 1;
+          skipCounter++;
+        } else {
+          alpha = (p < 0.5) ? 1 : 1;
+        }
+        
+        return alpha;
+      }
+    }
+
+    //**********************************************************************
+    // window.onkeypress
+    //   'i' to save out image
+    //   'c' to clear canvas
+    //   'j' saves points to json blob
+    //
+    window.onkeypress = function(e) {
+      /*if (e.charCode === 99) {
+        clearCanvas();
+        curves.length = 0;
+      }*/
+      if (e.charCode === 105) {
+        window.open(el.toDataURL());
+      }
+      if (e.charCode === 106) {
+        var json = JSON.stringify(points);
+        var blob = new Blob([json], {type: 'application/json'});
+        var url  = URL.createObjectURL(blob);
+        window.open(url);
+      }
+    }
+  </script>
 
 </html>

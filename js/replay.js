@@ -9,7 +9,7 @@ var paperColor = "rgb(255, 255, 245)";
 var paperColor = "rgb(252, 255, 243)";
 var capture;
 
-var curveFitting = 'hybrid2';
+var curveFitting = 'none';
 var tension;
 var sample;
 var thickness;
@@ -165,7 +165,7 @@ window.onload = function(){
   }
 
   // draw curves with default control values
-  hybrid2Input.checked = true;
+  noneInput.checked = true;
   //noneInput.changed;
   redraw();
 }

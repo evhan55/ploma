@@ -35,8 +35,10 @@ function redrawHybrid2() {
 
       if((area > 100 && curve.length > 40) || elapsed < 200) {
         var s = curve.length < 50 ? 1 : 3;
-        drawHybrid2Bezier(getSampledCurve(curve, 2));
+        //ctx.strokeStyle = '#FF0000';
+        drawHybrid2Bezier(getSampledCurve(curve, sample));
       } else {
+        //ctx.strokeStyle = '#000000';
         drawHybrid2None(getSampledCurve(curve, 1));
       }
     }

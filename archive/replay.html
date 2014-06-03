@@ -1,0 +1,407 @@
+<html>
+  <head>
+
+    <!-- INPUT FILE -->
+    <script src='capture2.json'></script>
+    <!-- END INPUT FILE -->
+
+    <script type='text/javascript'>
+      var canvas;
+      var ctx;
+      var paperColor = "rgb(253, 253, 240)";
+      var capture;
+
+      var tension;
+      var sample;
+      var thickness;
+      var darkness;
+      var blur;
+      var shadowDarkness;
+      var pressure;
+
+      var tensionInput;
+      var sampleInput;
+      var thicknessInput;
+      var darknessInput;
+      var blurInput;
+      var shadowDarknessInput;
+      var pressureInput;
+
+      var tensionReadout;
+      var sampleReadout;
+      var thicknessReadout;
+      var darknessReadout;
+      var blurReadout;
+      var shadowDarknessReadout;
+      var pressureReadout;
+
+      // *********************************************************************
+      // window.onload
+      //   Sets the canvas context, loads the JSON capture data and binds
+      //   events to the GUI controllers in the control panel.
+      //
+      window.onload = function(){
+        canvas = document.getElementById('canvas');
+        ctx = canvas.getContext('2d');
+
+        // load capture file points
+        capture = JSON.parse(jsonstr);
+
+        // tension input
+        tensionInput = document.getElementById('tension-input');
+        tensionReadout = document.getElementById('tension-readout');
+        tension = tensionInput.value;
+        tensionReadout.innerHTML = tension;
+        tensionInput.oninput = function(e) {
+          tension = tensionInput.value;
+          tensionReadout.innerHTML = tension;
+          redraw();
+        }
+
+        // sample input
+        sampleInput = document.getElementById('sample-input');
+        sampleReadout = document.getElementById('sample-readout');
+        sample = sampleInput.value;
+        sampleReadout.innerHTML = sample;
+        sampleInput.oninput = function(e) {
+          sample = sampleInput.value;
+          sampleReadout.innerHTML = sample;
+          redraw();
+        }
+
+        // thickness input
+        thicknessInput = document.getElementById('thickness-input');
+        thicknessReadout = document.getElementById('thickness-readout');
+        thickness = thicknessInput.value;
+        thicknessReadout.innerHTML = thickness;
+        thicknessInput.oninput = function(e) {
+          thickness = thicknessInput.value;
+          thicknessReadout.innerHTML = thickness;
+          redraw();
+        }
+
+        // darkness input
+        darknessInput = document.getElementById('darkness-input');
+        darknessReadout = document.getElementById('darkness-readout');
+        darkness = darknessInput.value;
+        darknessReadout.innerHTML = darkness;
+        darknessInput.oninput = function(e) {
+          darkness = darknessInput.value;
+          darknessReadout.innerHTML = darkness;
+          redraw();
+        }
+
+        // blur input
+        blurInput = document.getElementById('blur-input');
+        blurReadout = document.getElementById('blur-readout');
+        blur = blurInput.value;
+        blurReadout.innerHTML = blur;
+        blurInput.oninput = function(e) {
+          blur = blurInput.value;
+          blurReadout.innerHTML = blur;
+          redraw();
+        }
+
+        // shadow darkness input
+        shadowDarknessInput = document.getElementById('shadow-darkness-input');
+        shadowDarknessReadout = document.getElementById('shadow-darkness-readout');
+        shadowDarkness = shadowDarknessInput.value;
+        shadowDarknessReadout.innerHTML = shadowDarkness;
+        shadowDarknessInput.oninput = function(e) {
+          shadowDarkness = shadowDarknessInput.value;
+          shadowDarknessReadout.innerHTML = shadowDarkness;
+          redraw();
+        }
+
+        // pressure input
+        pressureInput = document.getElementById('pressure-input');
+        pressureReadout = document.getElementById('pressure-readout');
+        pressure = pressureInput.value;
+        pressureReadout.innerHTML = pressure;
+        pressureInput.oninput = function(e) {
+          pressure = pressureInput.value;
+          pressureReadout.innerHTML = pressure;
+          redraw();
+        }
+
+        // draw curve with default control values
+        redraw();
+      }
+
+      // *********************************************************************
+      // cursorOffset
+      //   Returns the x,y position of the cursor over the given element,
+      //   taking into account any offsets into the page.
+      //
+      function cursorOffset(e, el) {
+        var pt = {};
+        pt.x = e.pageX - el.offsetLeft + 0;
+        pt.y = e.pageY - el.offsetTop + 0;
+        return pt;
+      }
+
+      // *********************************************************************
+      // mapWidth
+      //   Returns a line width based on a pen pressure value which ranges
+      //   between 0 and 1.
+      //
+      function mapWidth(v) {
+        var result = 3*v;
+        return result;
+      }
+
+      // *********************************************************************
+      // pressureSensitivity
+      //   Remap pressure value based on sensitivity input between 0 and 1.
+      //
+      function mapPressure(p) {
+        var result = 1 - pressure*(1 - p);
+        return result;
+      }
+      
+      // *********************************************************************
+      // clearCanvas
+      //   Clears the canvas and fills it with the paper color.
+      //
+      function clearCanvas() {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fillStyle = paperColor;
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      }
+
+      // *********************************************************************
+      // redraw
+      //   Clears the canvas, processes the captured points and grabs
+      //   the canvas positions, and then calls the spline drawing with
+      //   those processed points.
+      //
+      function redraw() {
+
+        var curves = [];
+        var sampledCurves = [];
+        var count = 0;
+        curves[count] = [];
+
+        clearCanvas();
+
+        // Collect points into distinct curves
+        for (var i = 0; i < capture.length; i++) {
+          if(capture[i].break) {
+            count++;
+            curves[count] = [];
+          }
+          curves[count].push([capture[i].canvasX, capture[i].canvasY, capture[i].pressure]);
+        }
+
+        // Sample points down
+        if(sample > 1) {
+          count = 0;
+          for (var i = 0; i < curves.length; i++) {
+            var curve = curves[i];
+            sampledCurves[count] = [];
+            for (var j = 0; j < curve.length; j+=Number(sample)) {
+              sampledCurves[count].push(curve[j]);
+            }
+            count++;
+          }
+        } else {
+          sampledCurves = curves;
+        }
+
+        // Draw points and send pressure array
+        for (var i = 0; i < sampledCurves.length; i++) {
+          var pts = [];
+          var prs = [];
+          for (var j = 0; j < sampledCurves[i].length; j++) {
+            pts.push(sampledCurves[i][j][0]);
+            pts.push(sampledCurves[i][j][1]);
+            prs.push(sampledCurves[i][j][2]);
+            prs.push(sampledCurves[i][j][2]);
+          }
+          console.log(prs);
+          drawSpline(ctx, pts, prs, tension, thickness, darkness, blur, shadowDarkness);
+        }
+
+      }
+
+      // *********************************************************************
+      // getControlPoints
+      //   Source: http://scaledinnovation.com/analytics/splines/splines.html
+      //
+      function getControlPoints(x0,y0,x1,y1,x2,y2,t){
+        //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
+        //  x2,y2 is the next knot -- not connected here but needed to calculate p2
+        //  p1 is the control point calculated here, from x1 back toward x0.
+        //  p2 is the next control point, calculated here and returned to become the 
+        //  next segment's p1.
+        //  t is the 'tension' which controls how far the control points spread.
+        
+        //  Scaling factors: distances from this knot to the previous and following knots.
+        var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
+        var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
+       
+        var fa=t*d01/(d01+d12);
+        var fb=t-fa;
+      
+        var p1x=x1+fa*(x0-x2);
+        var p1y=y1+fa*(y0-y2);
+
+        var p2x=x1-fb*(x0-x2);
+        var p2y=y1-fb*(y0-y2);  
+        
+        return [p1x,p1y,p2x,p2y]
+      }
+
+      // *********************************************************************
+      // drawSpline
+      //   Source: http://scaledinnovation.com/analytics/splines/splines.html
+      //
+      function drawSpline(ctx,pts,prs,t,th,d,b,sh){
+        //ctx.lineWidth = th;
+        ctx.shadowBlur = b;
+        ctx.save();
+        var cp = [];   // array of control points, as x0,y0,x1,y1,...
+        var n = pts.length;
+
+        // Draw an open curve, not connected at the ends
+        for(var i=0;i<n-4;i+=2){
+          cp=cp.concat(getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
+        }    
+        for(var i=2;i<pts.length-5;i+=2){
+          var pressureCoefficient = pressure*prs[i];
+          ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
+          ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
+          ctx.lineWidth = mapPressure(prs[i])*th;
+          ctx.beginPath();
+          ctx.moveTo(pts[i],pts[i+1]);
+          ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
+          ctx.stroke();
+          ctx.closePath();
+        }
+
+        // For open curves the first and last arcs are simple quadratics.
+
+        // First arc
+        ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
+        ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
+        ctx.lineWidth = mapPressure(prs[0])*th;
+        ctx.beginPath();
+        ctx.moveTo(pts[0],pts[1]);
+        ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
+        ctx.stroke();
+        ctx.closePath();
+        
+        // Last arc
+        ctx.strokeStyle = 'rgba(0, 0, 0, '+d*mapPressure(prs[i])+')';
+        ctx.shadowColor = 'rgba(0, 0, 0, '+sh*mapPressure(prs[i])+')';
+        ctx.lineWidth = mapPressure(prs[n-1])*th;
+        ctx.beginPath();
+        ctx.moveTo(pts[n-2],pts[n-1]);
+        ctx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
+        ctx.stroke();
+        ctx.closePath();
+        
+        ctx.restore();
+      }
+
+    </script>
+
+    <style>
+      body {
+        font-family: sans-serif;
+        font-size: 13px;
+        color: #555;
+      }
+      canvas {
+        border-radius: 25px;
+        border: 1px solid #EED;
+        margin-top: 20px;
+        float: left;
+      }
+      object {
+        width: 0;
+        height: 0;
+      }
+      img {
+        display: none;
+      }
+      #panel {
+        width: 255px;
+        float: left;
+        margin-left: 20px;
+        margin-top: 20px;
+        border-radius: 10px;
+        padding: 10px;
+        border: 1px solid #EED;
+      }
+      .control {
+        height: 30px;
+        vertical-align: middle;
+      }
+      .control input {
+        margin-top: 5px;
+      }
+      .label {
+        height: 30px;
+        width: 80px;
+        line-height: 30px;
+        float: left;
+      }
+      .readout {
+        height: 30px;
+        line-height: 30px;
+        float: right;
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <!-- TEXTURE -->
+    <img src="tests/img/transparency140b.png" id="img"/>
+    <!-- NOTEBOOK -->
+    <canvas id='canvas' width='1000px' height='1000px'></canvas>
+    <!-- CONTROL PANEL -->
+    <div id='panel'>
+      <h3>Curve</h3>
+      <div class='control'>
+        <div class='label'>Tension</div>
+        <input id='tension-input' value='0.33' type='range' min='0' max='2' step='0.01'></input>
+        <div class='readout' id='tension-readout'></div>
+      </div>
+      <div class='control'>
+        <div class='label'>Sample</div>
+        <input id='sample-input' value='1' type='range' min='1' max='20' step='1'></input>
+        <div class='readout' id='sample-readout'></div>
+      </div>
+      <h3>Line</h3>
+      <div class='control'>
+        <div class='label'>Thickness</div>
+        <input id='thickness-input' value='2' type='range' min='0' max='10' step='0.05'></input>
+        <div class='readout' id='thickness-readout'></div>
+      </div>
+      <div class='control'>
+        <div class='label'>Darkness</div>
+        <input id='darkness-input' value='0.5' type='range' min='0' max='1' step='0.01'></input>
+        <div class='readout' id='darkness-readout'></div>
+      </div>
+      <h3>Shadow</h3>
+      <div class='control'>
+        <div class='label'>Blur</div>
+        <input id='blur-input' value='0' type='range' min='0' max='10' step='0.05'></input>
+        <div class='readout' id='blur-readout'></div>
+      </div>
+      <div class='control'>
+        <div class='label'>Darkness</div>
+        <input id='shadow-darkness-input' value='0' type='range' min='0' max='1' step='0.01'></input>
+        <div class='readout' id='shadow-darkness-readout'></div>
+      </div>
+      <h3>Pressure</h3>
+      <div class='control'>
+        <div class='label'>Sensitivity</div>
+        <input id='pressure-input' value='0' type='range' min='0' max='1' step='0.01'></input>
+        <div class='readout' id='pressure-readout'></div>
+      </div>
+    </div>
+  </body>
+</html>

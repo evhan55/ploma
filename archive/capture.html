@@ -1,0 +1,193 @@
+<html>
+  <head>
+    <script>
+      var button;
+      var canvas;
+      var ctx;
+      var isDrawing;
+      var oldX;
+      var oldY;
+      var paperColor = "rgb(253, 253, 240);";
+      var penColor = 'rgb(190, 190, 190);';
+      var points = [];
+
+      // *********************************************************************
+      // window.onload
+      //   Sets the canvas's rendering properties and binds the following
+      //   actions:
+      //     - button.onclick
+      //     - canvas.onmousedown
+      //     - canvas.onmousemove
+      //     - canvas.onmouseup
+      //
+      window.onload = function() {
+        canvas = document.getElementById('canvas');
+        button = document.getElementById('capture');
+
+        ctx = canvas.getContext('2d');
+        ctx.strokeStyle = penColor;
+
+        clearCanvas();
+
+        // *********************************************************************
+        // button.onclick
+        //   Saves the points to JSON and gives an output file to download and
+        //   then clears the canvas.
+        //
+        button.onclick = function(e) {
+          var json = JSON.stringify(points);
+          var blob = new Blob([json], {type: 'application/json'});
+          var url  = URL.createObjectURL(blob);
+          button.download = 'capture_'+Date.now()+'.json';
+          button.href = url;
+          points.length = 0;
+          clearCanvas();
+        }
+
+        // *********************************************************************
+        // canvas.onmousedown
+        //   Sets isDrawing to true and records the mouse position.
+        //
+        canvas.onmousedown = function(e) {
+          isDrawing = true;
+          oldX = cursorOffset(e, canvas).x;
+          oldY = cursorOffset(e, canvas).y;
+        };
+
+        // *********************************************************************
+        // canvas.onmousemove
+        //   Records all possible Wacom pen data into the point array and then
+        //   draws a line on the canvas based on the pen's position.
+        //
+        canvas.onmousemove = function(e) {
+          if (isDrawing) {
+            // Collect pen data
+            var penCanvasX = cursorOffset(e, canvas).x;
+            var penCanvasY = cursorOffset(e, canvas).y;
+            var penPressure = getWacomPlugin().penAPI.pressure;
+            var point = {
+              isWacom      : getWacomPlugin().penAPI.isWacom,
+              isEraser     : getWacomPlugin().penAPI.isEraser,
+              posX         : getWacomPlugin().penAPI.posX,
+              posY         : getWacomPlugin().penAPI.posY,
+              sysX         : getWacomPlugin().penAPI.sysX,
+              sysY         : getWacomPlugin().penAPI.sysY,
+              tabX         : getWacomPlugin().penAPI.tabX,
+              tabY         : getWacomPlugin().penAPI.tabY,
+              rotationDeg  : getWacomPlugin().penAPI.rotationDeg,
+              rotationRad  : getWacomPlugin().penAPI.rotationRad,
+              tiltX        : getWacomPlugin().penAPI.tiltX,
+              tiltY        : getWacomPlugin().penAPI.tiltY,
+              tangPressure : getWacomPlugin().penAPI.tangentialPressure,
+              version      : getWacomPlugin().penAPI.version,
+              pointerType  : getWacomPlugin().penAPI.pointerType,
+              tabletModel  : getWacomPlugin().penAPI.tabletModel,
+              pressure     : penPressure,
+              canvasX      : penCanvasX,
+              canvasY      : penCanvasY,
+              time         : Date.now()
+            };
+            points.push(point);
+
+            // Draw line
+            ctx.beginPath();
+            ctx.moveTo(oldX, oldY);
+            ctx.lineTo(penCanvasX, penCanvasY);
+            ctx.setLineWidth(mapWidth(penPressure));
+            ctx.stroke();
+            ctx.closePath();
+            oldX = penCanvasX;
+            oldY = penCanvasY;
+          }
+        };
+
+        // *********************************************************************
+        // canvas.onmouseup
+        //   Sets isDrawing to false and insert a breakpoint into the points
+        //   array.
+        //
+        canvas.onmouseup = function() {
+          isDrawing = false;
+          points.push({break: true});
+        };
+      };
+
+      // *********************************************************************
+      // getWacomPlugin
+      //   Returns Wacom plugin instance loaded on this page, if any.
+      //
+      function getWacomPlugin() {
+        var plugin = document.getElementById('wtPlugin');
+        return plugin;
+      }
+
+      // *********************************************************************
+      // cursorOffset
+      //   Returns the x,y position of the cursor over the given element,
+      //   taking into account any offsets into the page.
+      //
+      function cursorOffset(e, el) {
+        var pt = {};
+        pt.x = e.pageX - el.offsetLeft + 0;
+        pt.y = e.pageY - el.offsetTop + 0;
+        return pt;
+      }
+
+      // *********************************************************************
+      // mapWidth
+      //   Returns a line width based on a pen pressure value which ranges
+      //   between 0 and 1.
+      //
+      function mapWidth(p) {
+        var result = 3*p;
+        return result;
+      }
+      
+      // *********************************************************************
+      // clearCanvas
+      //   Clears the canvas and fills it with the paper color.
+      //
+      function clearCanvas() {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fillStyle = paperColor;
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      }
+    </script>
+
+    <style>
+      canvas {
+        cursor: url('cursor.cur'), crosshair; /* created at cursor.cc */
+        border-radius: 25px;
+        border: 1px solid #EED;
+        margin-top: 20px;
+      }
+      object {
+        width: 0;
+        height: 0;
+      }
+      a {
+        background: #DB5;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-left: 8px;
+        cursor: pointer;
+      }
+    </style>
+
+  </head>
+
+  <body id='content'>
+    <!-- CANVAS -->
+    <a id='capture'>Capture</a>
+    <br>
+    <canvas id='canvas' width='1000px' height='1000px'></canvas>
+
+    <!-- WACOM PLUGIN -->
+    <object id='wtPlugin' type='application/x-wacomtabletplugin'>
+      <param name='onload' value='pluginLoaded'/>
+    </object>
+  </body>
+
+</html>
