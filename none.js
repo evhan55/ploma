@@ -53,7 +53,8 @@ function drawNone(pts, prs) {
     minx = minpt.x;
     miny = minpt.y;
     ctx.lineWidth = (prs[i+2] < 0.6) ? 1.7 : 2.4;
-    ctx.strokeStyle = pat;
+    //ctx.strokeStyle = pat;
+    ctx.strokeStyle = '#000000';
     ctx.globalAlpha = (prs[i+2] < 0.5) ? 0.8 : 1;
     ctx.translate(minx, miny);
     ctx.beginPath();

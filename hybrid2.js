@@ -25,7 +25,7 @@ function redrawHybrid2() {
   // Draw each curve
   for (var i = 0; i < curves.length; i++) {
     var curve = curves[i];
-    toggleStyle();
+    //toggleStyle();
 
     if(curve.length > 2) {
       var area = getCurveArea(curve);
@@ -61,11 +61,9 @@ function drawHybrid2None(pts) {
     minpt = getMinPt(px,py,x,y,Infinity,Infinity,Infinity,Infinity);
     minx = minpt.x;
     miny = minpt.y;
-    ctx.lineWidth = (pts[i+1].pressure < 0.6) ? 2.4 : 3;
-    //ctx.lineWidth = pts[i+1].pressure*3;
-    //ctx.globalAlpha = (pts[i+1].pressure < 0.5) ? 0.9 : 1;
+    ctx.lineWidth = calcLineWidth(pts[i+1].pressure);
     ctx.globalAlpha = calcGlobalAlpha(pts[i+1].pressure);
-    ctx.strokeStyle = pat;
+    //ctx.strokeStyle = calcStrokeStyle(pts[i+1].pressure);
     ctx.translate(minx, miny);
     ctx.beginPath();
     ctx.moveTo(px - minx, py - miny);
@@ -132,9 +130,22 @@ function toggleStyle(){
 
 function calcLineWidth(p) {
   var width;
+  var widthTable;
 
-  width = (p < 0.6) ? 1.7 : 2.4
-  //return p;
+  widthTable = {
+    0.1: 1.3,
+    0.2: 1.3,
+    0.3: 1.4,
+    0.4: 1.5,
+    0.5: 1.8,
+    0.6: 2.3,
+    0.7: 2.4,
+    0.8: 2.5,
+    0.9: 2.5,
+    1.0: 2.6
+  };
+
+  width = widthTable[decimalAdjust('round', p, -1)];
 
   return width;
 }
@@ -144,14 +155,28 @@ function calcStrokeStyle(p) {
 
   style = (p < 0.5) ? pat2 : pat;
 
-  return pat;
+  return '#666690';
+  //return pat;
 }
 
 function calcGlobalAlpha(p) {
   var alpha;
+  var alphaTable;
 
-  alpha = Math.floor(Math.random()*50) === 1 ? 0.5 : 1;
+  alphaTable = {
+    0.1: 0.4,
+    0.2: 0.5,
+    0.3: 0.6,
+    0.4: 0.7,
+    0.5: 0.8,
+    0.6: 0.8,
+    0.7: 0.8,
+    0.8: 0.95,
+    0.9: 0.95,
+    1.0: 1
+  };
 
+  alpha = alphaTable[decimalAdjust('round', p, -1)];
 
   return alpha;
 }
@@ -188,6 +213,35 @@ function getCurveArea(c) {
 
   return area;
 }
+
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor
+/**
+ * Decimal adjustment of a number.
+ *
+ * @param {String}  type  The type of adjustment.
+ * @param {Number}  value The number.
+ * @param {Integer} exp   The exponent (the 10 logarithm of the adjustment base).
+ * @returns {Number}      The adjusted value.
+ */
+function decimalAdjust(type, value, exp) {
+  // If the exp is undefined or zero...
+  if (typeof exp === 'undefined' || +exp === 0) {
+    return Math[type](value);
+  }
+  value = +value;
+  exp = +exp;
+  // If the value is not a number or the exp is not an integer...
+  if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+    return NaN;
+  }
+  // Shift
+  value = value.toString().split('e');
+  value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+  // Shift back
+  value = value.toString().split('e');
+  return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+}
+
 
 /* function calcGlobalAlpha(p) {
   var alpha;
