@@ -65,7 +65,7 @@ function drawHybrid2None(pts) {
     miny = minpt.y;
     ctx.lineWidth = calcLineWidth(pts[i+1].pressure);
     ctx.globalAlpha = calcGlobalAlpha(pts[i+1].pressure);
-    //ctx.strokeStyle = calcStrokeStyle(pts[i+1].pressure);
+    ctx.strokeStyle = calcStrokeStyle(pts[i+1].pressure);
     ctx.translate(minx, miny);
     ctx.beginPath();
     ctx.moveTo(px - minx, py - miny);
@@ -135,10 +135,10 @@ function calcLineWidth(p) {
   var widthTable;
 
   widthTable = {
-    0.1: 1,
-    0.2: 1,
-    0.3: 1,
-    0.4: 1,
+    0.1: 1.2, // needs a texture
+    0.2: 1.4, // needs a texture
+    0.3: 1.6, // needs a texture
+    0.4: 1.8,
     0.5: 2,
     0.6: 2,
     0.7: 2.3,
@@ -153,12 +153,17 @@ function calcLineWidth(p) {
 }
 
 function calcStrokeStyle(p) {
-  var style;
+  var style = pat;
 
-  style = (p < 0.5) ? pat2 : pat;
+  if (p < 0.3) {
+    style = pat2;
+  }
 
-  return '#666690';
-  //return pat;
+  if (p > 0.85) {
+    style = pat3;
+  }
+
+  return style;
 }
 
 function calcGlobalAlpha(p) {
@@ -166,11 +171,11 @@ function calcGlobalAlpha(p) {
   var alphaTable;
 
   alphaTable = {
-    0.1: 0.3,
-    0.2: 0.3,
-    0.3: 0.4,
-    0.4: 0.4,
-    0.5: 0.6,
+    0.1: 0.6, // needs a texture
+    0.2: 0.6, // needs a texture
+    0.3: 0.6, // needs a texture
+    0.4: 0.8,
+    0.5: 0.8,
     0.6: 0.8,
     0.7: 0.8,
     0.8: 0.95,

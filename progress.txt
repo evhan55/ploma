@@ -6,11 +6,6 @@ TODO
 to make that look more organic even still.  This is not a problem for
 shorter curves with less points.
 
-- Still need to focus on how the texture looks for very light lines.
-
-- It's difficult to get thin, sparse dark lines with a transparent texture,
-so have to continue playing with switching textures in and out.
-
 - Need to adjust curve fitting a bit depending on more finetuned versions
 of area covered and speed
 
@@ -18,6 +13,8 @@ of area covered and speed
 fitting downsampling works for which speeds, areas and number of points.
 I have isolated a good compromise for handwriting by AK and EE, but need
 to collect more types of data to build up that lookup table.
+
+- For pressures close to 1, make the texture darker (same color but darker).
 
 ------------------------------
 Lessons
@@ -28,20 +25,19 @@ Texture
 
 - A little texture goes a long way.
 
-- Must offset the texture within the canvas so the offset into the
-texture is not "wallpapered" but randomized instead.
-Adding a little extra randomization doesn't hurt.
+- Must offset the texture within the canvas so the texture is not "wallpapered"
+but randomized instead. Adding a little extra randomization doesn't hurt.
 
-- Transparent textures with only black/blue pixels and transparent
-otherwise is the best for the alpha blending, this way the more you write
+- Textures with monochrome/variable-transparency pixels 
+are the best for alpha blending, this way the more you write
 the darker it gets, but there are no light pixels to obscure darker pixels
 underneath.
 
 Alpha
 -----
 
-- Simulating ink dispersal and catching is very effective.  Having the pen run
-out of ink sometimes, especially when the pen has just gone down, is very
+- Simulating ink dispersal and catching is very effective.  Having the pen "run
+out of ink" sometimes, especially when the pen has just gone down, is very
 effective.  This is easiest done on the fly, calculating the time as we
 go, or with a timer.
 
@@ -49,9 +45,17 @@ Curve Fitting
 -------------
 
 - Curve fitting depends on speed, area of curve, and number of points.
+- Curve fitting might come down to a lookup-table approach, too for certain speeds.
+
 
 Color
 -----
+
+- Ballpoint pen ink changes in hue perceptibly depending on lightness of touch.
+A very light touch looks very blue, a medium touch looks gray/blue, a dark
+touch looks black.  I need to use various darknesses of the same hue to 
+achieve this variation and swap textures in and out.  A single texture can't
+achieve the range.
 
 - Best RGB so far: 45, 43, 98
 - Best PNG so far: PencilTextures2_8sm_transparent6_sm17

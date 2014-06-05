@@ -2,11 +2,13 @@ var canvas;
 var ctx;
 var img;
 var img2;
+var img3;
 var pat;
 var pat2;
+var pat3;
 var paperColor = "rgb(253, 253, 240)";
 var paperColor = "rgb(255, 255, 245)";
-var paperColor = "rgb(252, 255, 243)";
+var paperColor = "rgb(255, 253, 230)";
 var capture;
 
 var curveFitting = 'hybrid2';
@@ -51,9 +53,11 @@ window.onload = function(){
   canvas = document.getElementById('canvas');
   img = document.getElementById("img");
   img2 = document.getElementById("img2");
+  img3 = document.getElementById("img3");
   ctx = canvas.getContext('2d');
   pat = ctx.createPattern(img,"repeat");
   pat2 = ctx.createPattern(img2, "repeat");
+  pat3 = ctx.createPattern(img3, "repeat");
   ctx.strokeStyle = pat;
 
   // load capture file points
