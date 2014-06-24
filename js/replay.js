@@ -7,11 +7,12 @@ var pat;
 var pat2;
 var pat3;
 var paperColor = "rgb(253, 253, 240)";
-var paperColor = "rgb(255, 255, 245)";
-var paperColor = "rgb(255, 253, 230)";
+var paperColor = "rgb(255, 255, 253)";
+//var paperColor = "rgb(255, 253, 230)";
+//var paperColor = "rgb(255, 255, 255)";
 var capture;
 
-var curveFitting = 'hybrid2';
+var curveFitting = 'hybrid-drawing';
 var tension;
 var sample = 2;
 var thickness;
@@ -26,7 +27,8 @@ var noneInput;
 var splineInput;
 var bezier2Input;
 var hybridInput;
-var hybrid2Input;
+var hybridWritingInput;
+var hybridDrawingInput;
 
 var tensionInput;
 var sampleInput;
@@ -159,17 +161,26 @@ window.onload = function(){
     redraw();
   }
 
-  //curve fitting input - hybrid2
-  hybrid2Input = document.getElementById('hybrid2-input');
-  hybrid2Input.onchange = function(e) {
-    if(hybrid2Input.checked) {
-      curveFitting = 'hybrid2';
+  //hybrid none/curve fitting input - hybrid-writing
+  hybridWritingInput = document.getElementById('hybrid-writing-input');
+  hybridWritingInput.onchange = function(e) {
+    if(hybridWritingInput.checked) {
+      curveFitting = 'hybrid-writing';
+    }
+    redraw();
+  }
+
+  //hybrid none/curve fitting input - hybrid-drawing
+  hybridDrawingInput = document.getElementById('hybrid-drawing-input');
+  hybridDrawingInput.onchange = function(e) {
+    if(hybridDrawingInput.checked) {
+      curveFitting = 'hybrid-drawing';
     }
     redraw();
   }
 
   // draw curves with default control values
-  hybrid2Input.checked = true;
+  hybridDrawingInput.checked = true;
   //noneInput.changed;
   redraw();
 }
@@ -240,8 +251,12 @@ function redraw() {
     redrawHybrid();
   }
 
-  if(curveFitting === 'hybrid2') {
-    redrawHybrid2();
+  if(curveFitting === 'hybrid-writing') {
+    redrawHybridWriting();
+  }
+
+  if(curveFitting === 'hybrid-drawing') {
+    redrawHybridDrawing();
   }
 }
 
@@ -250,4 +265,65 @@ function getMinPt(x1, y1, x2, y2, x3, y3, x4, y4) {
   var miny = Math.min(y1, y2, y3, y4) + Math.random()*50;
 
   return {x: minx, y: miny};
+}
+
+function getCurveArea(c) {
+  var minX = c[0].canvasX;
+  var minY = c[0].canvasY;
+  var maxX = c[0].canvasX;
+  var maxY = c[0].canvasY;
+  var area;
+
+  for(var i = 0; i < c.length; i++) {
+    minX = Math.min(minX, c[i].canvasX);
+    minY = Math.min(minY, c[i].canvasY);
+    maxX = Math.max(maxX, c[i].canvasX);
+    maxY = Math.max(maxY, c[i].canvasY);
+  }
+
+  area = (maxX - minX)*(maxY - minY);
+
+  return area;
+}
+
+function getSampledCurve(c, s) {
+  var sampledCurve = [];
+  for (var i = 0; i < c.length; i++) {
+    if(i%s === 0) {
+      sampledCurve.push(c[i]);
+    }
+    // always keep the last point
+    if(i === c.length-1) {
+      sampledCurve.push(c[i]);
+    }
+  }
+  return sampledCurve;
+}
+
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor
+/**
+ * Decimal adjustment of a number.
+ *
+ * @param {String}  type  The type of adjustment.
+ * @param {Number}  value The number.
+ * @param {Integer} exp   The exponent (the 10 logarithm of the adjustment base).
+ * @returns {Number}      The adjusted value.
+ */
+function decimalAdjust(type, value, exp) {
+  // If the exp is undefined or zero...
+  if (typeof exp === 'undefined' || +exp === 0) {
+    return Math[type](value);
+  }
+  value = +value;
+  exp = +exp;
+  // If the value is not a number or the exp is not an integer...
+  if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+    return NaN;
+  }
+  // Shift
+  value = value.toString().split('e');
+  value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+  // Shift back
+  value = value.toString().split('e');
+  return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
 }

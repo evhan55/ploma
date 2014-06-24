@@ -2,13 +2,14 @@
   <head>
 
     <!--<script src='capture_alan.json'></script>-->
-    <script src='captures/capture8.json'></script>
+    <script src='captures/capture10.json'></script>
     <script src='js/replay.js'></script>
     <script src='js/none.js'></script>
     <script src='js/spline.js'></script>
     <script src='js/bezier2.js'></script>
     <script src='js/hybrid.js'></script>
-    <script src='js/hybrid2.js'></script>
+    <script src='js/hybrid-writing.js'></script>
+    <script src='js/hybrid-drawing.js'></script>
 
     <style>
       body {
@@ -53,6 +54,9 @@
         line-height: 30px;
         float: left;
       }
+      .fitting {
+        width: 100px;
+      }
       .readout {
         height: 30px;
         line-height: 30px;
@@ -66,33 +70,47 @@
     <!-- TEXTURE -->
     <!-- <img src="tests/img/PencilTextures2f_80_dark8.png" id="img"/> Good for screenshot comparisons -->
     <!-- <img src="img/PencilTextures2_8sm_transparent6_sm17.png" id="img"/> Best pen color as of June 4 -->
+    
+    <!-- WORKING TEXTURES BELOW -->
     <img src="img/PencilTextures2_8sm_transparent6_sm17.png" id="img"/>
     <img src="img/PencilTextures2_8sm_transparent1_3_sm14.png" id="img2"/>
-    <img src="img/PencilTextures2_8sm_transparent6_sm17_dark.png" id="img3"/>
+    <img src="img/PencilTextures2_8sm_transparent6_sm17_darker.png" id="img3"/>
+
+    <!-- TEXTURE TESTS FOR A'S DARK LINES -->
+    <!--
+    <img src="img/PencilTextures2_8sm_transparent6_sm17.png" id="img"/>
+    <img src="img/PencilTextures2_8sm_transparent1_3_sm14_darker4.png" id="img2"/>
+    <img src="img/PencilTextures2_8sm_transparent6_sm17_darker.png" id="img3"/>
+    -->
+
     <!-- NOTEBOOK -->
     <canvas id='canvas' width='1300px' height='1000px'></canvas>
     <!-- CONTROL PANEL -->
     <div id='panel'>
       <h3>Fitting</h3>
       <div class='control'>
-        <div class='label'>None</div>
+        <div class='label fitting'>None</div>
         <input id='none-input' name='fitting' type='radio'></input>
       </div>
       <div class='control'>
-        <div class='label'>Cubic Spline</div>
+        <div class='label fitting'>Cubic Spline</div>
         <input id='spline-input' name='fitting' type='radio'></input>
       </div>
       <div class='control'>
-        <div class='label'>Quad Bezier</div>
+        <div class='label fitting'>Quad Bezier</div>
         <input id='bezier2-input' name='fitting' type='radio'></input>
       </div>
       <div class='control'>
-        <div class='label'>Hybrid</div>
+        <div class='label fitting'>Hybrid</div>
         <input id='hybrid-input' name='fitting' type='radio'></input>
       </div>
       <div class='control'>
-        <div class='label'>Hybrid 2</div>
-        <input id='hybrid2-input' name='fitting' type='radio'></input>
+        <div class='label fitting'>Hybrid Writing</div>
+        <input id='hybrid-writing-input' name='fitting' type='radio'></input>
+      </div>
+      <div class='control'>
+        <div class='label fitting'>Hybrid Drawing</div>
+        <input id='hybrid-drawing-input' name='fitting' type='radio'></input>
       </div>
       <h3>Curve</h3>
       <div class='control'>

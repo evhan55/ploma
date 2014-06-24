@@ -149,14 +149,25 @@ function calcLineWidth(p) {
 
   width = widthTable[decimalAdjust('round', p, -1)];
 
-  return width;
+  return p*3;
 }
 
+/**
+ * pat = middle tone
+ * pat2 = light tone
+ * pat3 = dark tone
+ */
 function calcStrokeStyle(p) {
   var style = pat;
+  ctx.shadowBlur = 0;
+  ctx.shadowColor = 'rgba(0, 0, 0, 0)';
 
   if (p < 0.3) {
     style = pat2;
+    //style = 'rgb(0, 0, 0)';
+    //ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'rgba(0, 0, 0, 255)';
   }
 
   if (p > 0.85) {
@@ -170,10 +181,11 @@ function calcGlobalAlpha(p) {
   var alpha;
   var alphaTable;
 
+  // Working Version
   alphaTable = {
-    0.1: 0.6, // needs a texture
-    0.2: 0.6, // needs a texture
-    0.3: 0.6, // needs a texture
+    0.1: 0.4, // needs a texture
+    0.2: 0.5, // needs a texture
+    0.3: 0.5, // needs a texture
     0.4: 0.8,
     0.5: 0.8,
     0.6: 0.8,
@@ -182,6 +194,20 @@ function calcGlobalAlpha(p) {
     0.9: 0.95,
     1.0: 1
   };
+
+  
+  /*alphaTable = {
+    0.1: 0.85, // needs a texture
+    0.2: 0.85, // needs a texture
+    0.3: 0.85, // needs a texture
+    0.4: 0.85,
+    0.5: 0.85,
+    0.6: 0.85,
+    0.7: 0.85,
+    0.8: 0.95,
+    0.9: 0.95,
+    1.0: 1
+  }*/
 
   alpha = alphaTable[decimalAdjust('round', p, -1)];
 

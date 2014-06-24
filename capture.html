@@ -8,11 +8,31 @@
       img {
         display: none;
       }
+      a {
+        cursor: pointer;
+        border-radius: 10px;
+        padding: 10px 5px;
+        color: white;
+        text-decoration: none;
+        font-family: sans-serif;
+        user-select: none;
+      }
+      #capture {
+        background: blue;
+      }
+      #clear {
+        margin-top: 10px;
+        background: #DD3333;
+      }
     </style>
   </head>
 
   <body>
     <canvas id="c" width="1300" height="950"></canvas>
+    <div id="buttons" style="float: right;">
+      <a id='capture' style="float: left;">Capture</a><br>
+      <a id='clear' style="float: left;">Clear</a>
+    </div>
     <img src="img/transparency100b_sm.png" id="img"/>
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
@@ -20,6 +40,8 @@
   </body>
 
   <script>
+    var button;
+    var button2;
     var el;
     var img;
     var plugin;
@@ -42,19 +64,34 @@
     // window.onload
     //
     window.onload = function() {
+      button = document.getElementById('capture');
+      button2 = document.getElementById('clear');
       el = document.getElementById('c');
       img = document.getElementById("img");
       plugin = document.getElementById('wtPlugin');
       ctx = el.getContext('2d');
       pat = ctx.createPattern(img,"repeat");
 
-      // clear canvas
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.fillStyle = 'rgb(252, 252, 238)';
-      ctx.fillRect(0, 0, 1300, 950);
-
       // set global rendering properties
       ctx.strokeStyle = pat;
+
+      // *********************************************************************
+      // button.onclick
+      //   Saves the points to JSON and gives an output file to download and
+      //   then clears the canvas.
+      //
+      button.onclick = function(e) {
+        var json = JSON.stringify(points);
+        var blob = new Blob([json], {type: 'application/json'});
+        var url  = URL.createObjectURL(blob);
+        button.download = 'capture_'+Date.now()+'.json';
+        button.href = url;
+        points.length = 0;
+      }
+
+      button2.onclick = function(e) {
+        clearCanvas();
+      }
 
       el.onmousedown = function(e) {
         isDrawing = true;
@@ -206,6 +243,16 @@
         var url  = URL.createObjectURL(blob);
         window.open(url);
       }
+    }
+
+    //**********************************************************************
+    // clearCanvas
+    //
+    //
+    function clearCanvas(){
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = 'rgb(252, 252, 238)';
+      ctx.fillRect(0, 0, 1300, 950);
     }
   </script>
 

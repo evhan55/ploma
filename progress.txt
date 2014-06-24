@@ -1,3 +1,29 @@
+
+------------------------------
+6/17/14
+------------------------------
+- last week at EyeO tested with illustrators, found out
+  - that my system worked well for penmanship but not so well for drawing (see Liz's cat drawing)
+  - drawings feel very flat, she wanted more blobs and unflattening
+  - that I need to add more table lookups and deal with the edge cases (very heavy and very light pressure)
+  - in order to do more testing, need to get optimization and rendering on the fly working
+  - capture/replay workflow is too disruptive for effective testing
+- retina screen will show very thin lines better, especially rendering twice the size and shrinking (Kyle McDonald)
+- WILL is using asm.js and is still slow on Cintiq HD13, will ask them if performance is better on the bigger tablets
+- WILL code is very tightly bound to the UI, which is unfortunate, so I have to spend time teasing them apart for my own app
+
+------------------------------
+6/19/14
+------------------------------
+The tools in the WILL SDK can be texture or color filled.  If texture filled, then the texture can be shaped, and randomized and scattered according to some linear algorithms,  No table look up from what I can tell.
+
+- what does the speed path builder do?
+	- how are width and alpha configured depending on speed?
+- what does the pressure path builder do?
+	- how are width and alpha configured depending on pressure?
+- what does a smoother do?
+
+
 ------------------------------
 TODO
 ------------------------------
@@ -56,6 +82,18 @@ A very light touch looks very blue, a medium touch looks gray/blue, a dark
 touch looks black.  I need to use various darknesses of the same hue to 
 achieve this variation and swap textures in and out.  A single texture can't
 achieve the range.
+
+Anti-aliasing
+-------------
+
+- HTML5 <canvas> antialiasing is automatic and handled by the browser.
+After experimenting with three browsers with antialising thin lines:
+Chrome is best
+Safari and Firefox are similar, and not as good.
+
+- For thin lines, making them dark causes the antialiasing to weaken and jaggies appear.
+If we want thin, dark lines (for less pressure or when, precisely?) then a good combination
+is a darkish-texture combined with a small canvas-applied shadow to hide the jaggies.
 
 - Best RGB so far: 45, 43, 98
 - Best PNG so far: PencilTextures2_8sm_transparent6_sm17
