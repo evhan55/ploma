@@ -1,4 +1,7 @@
 var canvas;
+var w = 1300;
+var h = 1000;
+var ratio = 2;
 var ctx;
 var img;
 var img2;
@@ -61,6 +64,13 @@ window.onload = function(){
   pat2 = ctx.createPattern(img2, "repeat");
   pat3 = ctx.createPattern(img3, "repeat");
   ctx.strokeStyle = pat;
+  //canvas.setAttribute('width', w);
+  //canvas.setAttribute('height', h);
+  canvas.setAttribute('width', w * ratio);
+  canvas.setAttribute('height', h * ratio);
+  canvas.style.width = w;
+  canvas.style.height = h;
+  ctx.scale(ratio, ratio);
 
   // load capture file points
   capture = JSON.parse(jsonstr);

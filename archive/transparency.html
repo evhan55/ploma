@@ -2,7 +2,7 @@
 	<head>
 	</head>
 	<body>
-    <img src="../img/PencilTextures2_8sm.png" id="image"/>
+    <img src="../img/img005 copy 3.png" id="image"/>
 	</body>
   <script type="text/javascript">
     // get the image
@@ -14,8 +14,8 @@
 
       // create and customize the canvas
       var canvas = document.createElement("canvas");
-      canvas.width = 93; //93 × 86;
-      canvas.height = 86; //298;
+      canvas.width = 100; //93 × 86;
+      canvas.height = 153; //298;
       document.body.appendChild(canvas);
 
       // get the context
@@ -26,7 +26,7 @@
 
 
       // get the image data object
-      var image = ctx.getImageData(0, 0, 93, 86);
+      var image = ctx.getImageData(0, 0, 100, 153);
       // get the image data values
       var imageData = image.data,
       length = imageData.length;
@@ -42,9 +42,9 @@
         var hsl = rgbToHsl(r, g, b);
         var l = hsl[2];
         //console.log(l*255);
-        imageData[i] = 45;
-        imageData[i+1] = 43;
-        imageData[i+2] = 98;
+        imageData[i] = 85;
+        imageData[i+1] = 24;
+        imageData[i+2] = 46;
         imageData[i+3] = (255 - l*255);
         //console.log(imageData[i+0] + "," + imageData[i+1] + "," + imageData[i+2] + "," + imageData[i+3]);
       }

@@ -65,13 +65,12 @@ function drawHybridNoneDrawing(pts) {
     miny = minpt.y;
 
     var pressure;
-    //if ((Math.floor(Math.random()*5)) === 4) {
-    //if (true) {
-      //pressure = Math.min(pts[i+1].pressure,0.2+Math.random());
+    if ((Math.floor(Math.random()*5)) === 4) {
+      pressure = Math.min(pts[i+1].pressure,0.2+Math.random());
       //pressure = 0.2 + Math.random();
-    //} else {
+    } else {
       pressure = pts[i+1].pressure;
-    //}
+    }
 
     ctx.lineWidth = calcLineWidthDrawing(pressure);
     ctx.globalAlpha = calcGlobalAlphaDrawing(pressure);
@@ -146,16 +145,16 @@ function calcLineWidthDrawing(p) {
   var widthTable;
 
   widthTable = {
-    0.1: 1.2, // needs a texture
-    0.2: 1.4, // needs a texture
+    0.1: 1, // needs a texture
+    0.2: 1, // needs a texture
     0.3: 1.6, // needs a texture
-    0.4: 1.8,
-    0.5: 1.8,
-    0.6: 1.8,
-    0.7: 2,
-    0.8: 2,
-    0.9: 2,
-    1.0: 2
+    0.4: 1.9,
+    0.5: 2.0,
+    0.6: 2.0,
+    0.7: 2.1,
+    0.8: 2.1,
+    0.9: 2.2,
+    1.0: 2.2
   };
 
   width = widthTable[decimalAdjust('round', p, -1)];
@@ -174,11 +173,11 @@ function calcStrokeStyleDrawing(p) {
   //ctx.shadowBlur = 0;
   //ctx.shadowColor = 'rgba(0, 0, 0, 0)';
 
-  if (p < 0.3) {
-    style = pat3;
+  if (p < 0.4) {
+    style = pat2;
     //style = 'rgb(0, 0, 0)';
     //ctx.globalAlpha = 1;
-    //ctx.shadowBlur = 0;
+    //ctx.shadowBlur = 2;
     //ctx.shadowColor = 'rgba(0, 0, 0, 255)';
   }
 
@@ -195,27 +194,27 @@ function calcGlobalAlphaDrawing(p) {
 
   // Working Version
   alphaTable = {
-    0.1: 0.4, // needs a texture
-    0.2: 0.5, // needs a texture
-    0.3: 0.5, // needs a texture
-    0.4: 0.8,
-    0.5: 0.8,
-    0.6: 0.8,
-    0.7: 0.8,
+    0.1: 0.1, // needs a texture
+    0.2: 0.1, // needs a texture
+    0.3: 0.3, // needs a texture
+    0.4: 0.4,
+    0.5: 0.4,
+    0.6: 0.7,
+    0.7: 0.7,
     0.8: 0.8,
     0.9: 0.8,
-    1.0: 1
+    1.0: 0.9
   };
 
   
   /*alphaTable = {
-    0.1: 0.85, // needs a texture
-    0.2: 0.85, // needs a texture
-    0.3: 0.85, // needs a texture
-    0.4: 0.85,
-    0.5: 0.85,
-    0.6: 0.85,
-    0.7: 0.85,
+    0.1: 0.95, // needs a texture
+    0.2: 0.95, // needs a texture
+    0.3: 0.95, // needs a texture
+    0.4: 0.95,
+    0.5: 0.95,
+    0.6: 0.95,
+    0.7: 0.95,
     0.8: 0.95,
     0.9: 0.95,
     1.0: 1
