@@ -160,13 +160,13 @@ function calcLineWidthDrawing(p) {
 
   widthTable = {
     0.1: 0, // needs a texture
-    0.2: 1.5, // needs a texture
-    0.3: 2.2, // needs a texture
-    0.4: 2.2,
-    0.5: 2.4,
-    0.6: 2.4,
-    0.7: 2.4,
-    0.8: 2.4,
+    0.2: 1.2, // needs a texture
+    0.3: 1.4, // needs a texture
+    0.4: 1.4,
+    0.5: 1.4,
+    0.6: 1.6,
+    0.7: 1.8,
+    0.8: 2.2,
     0.9: 2.5,
     1.0: 2.5
   };
@@ -213,14 +213,14 @@ function calcGlobalAlphaDrawing(p) {
   // Working Version
   alphaTable = {
     0.1: 0.2, // needs a texture
-    0.2: 0.6, // needs a texture
-    0.3: 0.6, // needs a texture
-    0.4: 0.6,
-    0.5: 0.6,
-    0.6: 0.6,
-    0.7: 0.7,
-    0.8: 0.7,
-    0.9: 0.7,
+    0.2: 0.3, // needs a texture
+    0.3: 0.3, // needs a texture
+    0.4: 0.4,
+    0.5: 0.4,
+    0.6: 0.5,
+    0.7: 0.5,
+    0.8: 0.5,
+    0.9: 0.5,
     1.0: 0.7
   };
 
