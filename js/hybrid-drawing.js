@@ -167,15 +167,15 @@ function calcLineWidthDrawing(p) {
     0.6: 1.4,
     0.7: 1.5,
     0.8: 1.8,
-    0.9: 2.5,
-    1.0: 2.6
+    0.9: 2.3,
+    1.0: 2.3
   };
 
   width = widthTable[decimalAdjust('round', p, -1)];
 
-  if(p < 0.4) {
+  /*if(p < 0.4) {
     width = p*3;
-  }
+  }*/
 
   /*if((p > 0.15) && (p < 0.2)) {
     width = 1;
@@ -225,7 +225,7 @@ function calcGlobalAlphaDrawing(p) {
     0.7: 0.8,
     0.8: 0.7,
     0.9: 0.7,
-    1.0: 0.8
+    1.0: 0.7
   };
 
   
@@ -242,10 +242,10 @@ function calcGlobalAlphaDrawing(p) {
     1.0: 1
   }*/
 
-  alpha = 0.95;
+  /*alpha = 0.95;
   if (p < 0.4) {
     alpha = 0.98;
-  }
+  }*/
 
   alpha = alphaTable[decimalAdjust('round', p, -1)];
 
