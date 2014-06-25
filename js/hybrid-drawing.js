@@ -12,12 +12,18 @@ function redrawHybridDrawing() {
     if(capture[i].break) {
       count++;
       curves[count] = [];
+      //console.log('break');
     } else {
+      var pendown = false;
+      if(curves[count].length < 10) {
+        pendown = true;
+      }
       curves[count].push({
         canvasX:    capture[i].canvasX,
         canvasY:    capture[i].canvasY,
         pressure:   capture[i].pressure,
-        time:       capture[i].time
+        time:       capture[i].time,
+        pendown:    pendown
       });
     }
   }
@@ -26,6 +32,10 @@ function redrawHybridDrawing() {
   for (var i = 0; i < curves.length; i++) {
     var curve = curves[i];
     //toggleStyle();
+
+    //console.log('----');
+    //console.log('idx: ' + i);
+    //console.log('curve length: ' + curve.length);
 
     if(curve.length > 2) {
       var area = getCurveArea(curve);
@@ -53,6 +63,7 @@ function drawHybridNoneDrawing(pts) {
   var py;
   var x;
   var y;
+  //console.log("length: " + pts.length);
 
 	for(var i = 0; i < pts.length-1; i++) {
     px = pts[i].canvasX;
@@ -65,9 +76,11 @@ function drawHybridNoneDrawing(pts) {
     miny = minpt.y;
 
     var pressure;
-    if ((Math.floor(Math.random()*5)) === 4) {
-      pressure = Math.min(pts[i+1].pressure,0.2+Math.random());
+    //if ((Math.floor(Math.random()*5)) === 4) {
+      //pressure = Math.min(pts[i+1].pressure,0.2+Math.random());
       //pressure = 0.2 + Math.random();
+    if (pts[i+1].pendown || pts[i].pendown) {
+      pressure = 0.4;
     } else {
       pressure = pts[i+1].pressure;
     }
@@ -90,6 +103,7 @@ function drawHybridBezierDrawing(points) {
   var p1 = points[0];
   var p2 = points[1];
   var from = p1;
+  //console.log("length: "  + points.length);
   
   if(p1 && p2) {
     for (var i = 1; i < points.length; i++) {
@@ -145,19 +159,23 @@ function calcLineWidthDrawing(p) {
   var widthTable;
 
   widthTable = {
-    0.1: 1, // needs a texture
-    0.2: 1, // needs a texture
-    0.3: 1.6, // needs a texture
-    0.4: 1.9,
-    0.5: 2.0,
-    0.6: 2.0,
-    0.7: 2.1,
-    0.8: 2.1,
-    0.9: 2.2,
-    1.0: 2.2
+    0.1: 0, // needs a texture
+    0.2: 1.5, // needs a texture
+    0.3: 2.2, // needs a texture
+    0.4: 2.2,
+    0.5: 2.4,
+    0.6: 2.4,
+    0.7: 2.4,
+    0.8: 2.4,
+    0.9: 2.5,
+    1.0: 2.5
   };
 
   width = widthTable[decimalAdjust('round', p, -1)];
+
+  if((p > 0.15) && (p < 0.2)) {
+    width = 1;
+  }
 
   //return p*3;
   return width;
@@ -174,7 +192,7 @@ function calcStrokeStyleDrawing(p) {
   //ctx.shadowColor = 'rgba(0, 0, 0, 0)';
 
   if (p < 0.4) {
-    style = pat2;
+    style = pat3;
     //style = 'rgb(0, 0, 0)';
     //ctx.globalAlpha = 1;
     //ctx.shadowBlur = 2;
@@ -194,16 +212,16 @@ function calcGlobalAlphaDrawing(p) {
 
   // Working Version
   alphaTable = {
-    0.1: 0.1, // needs a texture
-    0.2: 0.1, // needs a texture
-    0.3: 0.3, // needs a texture
-    0.4: 0.4,
-    0.5: 0.4,
-    0.6: 0.7,
+    0.1: 0.2, // needs a texture
+    0.2: 0.6, // needs a texture
+    0.3: 0.6, // needs a texture
+    0.4: 0.6,
+    0.5: 0.6,
+    0.6: 0.6,
     0.7: 0.7,
-    0.8: 0.8,
-    0.9: 0.8,
-    1.0: 0.9
+    0.8: 0.7,
+    0.9: 0.7,
+    1.0: 0.7
   };
 
   
