@@ -79,11 +79,11 @@ function drawHybridNoneDrawing(pts) {
     //if ((Math.floor(Math.random()*5)) === 4) {
       //pressure = Math.min(pts[i+1].pressure,0.2+Math.random());
       //pressure = 0.2 + Math.random();
-    if (pts[i+1].pendown || pts[i].pendown) {
-      pressure = 0;
-    } else {
+    //if (pts[i+1].pendown || pts[i].pendown) {
+    //  pressure = 0;
+    //} else {
       pressure = pts[i+1].pressure;
-    }
+    //}
 
     ctx.lineWidth = calcLineWidthDrawing(pressure);
     ctx.globalAlpha = calcGlobalAlphaDrawing(pressure);

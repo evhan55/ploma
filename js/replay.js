@@ -11,8 +11,8 @@ var pat2;
 var pat3;
 var paperColor = "rgb(253, 253, 240)";
 var paperColor = "rgb(255, 255, 253)";
-var paperColor = "rgb(255, 254, 219)";
-//var paperColor = "rgb(255, 255, 255)";
+//var paperColor = "rgb(255, 254, 219)";
+var paperColor = "rgb(253, 254, 251)";
 var capture;
 
 var curveFitting = 'hybrid-drawing';
