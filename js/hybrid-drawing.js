@@ -80,7 +80,7 @@ function drawHybridNoneDrawing(pts) {
       //pressure = Math.min(pts[i+1].pressure,0.2+Math.random());
       //pressure = 0.2 + Math.random();
     if (pts[i+1].pendown || pts[i].pendown) {
-      pressure = 0.4;
+      pressure = 0;
     } else {
       pressure = pts[i+1].pressure;
     }
@@ -159,22 +159,48 @@ function calcLineWidthDrawing(p) {
   var widthTable;
 
   widthTable = {
-    0.1: 0, // needs a texture
-    0.2: 1.5, // needs a texture
-    0.3: 2.2, // needs a texture
-    0.4: 2.2,
-    0.5: 2.4,
-    0.6: 2.4,
-    0.7: 2.4,
-    0.8: 2.4,
-    0.9: 2.5,
-    1.0: 2.5
+    00: 0.05,
+    05: 0.05,
+    10: 0.1,
+    15: 0.1, // needs a texture
+    20: 0.2, // needs a texture
+    25: 0.2, // needs a texture
+    30: 0.3, // needs a texture
+    35: 0.3, // needs a texture
+
+    40: 0.1,
+    45: 0.1,
+    50: 0.1,
+    55: 0.1,
+    60: 2.0,
+    65: 2.0,
+    70: 2.0,
+
+    75: 1.8,
+    80: 1.8,
+    85: 1.8,
+    90: 1.9,
+    95: 1.9,
+    100: 1.9
   };
 
-  width = widthTable[decimalAdjust('round', p, -1)];
+  //width = widthTable[decimalAdjust('round', p, -1)];
+  width = widthTable[pressureMapValue(p)];
 
-  if((p > 0.15) && (p < 0.2)) {
-    width = 1;
+  //if (p < 0.3) {
+  //  width = p;
+  //}
+
+  if((p > 0.4) && (p < 0.7)) {
+    width = ((p-0.4)/(0.3))*(2);
+    //width = p-0.1;
+    //width = 0.8;
+  }
+
+  if((p > 0) && (p < 0.4)) {
+    width = ((p)/(0.4))*(0.7);
+    //width = p-0.1;
+    //width = 0.8;
   }
 
   //return p*3;
@@ -191,7 +217,7 @@ function calcStrokeStyleDrawing(p) {
   //ctx.shadowBlur = 0;
   //ctx.shadowColor = 'rgba(0, 0, 0, 0)';
 
-  if (p < 0.4) {
+  if (p < 0.6) {
     style = pat3;
     //style = 'rgb(0, 0, 0)';
     //ctx.globalAlpha = 1;
@@ -216,9 +242,12 @@ function calcGlobalAlphaDrawing(p) {
     0.2: 0.6, // needs a texture
     0.3: 0.6, // needs a texture
     0.4: 0.6,
+
     0.5: 0.6,
     0.6: 0.6,
     0.7: 0.7,
+
+    /* DONE? */
     0.8: 0.7,
     0.9: 0.7,
     1.0: 0.7
@@ -245,7 +274,7 @@ function calcGlobalAlphaDrawing(p) {
 
   alpha = alphaTable[decimalAdjust('round', p, -1)];
 
-  return 1;
+  return 0.5;
 }
 
 /* function calcGlobalAlpha(p) {

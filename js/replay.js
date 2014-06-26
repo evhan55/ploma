@@ -11,7 +11,7 @@ var pat2;
 var pat3;
 var paperColor = "rgb(253, 253, 240)";
 var paperColor = "rgb(255, 255, 253)";
-var paperColor = "rgb(255, 250, 220)";
+var paperColor = "rgb(254, 255, 219)";
 //var paperColor = "rgb(255, 255, 255)";
 var capture;
 
@@ -64,6 +64,7 @@ window.onload = function(){
   pat2 = ctx.createPattern(img2, "repeat");
   pat3 = ctx.createPattern(img3, "repeat");
   ctx.strokeStyle = pat;
+  ctx.lineCap = 'round';
   //canvas.setAttribute('width', w);
   //canvas.setAttribute('height', h);
   canvas.setAttribute('width', w * ratio);
@@ -336,4 +337,8 @@ function decimalAdjust(type, value, exp) {
   // Shift back
   value = value.toString().split('e');
   return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+}
+
+function pressureMapValue(v){
+  return Math.round(Math.round(v*100)/5)*5;
 }

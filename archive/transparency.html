@@ -2,7 +2,7 @@
 	<head>
 	</head>
 	<body>
-    <img src="../img/scan.png" id="image"/>
+    <img src="../img/marriott-1.png" id="image"/>
 	</body>
   <script type="text/javascript">
     // get the image
@@ -14,8 +14,8 @@
 
       // create and customize the canvas
       var canvas = document.createElement("canvas");
-      canvas.width = 47; //93 × 86;
-      canvas.height = 67; //298;
+      canvas.width = 198; //93 × 86;
+      canvas.height = 114; //298;
       document.body.appendChild(canvas);
 
       // get the context
@@ -26,14 +26,13 @@
 
 
       // get the image data object
-      var image = ctx.getImageData(0, 0, 47, 67);
+      var image = ctx.getImageData(0, 0, 198, 114);
       // get the image data values
       var imageData = image.data,
       length = imageData.length;
-      // set every fourth value to 50
-      for(var i=3; i < length; i+=4){ 
-        imageData[i] = 50;
-      }
+      var darkest = 255;
+      var lightest = 0;
+      // get the darkest and lightest values
       for(var i=0; i < length; i+=4) {
         var r = imageData[i];
         var g = imageData[i+1];
@@ -41,11 +40,31 @@
         var a = imageData[i+3];
         var hsl = rgbToHsl(r, g, b);
         var l = hsl[2];
+        darkest = Math.min(darkest, l);
+        lightest = Math.max(lightest, l);
+      }
+      //console.log("darkest:"+darkest);
+      //console.log("lightest:"+lightest);
+      // set every fourth value to 50
+      //for(var i=3; i < length; i+=4){ 
+      //  imageData[i] = 50;
+      //}
+      // darkest = 10
+      // lightest = 100
+      // 40?
+      // 255 - (40/(lightest - darkest))*255
+      for(var i=0; i < length; i+=4) {
+        var r = imageData[i];
+        var g = imageData[i+1];
+        var b = imageData[i+2];
+        var hsl = rgbToHsl(r, g, b);
+        var l = hsl[2];
+        //console.log("l:"+l);
         //console.log(l*255);
         imageData[i] = 85;
         imageData[i+1] = 24;
         imageData[i+2] = 46;
-        imageData[i+3] = (255 - l*255);
+        imageData[i+3] = (255 - ((l-darkest)/(lightest-darkest))*255);
         //console.log(imageData[i+0] + "," + imageData[i+1] + "," + imageData[i+2] + "," + imageData[i+3]);
       }
       // after the manipulation, reset the data
