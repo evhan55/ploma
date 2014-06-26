@@ -274,7 +274,7 @@ function calcGlobalAlphaDrawing(p) {
 
   alpha = alphaTable[decimalAdjust('round', p, -1)];
 
-  return 0.5;
+  return 0.6;
 }
 
 /* function calcGlobalAlpha(p) {
