@@ -33,12 +33,13 @@
       <a id='capture' style="float: left;">Capture</a><br>
       <a id='clear' style="float: left;">Clear</a>
     </div>
-    <img src="img/transparency100b_sm.png" id="img"/>
+    <img src="img/image0052-1-b5.png" id="img"/>
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
   </body>
 
+  <script src='js/hybrid-drawing.js'></script>
   <script>
     var button;
     var button2;
@@ -47,6 +48,7 @@
     var plugin;
     var ctx;
     var pat;
+    var pat3;
     var cursorOffsetX = 12;
     var cursorOffsetY = 8;
     var isDrawing = false;
@@ -59,6 +61,60 @@
     var px;
     var py;
     var points = [];
+    var drawTimeout;
+    var sample = 2;
+
+    var doDrawing = function() {
+      
+    }
+
+    function getMinPt(x1, y1, x2, y2, x3, y3, x4, y4) {
+      var minx = Math.min(x1, x2, x3, x4) + Math.random()*50;
+      var miny = Math.min(y1, y2, y3, y4) + Math.random()*50;
+
+      return {x: minx, y: miny};
+    }
+
+    function getCurveArea(c) {
+      var minX = c[0].canvasX;
+      var minY = c[0].canvasY;
+      var maxX = c[0].canvasX;
+      var maxY = c[0].canvasY;
+      var area;
+
+      for(var i = 0; i < c.length; i++) {
+        minX = Math.min(minX, c[i].canvasX);
+        minY = Math.min(minY, c[i].canvasY);
+        maxX = Math.max(maxX, c[i].canvasX);
+        maxY = Math.max(maxY, c[i].canvasY);
+      }
+
+      area = (maxX - minX)*(maxY - minY);
+
+      return area;
+    }
+
+    function getSampledCurve(c, s) {
+      var sampledCurve = [];
+      for (var i = 0; i < c.length; i++) {
+        if(i%s === 0) {
+          sampledCurve.push(c[i]);
+        }
+        // always keep the last point
+        if(i === c.length-1) {
+          sampledCurve.push(c[i]);
+        }
+      }
+      return sampledCurve;
+    }
+
+    function pressureMapValue10(v){
+      return Math.round(Math.round(v*100)/10)*10;
+    }
+
+    function pressureMapValue(v){
+      return Math.round(Math.round(v*100)/5)*5;
+    }
 
     //**********************************************************************
     // window.onload
@@ -71,9 +127,11 @@
       plugin = document.getElementById('wtPlugin');
       ctx = el.getContext('2d');
       pat = ctx.createPattern(img,"repeat");
+      pat3 = pat;
 
       // set global rendering properties
       ctx.strokeStyle = pat;
+      clearCanvas();
 
       // *********************************************************************
       // button.onclick
@@ -140,6 +198,12 @@
           return;
         }
 
+        if (points.length > 100) {
+          capture = points;
+          points = [];
+          redrawHybridDrawing();
+        }
+
         x = e.clientX - cursorOffsetX;
         y = e.clientY - cursorOffsetY;
         minx = Math.min(x, px) + Math.random()*50;
@@ -170,18 +234,18 @@
         points.push(point);
 
         // set stroke and size according to pressure
-        ctx.lineWidth = calcLineWidth(point.pressure);
+        //ctx.lineWidth = calcLineWidth(point.pressure);
         //ctx.strokeStyle = calcStrokeStyle(point.pressure);
-        ctx.globalAlpha = calcGlobalAlpha(point.pressure);
+        //ctx.globalAlpha = calcGlobalAlpha(point.pressure);
 
         // stroke line in offset canvas
-        ctx.translate(minx, miny);
-        ctx.beginPath();
-        ctx.moveTo(px - minx, py - miny);
-        ctx.lineTo(x - minx, y - miny);
-        ctx.stroke();
-        ctx.closePath();
-        ctx.translate(-minx, -miny);
+        //ctx.translate(minx, miny);
+        //ctx.beginPath();
+        //ctx.moveTo(px - minx, py - miny);
+        //ctx.lineTo(x - minx, y - miny);
+        //ctx.stroke();
+        //ctx.closePath();
+        //ctx.translate(-minx, -miny);
 
         px = x;
         py = y;
@@ -190,10 +254,29 @@
       el.onmouseup = function() {
         isDrawing = false;
         points.push({break: true});
+        window.clearTimeout(drawTimeout);
       };
 
       function calcLineWidth(p) {
-        return (p < 0.6) ? 1.8 : 2.4;
+        var width;
+
+        if(p < 0.4) {
+          width = ((p)/(0.4))*(0.7);
+        }
+
+        if((p >= 0.4) && (p < 0.7)) {
+          width = ((p-0.4)/(0.3))*(2);
+        }
+
+        if((p >= 0.7) && (p < 0.9)) {
+          width = 1.8;
+        }
+
+        if((p >= 0.9)) {
+          width = 1.9;
+        }
+
+        return width;
       }
 
       function calcGlobalAlpha(p) {
@@ -213,10 +296,10 @@
         }
 
         if(isSkipping) {
-          alpha = 1;
+          alpha = 0.3;
           skipCounter++;
         } else {
-          alpha = (p < 0.5) ? 1 : 1;
+          alpha = 0.6;
         }
         
         return alpha;
@@ -251,7 +334,8 @@
     //
     function clearCanvas(){
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.fillStyle = 'rgb(252, 252, 238)';
+      ctx.fillStyle = 'rgb(253, 254, 251)';
+      ctx.globalAlpha = 1;
       ctx.fillRect(0, 0, 1300, 950);
     }
   </script>

@@ -312,6 +312,10 @@ function getSampledCurve(c, s) {
   return sampledCurve;
 }
 
+function pressureMapValue10(v){
+  return Math.round(Math.round(v*100)/10)*10;
+}
+
 function pressureMapValue(v){
   return Math.round(Math.round(v*100)/5)*5;
 }

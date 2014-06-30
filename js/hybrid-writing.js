@@ -147,7 +147,7 @@ function calcLineWidthWriting(p) {
     1.0: 2.5
   };
 
-  width = widthTable[decimalAdjust('round', p, -1)];
+  width = widthTable[pressureMapValue10(p)];
 
   return p*3;
 }
@@ -209,7 +209,7 @@ function calcGlobalAlphaWriting(p) {
     1.0: 1
   }*/
 
-  alpha = alphaTable[decimalAdjust('round', p, -1)];
+  alpha = alphaTable[pressureMapValue10(p)];
 
   return alpha;
 }

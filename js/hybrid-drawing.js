@@ -1,10 +1,7 @@
 function redrawHybridDrawing() {
   var curves = [];
-  var newCurves = [];
   var count = 0;
-  var currentPressure;
   curves[count] = [];
-  newCurves[count] = [];
 
   // Collect points into distinct curves
   // by penup/pendown
@@ -38,12 +35,9 @@ function redrawHybridDrawing() {
       var elapsed = lastPoint.time - firstPoint.time;
 
       if((area > 100 && curve.length > 40) || elapsed < 200) {
-        var s = curve.length < 50 ? 1 : 3;
-        //ctx.strokeStyle = '#FF0000';
         drawHybridBezierDrawing(getSampledCurve(curve, sample));
       } else {
-        //ctx.strokeStyle = '#000000';
-        drawHybridNoneDrawing(getSampledCurve(curve, 1));
+        drawHybridNoneDrawing(getSampledCurve(curve, sample));
       }
     }
   }
@@ -125,55 +119,23 @@ function midPointBtw2Drawing(p1, p2) {
   };
 }
 
-function toggleStyleDrawing(){
-  var black = '#000000';
-  var red = '#FF0000';
-
-  if(ctx.strokeStyle === black) {
-    ctx.strokeStyle = red;
-  } else {
-    ctx.strokeStyle = black;
-  }
-}
-
 function calcLineWidthDrawing(p) {
   var width;
-  var widthTable;
 
-  widthTable = {
-    00: 0.05,
-    05: 0.05,
-    10: 0.1,
-    15: 0.1, // needs a texture
-    20: 0.2, // needs a texture
-    25: 0.2, // needs a texture
-    30: 0.3, // needs a texture
-    35: 0.3, // needs a texture
+  if(p < 0.4) {
+    width = ((p)/(0.4))*(0.7);
+  }
 
-    40: 0.1,
-    45: 0.1,
-    50: 0.1,
-    55: 0.1,
-    60: 2.0,
-    65: 2.0,
-    70: 2.0,
-
-    75: 1.8,
-    80: 1.8,
-    85: 1.8,
-    90: 1.9,
-    95: 1.9,
-    100: 1.9
-  };
-
-  width = widthTable[pressureMapValue(p)];
-
-  if((p > 0.4) && (p < 0.7)) {
+  if((p >= 0.4) && (p < 0.7)) {
     width = ((p-0.4)/(0.3))*(2);
   }
 
-  if((p > 0) && (p < 0.4)) {
-    width = ((p)/(0.4))*(0.7);
+  if((p >= 0.7) && (p < 0.9)) {
+    width = 1.8;
+  }
+
+  if((p >= 0.9)) {
+    width = 1.9;
   }
 
   return width;

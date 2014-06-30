@@ -33,7 +33,7 @@
       <a id='capture' style="float: left;">Capture</a><br>
       <a id='clear' style="float: left;">Clear</a>
     </div>
-    <img src="img/transparency100b_sm.png" id="img"/>
+    <img src="img/image0052-1-b5.png" id="img"/>
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
@@ -193,7 +193,25 @@
       };
 
       function calcLineWidth(p) {
-        return (p < 0.6) ? 1.8 : 2.4;
+        var width;
+
+        if(p < 0.4) {
+          width = ((p)/(0.4))*(0.7);
+        }
+
+        if((p >= 0.4) && (p < 0.7)) {
+          width = ((p-0.4)/(0.3))*(2);
+        }
+
+        if((p >= 0.7) && (p < 0.9)) {
+          width = 1.8;
+        }
+
+        if((p >= 0.9)) {
+          width = 1.9;
+        }
+
+        return width;
       }
 
       function calcGlobalAlpha(p) {
@@ -213,10 +231,10 @@
         }
 
         if(isSkipping) {
-          alpha = 1;
+          alpha = 0.3;
           skipCounter++;
         } else {
-          alpha = (p < 0.5) ? 1 : 1;
+          alpha = 0.6;
         }
         
         return alpha;
@@ -251,7 +269,7 @@
     //
     function clearCanvas(){
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.fillStyle = 'rgb(252, 252, 238)';
+      ctx.fillStyle = 'rgb(253, 254, 251)';
       ctx.fillRect(0, 0, 1300, 950);
     }
   </script>
