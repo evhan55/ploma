@@ -12,7 +12,6 @@ function redrawHybridDrawing() {
     if(capture[i].break) {
       count++;
       curves[count] = [];
-      //console.log('break');
     } else {
       var pendown = false;
       if(curves[count].length < 10) {
@@ -31,11 +30,6 @@ function redrawHybridDrawing() {
   // Draw each curve
   for (var i = 0; i < curves.length; i++) {
     var curve = curves[i];
-    //toggleStyle();
-
-    //console.log('----');
-    //console.log('idx: ' + i);
-    //console.log('curve length: ' + curve.length);
 
     if(curve.length > 2) {
       var area = getCurveArea(curve);
@@ -63,7 +57,6 @@ function drawHybridNoneDrawing(pts) {
   var py;
   var x;
   var y;
-  //console.log("length: " + pts.length);
 
 	for(var i = 0; i < pts.length-1; i++) {
     px = pts[i].canvasX;
@@ -76,14 +69,7 @@ function drawHybridNoneDrawing(pts) {
     miny = minpt.y;
 
     var pressure;
-    //if ((Math.floor(Math.random()*5)) === 4) {
-      //pressure = Math.min(pts[i+1].pressure,0.2+Math.random());
-      //pressure = 0.2 + Math.random();
-    //if (pts[i+1].pendown || pts[i].pendown) {
-    //  pressure = 0;
-    //} else {
-      pressure = pts[i+1].pressure;
-    //}
+    pressure = pts[i+1].pressure;
 
     ctx.lineWidth = calcLineWidthDrawing(pressure);
     ctx.globalAlpha = calcGlobalAlphaDrawing(pressure);
@@ -103,7 +89,6 @@ function drawHybridBezierDrawing(points) {
   var p1 = points[0];
   var p2 = points[1];
   var from = p1;
-  //console.log("length: "  + points.length);
   
   if(p1 && p2) {
     for (var i = 1; i < points.length; i++) {
@@ -120,9 +105,6 @@ function drawHybridBezierDrawing(points) {
 
 //http://stackoverflow.com/questions/5634460/quadratic-bezier-curve-calculate-point
 function drawQuadraticCurveDrawing(from, to, ctrl) {
-  // using canvas to draw the quadratic
-  //ctx.quadraticCurveTo(ctrl.canvasX, ctrl.canvasY, to.x, to.y);
-
   // using segments to draw the quadratic
   var points = [];
   for (var t = 0; t <= 1; t += 0.5) {
@@ -184,121 +166,27 @@ function calcLineWidthDrawing(p) {
     100: 1.9
   };
 
-  //width = widthTable[decimalAdjust('round', p, -1)];
   width = widthTable[pressureMapValue(p)];
-
-  //if (p < 0.3) {
-  //  width = p;
-  //}
 
   if((p > 0.4) && (p < 0.7)) {
     width = ((p-0.4)/(0.3))*(2);
-    //width = p-0.1;
-    //width = 0.8;
   }
 
   if((p > 0) && (p < 0.4)) {
     width = ((p)/(0.4))*(0.7);
-    //width = p-0.1;
-    //width = 0.8;
   }
 
-  //return p*3;
   return width;
 }
 
-/**
- * pat = middle tone
- * pat2 = light tone
- * pat3 = dark tone
- */
 function calcStrokeStyleDrawing(p) {
-  var style = pat3;
-  //ctx.shadowBlur = 0;
-  //ctx.shadowColor = 'rgba(0, 0, 0, 0)';
-
-  if (p < 0.6) {
-    style = pat3;
-    //style = 'rgb(0, 0, 0)';
-    //ctx.globalAlpha = 1;
-    //ctx.shadowBlur = 1;
-    //ctx.shadowColor = 'rgba(129, 102, 111, 15)';
-  }
-
-  if (p > 0.85) {
-    style = pat3;
-  }
+  style = pat3;
 
   return style;
 }
 
 function calcGlobalAlphaDrawing(p) {
-  var alpha;
-  var alphaTable;
+  var alpha = 0.6;
 
-  // Working Version
-  alphaTable = {
-    0.1: 0.2, // needs a texture
-    0.2: 0.6, // needs a texture
-    0.3: 0.6, // needs a texture
-    0.4: 0.6,
-
-    0.5: 0.6,
-    0.6: 0.6,
-    0.7: 0.7,
-
-    /* DONE? */
-    0.8: 0.7,
-    0.9: 0.7,
-    1.0: 0.7
-  };
-
-  
-  /*alphaTable = {
-    0.1: 0.95, // needs a texture
-    0.2: 0.95, // needs a texture
-    0.3: 0.95, // needs a texture
-    0.4: 0.95,
-    0.5: 0.95,
-    0.6: 0.95,
-    0.7: 0.95,
-    0.8: 0.95,
-    0.9: 0.95,
-    1.0: 1
-  }*/
-
-  /*alpha = 0.95;
-  if (p < 0.4) {
-    alpha = 0.98;
-  }*/
-
-  alpha = alphaTable[decimalAdjust('round', p, -1)];
-
-  return 0.6;
-}
-
-/* function calcGlobalAlpha(p) {
-  var alpha;
-
-  if(isSkipping && (skipCounter > 30)) {
-    isSkipping = false;
-    skipCounter = 0;
-  }
-
-  if(emptyInk && (penDownFrame < 5)) {
-    isSkipping = true;
-    emptyInk = false;
-    window.setTimeout(function() {
-      emptyInk = true;
-    }, 10000);
-  }
-
-  if(isSkipping) {
-    alpha = 0.5;
-    skipCounter++;
-  } else {
-    alpha = (p < 0.5) ? 0.9 : 1;
-  }
-  
   return alpha;
-}*/
+}

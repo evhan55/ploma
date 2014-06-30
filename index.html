@@ -1,0 +1,259 @@
+<html>
+  <head>
+    <style>
+      canvas {
+        cursor: url('cursors/cursor.cur'), crosshair;
+        border: 1px solid yellow;
+      }
+      img {
+        display: none;
+      }
+      a {
+        cursor: pointer;
+        border-radius: 10px;
+        padding: 10px 5px;
+        color: white;
+        text-decoration: none;
+        font-family: sans-serif;
+        user-select: none;
+      }
+      #capture {
+        background: blue;
+      }
+      #clear {
+        margin-top: 10px;
+        background: #DD3333;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="c" width="1300" height="950"></canvas>
+    <div id="buttons" style="float: right;">
+      <a id='capture' style="float: left;">Capture</a><br>
+      <a id='clear' style="float: left;">Clear</a>
+    </div>
+    <img src="img/transparency100b_sm.png" id="img"/>
+    <object id="wtPlugin" type="application/x-wacomtabletplugin">
+      <param name="onload" value="pluginLoaded" />
+    </object>
+  </body>
+
+  <script>
+    var button;
+    var button2;
+    var el;
+    var img;
+    var plugin;
+    var ctx;
+    var pat;
+    var cursorOffsetX = 12;
+    var cursorOffsetY = 8;
+    var isDrawing = false;
+    var isSkipping = false;
+    var skipCounter = 0;
+    var penDownFrame = 0;
+    var emptyInk = true;
+    var x;
+    var y;
+    var px;
+    var py;
+    var points = [];
+
+    //**********************************************************************
+    // window.onload
+    //
+    window.onload = function() {
+      button = document.getElementById('capture');
+      button2 = document.getElementById('clear');
+      el = document.getElementById('c');
+      img = document.getElementById("img");
+      plugin = document.getElementById('wtPlugin');
+      ctx = el.getContext('2d');
+      pat = ctx.createPattern(img,"repeat");
+
+      // set global rendering properties
+      ctx.strokeStyle = pat;
+
+      // *********************************************************************
+      // button.onclick
+      //   Saves the points to JSON and gives an output file to download and
+      //   then clears the canvas.
+      //
+      button.onclick = function(e) {
+        var json = JSON.stringify(points);
+        var blob = new Blob([json], {type: 'application/json'});
+        var url  = URL.createObjectURL(blob);
+        button.download = 'capture_'+Date.now()+'.json';
+        button.href = url;
+        points.length = 0;
+      }
+
+      button2.onclick = function(e) {
+        clearCanvas();
+      }
+
+      el.onmousedown = function(e) {
+        isDrawing = true;
+
+        x = e.clientX - cursorOffsetX;
+        y = e.clientY - cursorOffsetY;
+        px = x;
+        py = y;
+
+        point = {
+          isWacom      : plugin.penAPI.isWacom,
+          isEraser     : plugin.penAPI.isEraser,
+          posX         : plugin.penAPI.posX,
+          posY         : plugin.penAPI.posY,
+          sysX         : plugin.penAPI.sysX,
+          sysY         : plugin.penAPI.sysY,
+          tabX         : plugin.penAPI.tabX,
+          tabY         : plugin.penAPI.tabY,
+          rotationDeg  : plugin.penAPI.rotationDeg,
+          rotationRad  : plugin.penAPI.rotationRad,
+          tiltX        : plugin.penAPI.tiltX,
+          tiltY        : plugin.penAPI.tiltY,
+          tangPressure : plugin.penAPI.tangentialPressure,
+          version      : plugin.penAPI.version,
+          pointerType  : plugin.penAPI.pointerType,
+          tabletModel  : plugin.penAPI.tabletModel,
+          pressure     : plugin.penAPI.pressure,
+          canvasX      : x,
+          canvasY      : y,
+          time         : Date.now()
+        };
+        points.push(point);
+
+        penDownFrame = 0;
+      };
+
+      el.onmousemove = function(e) {
+        var minx;
+        var miny;
+        var pressure;
+        var point;
+
+        penDownFrame++;
+
+        if (!isDrawing) {
+          return;
+        }
+
+        x = e.clientX - cursorOffsetX;
+        y = e.clientY - cursorOffsetY;
+        minx = Math.min(x, px) + Math.random()*50;
+        miny = Math.min(y, py) + Math.random()*50;
+
+        point = {
+          isWacom      : plugin.penAPI.isWacom,
+          isEraser     : plugin.penAPI.isEraser,
+          posX         : plugin.penAPI.posX,
+          posY         : plugin.penAPI.posY,
+          sysX         : plugin.penAPI.sysX,
+          sysY         : plugin.penAPI.sysY,
+          tabX         : plugin.penAPI.tabX,
+          tabY         : plugin.penAPI.tabY,
+          rotationDeg  : plugin.penAPI.rotationDeg,
+          rotationRad  : plugin.penAPI.rotationRad,
+          tiltX        : plugin.penAPI.tiltX,
+          tiltY        : plugin.penAPI.tiltY,
+          tangPressure : plugin.penAPI.tangentialPressure,
+          version      : plugin.penAPI.version,
+          pointerType  : plugin.penAPI.pointerType,
+          tabletModel  : plugin.penAPI.tabletModel,
+          pressure     : plugin.penAPI.pressure,
+          canvasX      : x,
+          canvasY      : y,
+          time         : Date.now()
+        };
+        points.push(point);
+
+        // set stroke and size according to pressure
+        ctx.lineWidth = calcLineWidth(point.pressure);
+        //ctx.strokeStyle = calcStrokeStyle(point.pressure);
+        ctx.globalAlpha = calcGlobalAlpha(point.pressure);
+
+        // stroke line in offset canvas
+        ctx.translate(minx, miny);
+        ctx.beginPath();
+        ctx.moveTo(px - minx, py - miny);
+        ctx.lineTo(x - minx, y - miny);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.translate(-minx, -miny);
+
+        px = x;
+        py = y;
+      };
+
+      el.onmouseup = function() {
+        isDrawing = false;
+        points.push({break: true});
+      };
+
+      function calcLineWidth(p) {
+        return (p < 0.6) ? 1.8 : 2.4;
+      }
+
+      function calcGlobalAlpha(p) {
+        var alpha;
+
+        if(isSkipping && (skipCounter > 30)) {
+          isSkipping = false;
+          skipCounter = 0;
+        }
+
+        if(emptyInk && (penDownFrame < 5)) {
+          isSkipping = true;
+          emptyInk = false;
+          window.setTimeout(function() {
+            emptyInk = true;
+          }, 30000);
+        }
+
+        if(isSkipping) {
+          alpha = 1;
+          skipCounter++;
+        } else {
+          alpha = (p < 0.5) ? 1 : 1;
+        }
+        
+        return alpha;
+      }
+    }
+
+    //**********************************************************************
+    // window.onkeypress
+    //   'i' to save out image
+    //   'c' to clear canvas
+    //   'j' saves points to json blob
+    //
+    window.onkeypress = function(e) {
+      /*if (e.charCode === 99) {
+        clearCanvas();
+        curves.length = 0;
+      }*/
+      if (e.charCode === 105) {
+        window.open(el.toDataURL());
+      }
+      if (e.charCode === 106) {
+        var json = JSON.stringify(points);
+        var blob = new Blob([json], {type: 'application/json'});
+        var url  = URL.createObjectURL(blob);
+        window.open(url);
+      }
+    }
+
+    //**********************************************************************
+    // clearCanvas
+    //
+    //
+    function clearCanvas(){
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.fillStyle = 'rgb(252, 252, 238)';
+      ctx.fillRect(0, 0, 1300, 950);
+    }
+  </script>
+
+</html>
