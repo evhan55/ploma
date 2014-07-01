@@ -296,11 +296,11 @@
         emptyInk = false;
         window.setTimeout(function() {
           emptyInk = true;
-        }, 7000);
+        }, 2000);
       }
 
       if(isSkipping) {
-        alpha = 0.1+(skipCounter/100);
+        alpha = 0.3+(skipCounter/100);
         skipCounter++;
       } else {
         if(p < 0.4) {
