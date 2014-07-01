@@ -28,22 +28,25 @@
   </head>
 
   <body>
-    <canvas id="c" width="1300" height="950"></canvas>
+    <canvas id="c"></canvas>
     <div id="buttons" style="float: right;">
       <a id='capture' style="float: left;">Capture</a><br>
       <a id='clear' style="float: left;">Clear</a>
     </div>
-    <img src="img/image0052-1-b5.png" id="img"/>
+    <img src="img/image0052-1-b5-4_sm-2.png" id="img"/>
     <object id="wtPlugin" type="application/x-wacomtabletplugin">
       <param name="onload" value="pluginLoaded" />
     </object>
   </body>
 
-  <script src='js/hybrid-drawing.js'></script>
+  <script src='js/hybrid-drawing-realtime.js'></script>
   <script>
     var button;
     var button2;
     var el;
+    var w = 1300;
+    var h = 1000;
+    var ratio = 2;
     var img;
     var plugin;
     var ctx;
@@ -62,7 +65,8 @@
     var py;
     var points = [];
     var drawTimeout;
-    var sample = 2;
+    var sample = 1;
+    var mouseMoveCounter = 0;
 
     var doDrawing = function() {
       
@@ -128,6 +132,11 @@
       ctx = el.getContext('2d');
       pat = ctx.createPattern(img,"repeat");
       pat3 = pat;
+      el.setAttribute('width', w * ratio);
+      el.setAttribute('height', h * ratio);
+      el.style.width = w;
+      el.style.height = h;
+      ctx.scale(ratio, ratio);
 
       // set global rendering properties
       ctx.strokeStyle = pat;
@@ -191,16 +200,21 @@
         var miny;
         var pressure;
         var point;
-
+        mouseMoveCounter++;
         penDownFrame++;
+
+        if (!(mouseMoveCounter % 2 === 0)){
+          return;
+        }
 
         if (!isDrawing) {
           return;
         }
 
-        if (points.length > 100) {
+        if (points.length > 10) {
           capture = points;
           points = [];
+          points.push(capture[capture.length-1]);
           redrawHybridDrawing();
         }
 
@@ -233,77 +247,76 @@
         };
         points.push(point);
 
-        // set stroke and size according to pressure
-        //ctx.lineWidth = calcLineWidth(point.pressure);
-        //ctx.strokeStyle = calcStrokeStyle(point.pressure);
-        //ctx.globalAlpha = calcGlobalAlpha(point.pressure);
-
-        // stroke line in offset canvas
-        //ctx.translate(minx, miny);
-        //ctx.beginPath();
-        //ctx.moveTo(px - minx, py - miny);
-        //ctx.lineTo(x - minx, y - miny);
-        //ctx.stroke();
-        //ctx.closePath();
-        //ctx.translate(-minx, -miny);
-
         px = x;
         py = y;
       };
 
       el.onmouseup = function() {
         isDrawing = false;
-        points.push({break: true});
-        window.clearTimeout(drawTimeout);
+        capture = points;
+        points = [];
+        //points.push(capture[capture.length-1]);
+        redrawHybridDrawing();
       };
+      
+    }
 
-      function calcLineWidth(p) {
-        var width;
+    function calcLineWidthDrawing(p) {
+      var width;
 
+      if(p < 0.4) {
+        width = ((p)/(0.4))*(0.7);
+      }
+
+      if((p >= 0.4) && (p < 0.7)) {
+        width = ((p-0.4)/(0.3))*(2);
+      }
+
+      if((p >= 0.7) && (p < 0.9)) {
+        width = 2.5;
+      }
+
+      if((p >= 0.9)) {
+        width = 2.8;
+      }
+
+      return width;
+    }
+
+    function calcGlobalAlphaDrawing(p) {
+      var alpha;
+
+      if(isSkipping && (skipCounter > 30)) {
+        isSkipping = false;
+        skipCounter = 0;
+      }
+
+      if(emptyInk) {
+        isSkipping = true;
+        emptyInk = false;
+        window.setTimeout(function() {
+          emptyInk = true;
+        }, 7000);
+      }
+
+      if(isSkipping) {
+        alpha = 0.1+(skipCounter/100);
+        skipCounter++;
+      } else {
         if(p < 0.4) {
-          width = ((p)/(0.4))*(0.7);
-        }
-
-        if((p >= 0.4) && (p < 0.7)) {
-          width = ((p-0.4)/(0.3))*(2);
-        }
-
-        if((p >= 0.7) && (p < 0.9)) {
-          width = 1.8;
-        }
-
-        if((p >= 0.9)) {
-          width = 1.9;
-        }
-
-        return width;
-      }
-
-      function calcGlobalAlpha(p) {
-        var alpha;
-
-        if(isSkipping && (skipCounter > 30)) {
-          isSkipping = false;
-          skipCounter = 0;
-        }
-
-        if(emptyInk && (penDownFrame < 5)) {
-          isSkipping = true;
-          emptyInk = false;
-          window.setTimeout(function() {
-            emptyInk = true;
-          }, 30000);
-        }
-
-        if(isSkipping) {
           alpha = 0.3;
-          skipCounter++;
         } else {
-          alpha = 0.6;
+          alpha = 0.9;
         }
-        
-        return alpha;
       }
+      
+      return alpha;
+    }
+
+    function calcStrokeStyleDrawing(p) {
+      style = pat3;
+
+      return style;
     }
 
     //**********************************************************************

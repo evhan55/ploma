@@ -13,6 +13,7 @@ var paperColor = "rgb(253, 253, 240)";
 var paperColor = "rgb(255, 255, 253)";
 //var paperColor = "rgb(255, 254, 219)";
 var paperColor = "rgb(253, 254, 251)";
+var paperColor = "rgb(255, 255, 255)";
 var capture;
 
 var curveFitting = 'hybrid-drawing';
@@ -206,7 +207,6 @@ window.onload = function(){
 window.onkeypress = function(e) {
   if (e.charCode === 99) {
     clearCanvas();
-    curves.length = 0;
   }
   if (e.charCode === 105) {
     window.open(canvas.toDataURL());
@@ -216,6 +216,15 @@ window.onkeypress = function(e) {
     var blob = new Blob([json], {type: 'application/json'});
     var url  = URL.createObjectURL(blob);
     window.open(url);
+  }
+  if (e.charCode === 107) {
+    var newImageData = contrastImage(ctx.getImageData(0, 0, w*ratio, h*ratio), 10);
+    ctx.putImageData(newImageData, 0, 0, 0, 0, w*ratio, h*ratio);
+  }
+  if (e.charCode === 108) {
+    var weights = [0, -1,  0, -1,  5, -1, 0, -1,  0];
+    var newImageData = convolute(ctx.getImageData(0, 0, w*ratio, h*ratio), weights);
+    ctx.putImageData(newImageData, 0, 0, 0, 0, w*ratio, h*ratio);
   }
 }
 
