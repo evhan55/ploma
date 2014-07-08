@@ -146,43 +146,6 @@ window.onload = function() {
   };
 
   canvas.onmousemove = function(e) {
-    var minx;
-    var miny;
-    var pressure;
-    var point;
-    penDownFrame++;
-    var elapsed = Date.now() - penDownTime;
-
-    if (!isDrawing) {
-      return;
-    }
-
-    if (emptyInk) {
-      skipCounter++;
-      if (skipCounter > 8) {
-        emptyInk = false;
-      }
-    } else {
-      if (penDownFrame < 12 && ((Math.floor(Math.random()*20)) === 3)) {
-        emptyInk = true;
-        skipCounter = 0;
-      }
-    }
-
-    // If 40ms have passed
-    //   1. collect points
-    //   2. sample them down
-    //   3. draw a curve through the sampled points
-    //   4. reset points
-    if (elapsed > 40) {
-      var sampledCurve = getSampledPoints(points);
-      drawCurve(sampledCurve);
-      points = [];
-      // start the new curve where this one leaves off
-      points.push(sampledCurve[sampledCurve.length-1]);
-      penDownTime = Date.now();
-    }
-
     recordPoint(e);
     px = x;
     py = y;
@@ -193,8 +156,64 @@ window.onload = function() {
     drawCurve(getSampledPoints(points));
     points = [];
   };
+
+  redraw();
   
 }
+
+// requestAnimFrame shim layer by Paul Irish
+var requestAnimFrame = (function(){
+  return window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame ||
+    window.oRequestAnimationFrame ||
+    window.msRequestAnimationFrame ||
+    function(callback, element){
+      window.setTimeout(callback, 1000 / 60);
+    };
+})();
+
+function redraw(time) {
+  requestAnimFrame(redraw);
+  
+  var minx;
+  var miny;
+  var pressure;
+  var point;
+  penDownFrame++;
+  var elapsed = Date.now() - penDownTime;
+
+  if (!isDrawing) {
+    return;
+  }
+
+  if (emptyInk) {
+    skipCounter++;
+    if (skipCounter > 8) {
+      emptyInk = false;
+    }
+  } else {
+    if (penDownFrame < 12 && ((Math.floor(Math.random()*20)) === 3)) {
+      emptyInk = true;
+      skipCounter = 0;
+    }
+  }
+
+  // If 40ms have passed
+  //   1. collect points
+  //   2. sample them down
+  //   3. draw a curve through the sampled points
+  //   4. reset points
+  if (elapsed > 40) {
+    var sampledCurve = getSampledPoints(points);
+    drawCurve(sampledCurve);
+    points = [];
+    // start the new curve where this one leaves off
+    points.push(sampledCurve[sampledCurve.length-1]);
+    penDownTime = Date.now();
+  }
+
+};
 
 function drawCurve(pts) {
   var p1 = pts[0];
