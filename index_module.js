@@ -62,6 +62,7 @@ a {
 </object>
 </body>
 
+<script src='js/ploma_module.js'></script>
 <script>
 var w = 1300;
 var h = 1000;
@@ -257,7 +258,7 @@ function drawSegments(pts) {
     minx = minpt.x;
     miny = minpt.y;
 
-    ctx.lineWidth = calcLineWidth(pts[i+1].p);
+    ctx.lineWidth = Module.calcLineWidth(pts[i+1].p);
     ctx.globalAlpha = calcGlobalAlpha(
       pts[i+1].p,
       pts[i+1].e,
@@ -274,7 +275,7 @@ function drawSegments(pts) {
   }
 }
 
-function calcLineWidth(p) {
+/*function calcLineWidth(p) {
   var width;
   if(p < 0.4) {
     width = ((p)/(0.4))*(0.7);
@@ -292,7 +293,7 @@ function calcLineWidth(p) {
     }
   }
   return width;
-}
+}*/
 
 function calcGlobalAlpha(p, e, s) {
   var alpha;

@@ -62,6 +62,7 @@ a {
 </object>
 </body>
 
+<script src='js/ploma_module.js'></script>
 <script>
 var w = 1300;
 var h = 1000;
@@ -70,7 +71,7 @@ var cursorOffsetX = 8;
 var cursorOffsetY = 8;
 var sample = 2;
 var isDrawing = false;
-var emptyInk = true;
+var emptyInk = 1;
 var skipCounter = 0;
 var penDownFrame = 0;
 var mouseMoveCounter = 0;
@@ -141,10 +142,6 @@ window.onload = function() {
   canvas.onmousedown = function(e) {
     isDrawing = true;
     penDownFrame = 0;
-    mouseMoveCounter++;
-    if (!(mouseMoveCounter % 2 === 0)){
-      return;
-    }
     recordPoint(e);
     penDownTime = Date.now();
     points = [];
@@ -153,6 +150,10 @@ window.onload = function() {
 
   canvas.onmousemove = function(e) {
     penDownFrame++;
+    mouseMoveCounter++;
+    if (!(mouseMoveCounter % 2 === 0)){
+      return;
+    }
     recordPoint(e);
   };
 
@@ -216,19 +217,19 @@ function drawCurve(pts) {
       var ctrl = p1;
       var a = [];
       for (var t = 0; t <= 1; t += 0.5) {
-        var newPoint = {};
-        newPoint.x =
-          (1 - t) * (1 - t) * from.x +
-          2 * (1 - t) * t * ctrl.x +
-          t * t * to.x;
-        newPoint.y =
-          (1 - t) * (1 - t) * from.y +
-          2 * (1 - t) * t * ctrl.y +
-          t * t * to.y;
-        newPoint.p = (from.p + to.p + ctrl.p) / 3;
-        newPoint.e = from.e;
-        newPoint.s = from.s;
-        newPoint.t = from.t + ((to.t - from.t) /2);
+        var newPoint = [];
+        newPoint[0] =
+          (1 - t) * (1 - t) * from[0] +
+          2 * (1 - t) * t * ctrl[0] +
+          t * t * to[0];
+        newPoint[1] =
+          (1 - t) * (1 - t) * from[1] +
+          2 * (1 - t) * t * ctrl[1] +
+          t * t * to[1];
+        newPoint[2] = (from[2] + to[2] + ctrl[2]) / 3;
+        newPoint[3] = from[3] + ((to[3] - from[3]) /2);
+        newPoint[4] = from[4];
+        newPoint[5] = from[5];
         a.push(newPoint);
       }
       drawSegments(a);
@@ -247,21 +248,21 @@ function drawSegments(pts) {
   var miny;
 
   for(var i = 0; i < pts.length-1; i++) {
-    px = pts[i].x;
-    py = pts[i].y;
-    x = pts[i+1].x;
-    y = pts[i+1].y;
-    latencies.push(Date.now() - pts[i].t);
+    px = pts[i][0];
+    py = pts[i][1];
+    x = pts[i+1][0];
+    y = pts[i+1][1];
+    latencies.push(Date.now() - pts[i][3]);
 
-    minpt = getMinPt({x: px, y: py}, pts[i+1]);
-    minx = minpt.x;
-    miny = minpt.y;
+    minpt = getMinPt([px, py], pts[i+1]);
+    minx = minpt[0];
+    miny = minpt[1];
 
-    ctx.lineWidth = calcLineWidth(pts[i+1].p);
-    ctx.globalAlpha = calcGlobalAlpha(
-      pts[i+1].p,
-      pts[i+1].e,
-      pts[i+1].s)
+    ctx.lineWidth = Module.calcLineWidth(pts[i+1][2]);
+    ctx.globalAlpha = Module.calcGlobalAlpha(
+      pts[i+1][2],
+      pts[i+1][4],
+      pts[i+1][5])
     ;
 
     ctx.translate(minx, miny);
@@ -274,71 +275,37 @@ function drawSegments(pts) {
   }
 }
 
-function calcLineWidth(p) {
-  var width;
-  if(p < 0.4) {
-    width = ((p)/(0.4))*(0.7);
-  } else {
-    if((p >= 0.4) && (p < 0.7)) {
-      width = ((p-0.4)/(0.3))*(2);
-    } else {
-      if((p >= 0.7) && (p < 0.9)) {
-        width = 2.5;
-      } else {
-        if((p >= 0.9)) {
-          width = 2.8;
-        }
-      }
-    }
-  }
-  return width;
-}
-
-function calcGlobalAlpha(p, e, s) {
-  var alpha;
-  if(e) {
-    alpha = 0.3+(s/70);
-  } else {
-    if(p < 0.4) {
-      alpha = 0.3;
-    } else {
-      alpha = 0.9;
-    }
-  }
-  return alpha;
-}
-
 function recordPoint(e) {
   var x = e.clientX - cursorOffsetX;
   var y = e.clientY - cursorOffsetY; 
   if (emptyInk) {
     skipCounter++;
     if (skipCounter > 8) {
-      emptyInk = false;
+      emptyInk = 0;
     }
   } else {
     if (penDownFrame < 12 && ((Math.floor(Math.random()*20)) === 3)) {
-      emptyInk = true;
+      emptyInk = 1;
       skipCounter = 0;
     }
   }
-  point = {
-    x   : x,
-    y   : y,
-    p   : plugin.penAPI.pressure,
-    t   : Date.now(),
-    e   : emptyInk,
-    s   : skipCounter
-  };
-  if(point.p < 0.6) {
+  point = [
+    x,                      // x: 0
+    y,                      // y: 1
+    plugin.penAPI.pressure, // p: 2
+    Date.now(),             // t: 3
+    emptyInk,               // e: 4
+    skipCounter             // s: 5
+  ];
+  if(point[2] < 0.6) {
     if (Math.floor(Math.random()*100) === 3) {
-      point.p = 0.5;
+      point[2] = 0.5;
     }
   }
   points.push(point);
 }
 
-function getSampledPoints(pts) {
+/*function getSampledPoints(pts) {
   var newPoints = [];
   for(var i = 0; i < pts.length; i++) {
     if (i%sample === 0) {
@@ -349,37 +316,37 @@ function getSampledPoints(pts) {
     }
   }
   return newPoints;
-}
+}*/
 
 function getMinPt(p1, p2) {
-  return {
-    x: Math.min(p1.x, p2.x) + Math.random()*50,
-    y: Math.min(p1.y, p2.y) + Math.random()*50
-  };
+  return [
+    Math.min(p1[0], p2[0]) + Math.random()*50,
+    Math.min(p1[1], p2[1]) + Math.random()*50
+  ];
 }
 
 function getMidPt(p1, p2) {
-  return {
-    x: p1.x + (p2.x - p1.x) / 2,
-    y: p1.y + (p2.y - p1.y) / 2,
-    p: (p1.p + p2.p) / 2,
-    e: p1.e,
-    s: p1.s,
-    t: p1.t + ((p2.t - p1.t) / 2)
-  };
+  return [
+    p1[0] + (p2[0] - p1[0]) / 2,    // x: 0
+    p1[1] + (p2[1] - p1[1]) / 2,    // y: 1
+    (p1[2] + p2[2]) / 2,            // p: 2
+    p1[3] + ((p2[3] - p1[3]) / 2),  // t: 3
+    p1[4],                          // e: 4
+    p1[5]                           // s: 5
+  ];
 }
 
 function getCurveArea(pts) {
-  var minX = pts[0].x;
-  var minY = pts[0].y;
-  var maxX = pts[0].x;
-  var maxY = pts[0].y;
+  var minX = pts[0][0];
+  var minY = pts[0][1];
+  var maxX = pts[0][0];
+  var maxY = pts[0][1];
   var area;
   for(var i = 0; i < pts.length; i++) {
-    minX = Math.min(minX, pts[i].x);
-    minY = Math.min(minY, pts[i].y);
-    maxX = Math.max(maxX, pts[i].x);
-    maxY = Math.max(maxY, pts[i].y);
+    minX = Math.min(minX, pts[i][0]);
+    minY = Math.min(minY, pts[i][1]);
+    maxX = Math.max(maxX, pts[i][0]);
+    maxY = Math.max(maxY, pts[i][1]);
   }
   area = (maxX - minX)*(maxY - minY);
   return area;
