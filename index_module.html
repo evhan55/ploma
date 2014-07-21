@@ -149,24 +149,27 @@ window.onload = function() {
   };
 
   canvas.onmousemove = function(e) {
-    penDownFrame++;
-    mouseMoveCounter++;
-    if (!(mouseMoveCounter % 2 === 0)){
+    if (!isDrawing) {
       return;
     }
-    recordPoint(e);
+
+    penDownFrame++;
+    mouseMoveCounter++;
+    if (mouseMoveCounter % 1 === 0){
+      recordPoint(e);
+    }
   };
 
   canvas.onmouseup = function(e) {
     isDrawing = false;
     recordPoint(e);
-    drawCurve(getSampledPoints(points));
+    redraw();
     points = [];
     // calculate average latency
-    var sum = 0;
-    for ( var i = 0 ; i < latencies.length; i++) {
-      sum+= latencies[i];
-    }
+    //var sum = 0;
+    //for ( var i = 0 ; i < latencies.length; i++) {
+    //  sum+= latencies[i];
+    //}
     //console.log('average latency: ' + sum/latencies.length);
   };
 
@@ -278,7 +281,7 @@ function drawSegments(pts) {
 function recordPoint(e) {
   var x = e.clientX - cursorOffsetX;
   var y = e.clientY - cursorOffsetY; 
-  if (emptyInk) {
+  /*if (emptyInk) {
     skipCounter++;
     if (skipCounter > 8) {
       emptyInk = 0;
@@ -288,24 +291,27 @@ function recordPoint(e) {
       emptyInk = 1;
       skipCounter = 0;
     }
-  }
+  }*/
+  emptyInk = 1;
+  skipCounter = 0;
   point = [
     x,                      // x: 0
     y,                      // y: 1
-    plugin.penAPI.pressure, // p: 2
+    //plugin.penAPI.pressure, // p: 2
+    1,
     Date.now(),             // t: 3
     emptyInk,               // e: 4
     skipCounter             // s: 5
   ];
-  if(point[2] < 0.6) {
+  /*if(point[2] < 0.6) {
     if (Math.floor(Math.random()*100) === 3) {
       point[2] = 0.5;
     }
-  }
+  }*/
   points.push(point);
 }
 
-/*function getSampledPoints(pts) {
+function getSampledPoints(pts) {
   var newPoints = [];
   for(var i = 0; i < pts.length; i++) {
     if (i%sample === 0) {
@@ -316,7 +322,7 @@ function recordPoint(e) {
     }
   }
   return newPoints;
-}*/
+}
 
 function getMinPt(p1, p2) {
   return [

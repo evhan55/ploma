@@ -68,12 +68,11 @@ var h = 1000;
 var ratio = 2;
 var cursorOffsetX = 8;
 var cursorOffsetY = 8;
-var sample = 2;
+//var sample = 1;
 var isDrawing = false;
 var emptyInk = true;
 var skipCounter = 0;
 var penDownFrame = 0;
-var mouseMoveCounter = 0;
 var points = [];
 var canvas;
 var button;
@@ -89,6 +88,7 @@ var curY;
 var lasX;
 var lasY;
 var latencies = [];
+var intervalID;
 
 window.onload = function() {
   canvas = document.getElementById('canvas');
@@ -141,41 +141,51 @@ window.onload = function() {
   canvas.onmousedown = function(e) {
     isDrawing = true;
     penDownFrame = 0;
-    mouseMoveCounter++;
-    if (!(mouseMoveCounter % 2 === 0)){
-      return;
-    }
     recordPoint(e);
     penDownTime = Date.now();
-    points = [];
-    latencies = [];
   };
 
   canvas.onmousemove = function(e) {
+    var self = this;
+
+    if (!isDrawing) return;
+    if (intervalID) return;
+
     penDownFrame++;
     recordPoint(e);
-  };
+    redraw();
+
+    intervalID = setInterval(function() {
+      if (isDrawing) {
+
+        penDownFrame++;
+        recordPoint(e);
+        redraw();
+
+        clearInterval(intervalID);
+        intervalID = null;
+
+      }
+    }, 16);
+  }
 
   canvas.onmouseup = function(e) {
     isDrawing = false;
     recordPoint(e);
-    drawCurve(getSampledPoints(points));
+    //drawCurve(getSampledPoints(points));
+    drawCurve(points);
+    clearInterval(intervalID);
+    intervalID = null;
     points = [];
-    // calculate average latency
-    var sum = 0;
-    for ( var i = 0 ; i < latencies.length; i++) {
-      sum+= latencies[i];
-    }
-    //console.log('average latency: ' + sum/latencies.length);
   };
 
   // init
-  redraw();
+  //redraw();
   
 }
 
 // requestAnimFrame shim layer by Paul Irish
-var requestAnimFrame = (function(){
+/*var requestAnimFrame = (function(){
   return window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.mozRequestAnimationFrame ||
@@ -184,17 +194,18 @@ var requestAnimFrame = (function(){
     function(callback, element){
       window.setTimeout(callback, 1000 / 60);
     };
-})();
+})();*/
 
-function redraw(time) {
-  requestAnimFrame(redraw);
+function redraw() {
+  //requestAnimFrame(redraw);
 
   if (!isDrawing) {
     return;
   }
 
   if((Date.now() - penDownTime) > 40 && (points.length > 10)) {
-    var sampledCurve = getSampledPoints(points);
+    //var sampledCurve = getSampledPoints(points);
+    var sampledCurve = points;
     sampledCurve.push(sampledCurve[sampledCurve.length-1]);
     drawCurve(sampledCurve);
     points = [];
