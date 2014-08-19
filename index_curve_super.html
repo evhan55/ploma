@@ -56,13 +56,12 @@ a {
   <br>
   <a id="clear">Clear</a>
 </div>
-<img src="img/image0052-1-b5-4_sm-2.png" id="img"/>
+<img src="img/image0052-1-b5-4_sm-25.png" id="img"/>
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded" />
 </object>
 </body>
 
-<script src='js/ploma_module.js'></script>
 <script>
 var w = 1300;
 var h = 1000;
@@ -71,10 +70,9 @@ var cursorOffsetX = 8;
 var cursorOffsetY = 8;
 var sample = 2;
 var isDrawing = false;
-var emptyInk = 1;
+var emptyInk = true;
 var skipCounter = 0;
 var penDownFrame = 0;
-var mouseMoveCounter = 0;
 var points = [];
 var canvas;
 var button;
@@ -90,6 +88,7 @@ var curY;
 var lasX;
 var lasY;
 var latencies = [];
+var intervalID;
 
 window.onload = function() {
   canvas = document.getElementById('canvas');
@@ -108,6 +107,7 @@ window.onload = function() {
   pat = ctx.createPattern(img,"repeat");
   ctx.scale(ratio, ratio);
   ctx.strokeStyle = pat;
+  ctx.strokeStyle = 'rgb(0, 0, 0)';
   clearCanvas();
 
   save.onclick = function(e) {
@@ -144,42 +144,49 @@ window.onload = function() {
     penDownFrame = 0;
     recordPoint(e);
     penDownTime = Date.now();
-    points = [];
-    latencies = [];
   };
 
   canvas.onmousemove = function(e) {
-    if (!isDrawing) {
-      return;
-    }
+    var self = this;
+
+    if (!isDrawing) return;
+    if (intervalID) return;
 
     penDownFrame++;
-    mouseMoveCounter++;
-    if (mouseMoveCounter % 1 === 0){
-      recordPoint(e);
-    }
-  };
+    recordPoint(e);
+    redraw();
+
+    intervalID = setInterval(function() {
+      if (isDrawing) {
+
+        penDownFrame++;
+        recordPoint(e);
+        redraw();
+
+        clearInterval(intervalID);
+        intervalID = null;
+
+      }
+    }, 16);
+  }
 
   canvas.onmouseup = function(e) {
     isDrawing = false;
     recordPoint(e);
-    redraw();
+    drawCurve(getSampledPoints(points));
+    //drawCurve(points);
+    clearInterval(intervalID);
+    intervalID = null;
     points = [];
-    // calculate average latency
-    //var sum = 0;
-    //for ( var i = 0 ; i < latencies.length; i++) {
-    //  sum+= latencies[i];
-    //}
-    //console.log('average latency: ' + sum/latencies.length);
   };
 
   // init
-  redraw();
+  //redraw();
   
 }
 
 // requestAnimFrame shim layer by Paul Irish
-var requestAnimFrame = (function(){
+/*var requestAnimFrame = (function(){
   return window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.mozRequestAnimationFrame ||
@@ -188,10 +195,10 @@ var requestAnimFrame = (function(){
     function(callback, element){
       window.setTimeout(callback, 1000 / 60);
     };
-})();
+})();*/
 
-function redraw(time) {
-  requestAnimFrame(redraw);
+function redraw() {
+  //requestAnimFrame(redraw);
 
   if (!isDrawing) {
     return;
@@ -199,6 +206,7 @@ function redraw(time) {
 
   if((Date.now() - penDownTime) > 40 && (points.length > 10)) {
     var sampledCurve = getSampledPoints(points);
+    //var sampledCurve = points;
     sampledCurve.push(sampledCurve[sampledCurve.length-1]);
     drawCurve(sampledCurve);
     points = [];
@@ -220,19 +228,19 @@ function drawCurve(pts) {
       var ctrl = p1;
       var a = [];
       for (var t = 0; t <= 1; t += 0.5) {
-        var newPoint = [];
-        newPoint[0] =
-          (1 - t) * (1 - t) * from[0] +
-          2 * (1 - t) * t * ctrl[0] +
-          t * t * to[0];
-        newPoint[1] =
-          (1 - t) * (1 - t) * from[1] +
-          2 * (1 - t) * t * ctrl[1] +
-          t * t * to[1];
-        newPoint[2] = (from[2] + to[2] + ctrl[2]) / 3;
-        newPoint[3] = from[3] + ((to[3] - from[3]) /2);
-        newPoint[4] = from[4];
-        newPoint[5] = from[5];
+        var newPoint = {};
+        newPoint.x =
+          (1 - t) * (1 - t) * from.x +
+          2 * (1 - t) * t * ctrl.x +
+          t * t * to.x;
+        newPoint.y =
+          (1 - t) * (1 - t) * from.y +
+          2 * (1 - t) * t * ctrl.y +
+          t * t * to.y;
+        newPoint.p = (from.p + to.p + ctrl.p) / 3;
+        newPoint.e = from.e;
+        newPoint.s = from.s;
+        newPoint.t = from.t + ((to.t - from.t) /2);
         a.push(newPoint);
       }
       drawSegments(a);
@@ -251,21 +259,21 @@ function drawSegments(pts) {
   var miny;
 
   for(var i = 0; i < pts.length-1; i++) {
-    px = pts[i][0];
-    py = pts[i][1];
-    x = pts[i+1][0];
-    y = pts[i+1][1];
-    latencies.push(Date.now() - pts[i][3]);
+    px = pts[i].x;
+    py = pts[i].y;
+    x = pts[i+1].x;
+    y = pts[i+1].y;
+    latencies.push(Date.now() - pts[i].t);
 
-    minpt = getMinPt([px, py], pts[i+1]);
-    minx = minpt[0];
-    miny = minpt[1];
+    minpt = getMinPt({x: px, y: py}, pts[i+1]);
+    minx = minpt.x;
+    miny = minpt.y;
 
-    ctx.lineWidth = Module.calcLineWidth(pts[i+1][2]);
-    ctx.globalAlpha = Module.calcGlobalAlpha(
-      pts[i+1][2],
-      pts[i+1][4],
-      pts[i+1][5])
+    ctx.lineWidth = calcLineWidth(pts[i+1].p);
+    ctx.globalAlpha = calcGlobalAlpha(
+      pts[i+1].p,
+      pts[i+1].e,
+      pts[i+1].s)
     ;
 
     ctx.translate(minx, miny);
@@ -278,36 +286,68 @@ function drawSegments(pts) {
   }
 }
 
+function calcLineWidth(p) {
+  var width;
+  if(p < 0.4) {
+    width = ((p+0.1)/(0.4))*(0.7);
+  } else {
+    if((p >= 0.4) && (p < 0.7)) {
+      width = ((p-0.4)/(0.3))*(2);
+    } else {
+      if((p >= 0.7) && (p < 0.9)) {
+        width = 2.4;
+      } else {
+        if((p >= 0.9)) {
+          width = 2.5;
+        }
+      }
+    }
+  }
+  return width;
+}
+
+function calcGlobalAlpha(p, e, s) {
+  var alpha;
+  if(e) {
+    alpha = 0.3+(s/70);
+  } else {
+    if(p < 0.4) {
+      alpha = 0.3;
+    } else {
+      alpha = 0.9;
+    }
+  }
+  alpha = 0.9;
+  return alpha;
+}
+
 function recordPoint(e) {
   var x = e.clientX - cursorOffsetX;
   var y = e.clientY - cursorOffsetY; 
-  /*if (emptyInk) {
+  if (emptyInk) {
     skipCounter++;
     if (skipCounter > 8) {
-      emptyInk = 0;
+      emptyInk = false;
     }
   } else {
     if (penDownFrame < 12 && ((Math.floor(Math.random()*20)) === 3)) {
-      emptyInk = 1;
+      emptyInk = true;
       skipCounter = 0;
     }
-  }*/
-  emptyInk = 1;
-  skipCounter = 0;
-  point = [
-    x,                      // x: 0
-    y,                      // y: 1
-    //plugin.penAPI.pressure, // p: 2
-    1,
-    Date.now(),             // t: 3
-    emptyInk,               // e: 4
-    skipCounter             // s: 5
-  ];
-  /*if(point[2] < 0.6) {
+  }
+  point = {
+    x   : x,
+    y   : y,
+    p   : plugin.penAPI.pressure,
+    t   : Date.now(),
+    e   : emptyInk,
+    s   : skipCounter
+  };
+  if(point.p < 0.6) {
     if (Math.floor(Math.random()*100) === 3) {
-      point[2] = 0.5;
+      point.p = 0.5;
     }
-  }*/
+  }
   points.push(point);
 }
 
@@ -325,34 +365,34 @@ function getSampledPoints(pts) {
 }
 
 function getMinPt(p1, p2) {
-  return [
-    Math.min(p1[0], p2[0]) + Math.random()*50,
-    Math.min(p1[1], p2[1]) + Math.random()*50
-  ];
+  return {
+    x: Math.min(p1.x, p2.x) + Math.random()*50,
+    y: Math.min(p1.y, p2.y) + Math.random()*50
+  };
 }
 
 function getMidPt(p1, p2) {
-  return [
-    p1[0] + (p2[0] - p1[0]) / 2,    // x: 0
-    p1[1] + (p2[1] - p1[1]) / 2,    // y: 1
-    (p1[2] + p2[2]) / 2,            // p: 2
-    p1[3] + ((p2[3] - p1[3]) / 2),  // t: 3
-    p1[4],                          // e: 4
-    p1[5]                           // s: 5
-  ];
+  return {
+    x: p1.x + (p2.x - p1.x) / 2,
+    y: p1.y + (p2.y - p1.y) / 2,
+    p: (p1.p + p2.p) / 2,
+    e: p1.e,
+    s: p1.s,
+    t: p1.t + ((p2.t - p1.t) / 2)
+  };
 }
 
 function getCurveArea(pts) {
-  var minX = pts[0][0];
-  var minY = pts[0][1];
-  var maxX = pts[0][0];
-  var maxY = pts[0][1];
+  var minX = pts[0].x;
+  var minY = pts[0].y;
+  var maxX = pts[0].x;
+  var maxY = pts[0].y;
   var area;
   for(var i = 0; i < pts.length; i++) {
-    minX = Math.min(minX, pts[i][0]);
-    minY = Math.min(minY, pts[i][1]);
-    maxX = Math.max(maxX, pts[i][0]);
-    maxY = Math.max(maxY, pts[i][1]);
+    minX = Math.min(minX, pts[i].x);
+    minY = Math.min(minY, pts[i].y);
+    maxX = Math.max(maxX, pts[i].x);
+    maxY = Math.max(maxY, pts[i].y);
   }
   area = (maxX - minX)*(maxY - minY);
   return area;
@@ -418,7 +458,8 @@ function convolute(pixels, weights, opaque) {
 
 function clearCanvas(){
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = 'rgb(41, 37, 61)';
+  ctx.fillStyle = 'rgb(253, 254, 251)';
+  ctx.fillStyle = 'rgb(255, 255, 230)';
   ctx.globalAlpha = 1;
   ctx.fillRect(0, 0, w, h);
 }

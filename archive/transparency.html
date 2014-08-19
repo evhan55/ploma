@@ -2,7 +2,7 @@
 	<head>
 	</head>
 	<body>
-    <img src="../img/img005 copy 4-2.png" id="image"/>
+    <img src="../img/essential_fill_11a.png" id="image"/>
 	</body>
   <script type="text/javascript">
     // get the image
@@ -14,8 +14,8 @@
 
       // create and customize the canvas
       var canvas = document.createElement("canvas");
-      canvas.width = 65; //93 × 86;
-      canvas.height = 92; //298;
+      canvas.width = 256; //93 × 86;
+      canvas.height = 256; //298;
       document.body.appendChild(canvas);
 
       // get the context
@@ -26,7 +26,7 @@
 
 
       // get the image data object
-      var image = ctx.getImageData(0, 0, 65, 92);
+      var image = ctx.getImageData(0, 0, 256, 256);
       // get the image data values
       var imageData = image.data,
       length = imageData.length;
@@ -61,10 +61,11 @@
         var l = hsl[2];
         //console.log("l:"+l);
         //console.log(l*255);
-        imageData[i] = 85;
-        imageData[i+1] = 24;
-        imageData[i+2] = 46;
-        imageData[i+3] = (255 - ((l-darkest)/(lightest-darkest))*255);
+        imageData[i] = 255;
+        imageData[i+1] = 255;
+        imageData[i+2] = 255;
+        imageData[i+3] = (255 - ((l-darkest)/(lightest-darkest))*255) - 50;
+        //imageData[i+3] = (255 - l);
         //console.log(imageData[i+0] + "," + imageData[i+1] + "," + imageData[i+2] + "," + imageData[i+3]);
       }
       // after the manipulation, reset the data

@@ -1,0 +1,189 @@
+<html>
+<head>
+<style>
+body {
+  font-family: sans-serif;
+}
+canvas {
+  float: left;
+  cursor: url('cursors/cursor.cur'), crosshair;
+  border: 1px solid gray;
+}
+a {
+  padding: 10px;
+  line-height: 40px;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+  -moz-user-select: none;
+}
+#contrast {
+  background: #BCBDAC;
+}
+#sharpness {
+  background: #CFBE27;
+}
+#save {
+  background: #3B2D38;
+}
+#clear {
+  background: #F02475;
+}
+</style>
+</head>
+
+<body>
+<canvas id="c"></canvas>
+<div id="buttons">
+  <a id="contrast">Contrast</a>
+  <br>
+  <a id="sharpness">Sharpness</a>
+  <br>
+  <br>
+  <a id="save">Save</a>
+  <br>
+  <br>
+  <br>
+  <a id="clear">Clear</a>
+</div>
+<object id="wtPlugin" type="application/x-wacomtabletplugin">
+  <param name="onload" value="pluginLoaded" />
+</object>
+</body>
+
+<script>
+
+var el = document.getElementById('c');
+var ctx = el.getContext('2d');
+var plugin = document.getElementById('wtPlugin');
+var intervalID = null;
+var mouseMoveCounter = 0;
+var desiredWidthInCSSPixels = 1500;
+var desiredHeightInCSSPixels = 800;
+var devicePixelRatio = 1.6;
+var isDrawing;
+var lastPoint;
+var points = [];
+
+el.style.width = desiredWidthInCSSPixels + "px";
+el.style.height = desiredHeightInCSSPixels + "px";
+el.width = desiredWidthInCSSPixels * devicePixelRatio;
+el.height = desiredHeightInCSSPixels * devicePixelRatio;
+
+ctx.fillStyle = 'rgb(54, 44, 69)';
+ctx.fillStyle = 'rgb(0, 0, 0)';
+
+el.onmousedown = function(e) {
+  isDrawing = true;
+  lastPoint = { x: e.clientX*devicePixelRatio, y: e.clientY*devicePixelRatio };
+};
+
+el.onmousemove = function(e) {
+
+  if (!isDrawing) return;
+
+  mouseMoveCounter++;
+  if ((mouseMoveCounter % 2) !== 0) return;
+
+  if (isDrawing) {
+
+    var currentPoint = { x: e.clientX*devicePixelRatio, y: e.clientY*devicePixelRatio };
+    var dist = distanceBetween(lastPoint, currentPoint);
+    var angle = angleBetween(lastPoint, currentPoint);
+
+    var p = plugin.penAPI.pressure;
+    //ctx.globalAlpha = 0.09*devicePixelRatio;
+    ctx.globalAlpha = 0.07*devicePixelRatio;
+
+    var numStrokes;
+    var spacing;
+    var scattering;
+    var radius;
+
+    p = 0.15;
+
+    if(p < 0.2) {
+      /*numStrokes = 3;
+      spacing = 0.3;
+      scattering = 1.5+p;
+      radius = 0.15*p;*/
+      numStrokes = 70;
+      spacing = Math.max(2,Math.random()*3);
+      scattering = 0.2;
+      radius = 0.95*p;
+    }
+
+    if((p >= 0.2) && (p < 0.3)) {
+      numStrokes = 10;
+      spacing = 0.4;
+      scattering = 2+p;
+      radius = 0.2*p;
+    }
+
+    if((p >= 0.3) && (p < 0.4)) {
+      numStrokes = 20;
+      spacing = 0.4;
+      scattering = 1.8+0.7*p; // 1.1 - 1.8
+      radius = 0.2*p;
+    }
+
+    if((p >= 0.4) && (p < 0.5)) {  
+      numStrokes = 20;
+      spacing = 0.35;
+      scattering = 1.8+0.7*p; // 1.8 - 2.5
+      radius = 0.2*p;
+    }
+
+    if((p >= 0.5) && (p < 0.95)) {
+      numStrokes = 20;
+      spacing = 0.33;
+      scattering = 2.5;
+      radius = 0.2;
+    }
+
+    if(p >= 0.95) {
+      numStrokes = 25;
+      spacing = 0.20;
+      scattering = 1;
+      radius = 0.1;
+    }
+
+    /*if(Math.floor(Math.random()*70) === 5) {
+      ctx.globalAlpha = 0.15;
+    } else {
+      if(Math.floor(Math.random()*70) === 4) {
+        ctx.globalAlpha = 0.03;
+      }
+    }*/
+
+    for (var r=0; r < numStrokes; r++) {
+      for (var i = 0; i < dist; i+=spacing*devicePixelRatio) {
+        x = lastPoint.x + (Math.sin(angle) * i) - 5 + (-scattering*devicePixelRatio + Math.random()*scattering*devicePixelRatio*2);
+        y = lastPoint.y + (Math.cos(angle) * i) - 5 + (-scattering*devicePixelRatio + Math.random()*scattering*devicePixelRatio*2);
+        ctx.beginPath();
+        ctx.arc(x, y, radius*devicePixelRatio, false, Math.PI * 2, false);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    lastPoint = currentPoint;
+
+  }
+
+};
+
+el.onmouseup = function() {
+  isDrawing = false;
+};
+
+function distanceBetween(point1, point2) {
+  return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
+}
+function angleBetween(point1, point2) {
+  return Math.atan2( point2.x - point1.x, point2.y - point1.y );
+}
+
+</script>
+
+</html>

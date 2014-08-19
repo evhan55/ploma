@@ -56,7 +56,7 @@ a {
   <br>
   <a id="clear">Clear</a>
 </div>
-<img src="img/image0052-1-b5-4_sm-2.png" id="img"/>
+<img src="img/image0052-1-b5-4_sm-25.png" id="img"/>
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded" />
 </object>
@@ -65,10 +65,10 @@ a {
 <script>
 var w = 1300;
 var h = 1000;
-var ratio = 2;
+var ratio = 1;
 var cursorOffsetX = 8;
 var cursorOffsetY = 8;
-//var sample = 1;
+var sample = 2;
 var isDrawing = false;
 var emptyInk = true;
 var skipCounter = 0;
@@ -107,6 +107,7 @@ window.onload = function() {
   pat = ctx.createPattern(img,"repeat");
   ctx.scale(ratio, ratio);
   ctx.strokeStyle = pat;
+  ctx.strokeStyle = 'rgb(0, 0, 0)';
   clearCanvas();
 
   save.onclick = function(e) {
@@ -172,8 +173,8 @@ window.onload = function() {
   canvas.onmouseup = function(e) {
     isDrawing = false;
     recordPoint(e);
-    //drawCurve(getSampledPoints(points));
-    drawCurve(points);
+    drawCurve(getSampledPoints(points));
+    //drawCurve(points);
     clearInterval(intervalID);
     intervalID = null;
     points = [];
@@ -204,8 +205,8 @@ function redraw() {
   }
 
   if((Date.now() - penDownTime) > 40 && (points.length > 10)) {
-    //var sampledCurve = getSampledPoints(points);
-    var sampledCurve = points;
+    var sampledCurve = getSampledPoints(points);
+    //var sampledCurve = points;
     sampledCurve.push(sampledCurve[sampledCurve.length-1]);
     drawCurve(sampledCurve);
     points = [];
@@ -288,16 +289,16 @@ function drawSegments(pts) {
 function calcLineWidth(p) {
   var width;
   if(p < 0.4) {
-    width = ((p)/(0.4))*(0.7);
+    width = ((p+0.1)/(0.4))*(0.9);
   } else {
     if((p >= 0.4) && (p < 0.7)) {
-      width = ((p-0.4)/(0.3))*(2);
+      width = ((p-0.4+0.1)/(0.3))*(1.8);
     } else {
       if((p >= 0.7) && (p < 0.9)) {
-        width = 2.5;
+        width = 1.8;
       } else {
         if((p >= 0.9)) {
-          width = 2.8;
+          width = 1.8;
         }
       }
     }
@@ -316,6 +317,7 @@ function calcGlobalAlpha(p, e, s) {
       alpha = 0.9;
     }
   }
+  alpha = 0.9;
   return alpha;
 }
 
@@ -457,6 +459,7 @@ function convolute(pixels, weights, opaque) {
 function clearCanvas(){
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = 'rgb(253, 254, 251)';
+  //ctx.fillStyle = 'rgb(255, 255, 230)';
   ctx.globalAlpha = 1;
   ctx.fillRect(0, 0, w, h);
 }
