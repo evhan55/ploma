@@ -1,3 +1,35 @@
+<!--
+  @TODO: Find all original inspiration code
+
+  Empty Cursor website
+
+  Color Palette
+  http://www.colourlovers.com/palette/3412827/21st
+
+  Bezier Tangent End Point
+  ???
+  http://pomax.github.io/bezierinfo/
+
+  Bezier Equation from StackOverflow
+  http://stackoverflow.com/questions/5634460/quadratic-bezier-curve-calculate-point
+
+  Bezier Length
+  http://books.google.com/books?id=8CGj9_ZlFKoC&lpg=PA199&ots=yB9xOx-sGF&dq=bezier%20control%20polygon%20length&pg=PA199#v=onepage&q=bezier%20control%20polygon%20length&f=false
+
+  Alpha Compositing
+  http://en.wikipedia.org/wiki/Alpha_compositing
+
+  Line Scattering and General Techniques
+  http://perfectionkills.com/exploring-canvas-drawing-techniques/#_=_
+
+  Convolution/sharpness
+
+  Convolution/contrast
+
+  Wacom SDK?
+
+-->
+
 <html>
 <head>
 <style>
@@ -20,13 +52,6 @@ a {
   text-decoration: none;
   -moz-user-select: none;
 }
-/*http://www.colourlovers.com/palette/3412827/21st*/
-#contrast {
-  background: #BCBDAC;
-}
-#sharpness {
-  background: #CFBE27;
-}
 #save {
   background: #3B2D38;
 }
@@ -39,389 +64,277 @@ a {
 <body>
 <canvas id="canvas"></canvas>
 <div id="buttons">
-  <a id="contrast">Contrast</a>
-  <br>
-  <a id="sharpness">Sharpness</a>
-  <br>
-  <br>
-  <br>
   <a id="save">Save</a>
   <br>
   <br>
   <br>
   <a id="clear">Clear</a>
 </div>
-<img src="img/image0052-1-b5-4_sm.png" id="img"/>
+<img src="img/circle_ballpoint_4.png" id="texture"/>
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
-  <param name="onload" value="pluginLoaded" />
+  <param name="onload" value="pluginLoaded"/>
 </object>
 </body>
 
 <script>
+// State
 var w = 1300;
 var h = 1000;
-var ratio = 2;
-var cursorOffsetX = 8;
-var cursorOffsetY = 8;
-var sample = 2;
-var isDrawing = false;
-var skipCounter = 0;
-var penDownFrame = 0;
+var ratio = 1;
+var sample = 1;
+var cursorOffsetX = 13;
+var cursorOffsetY = 3;
 var points = [];
+var isDrawing = false;
+
+// DOM
 var canvas;
-var button;
-var button2;
-var img;
+var save;
+var clear;
+var texture;
+var textureImageData;
 var plugin;
 var ctx;
-var pat;
-var storedImageData;
-var penDownTime = 0;
-var curX;
-var curY;
-var lasX;
-var lasY;
-var latencies = [];
-var intervalID;
+var lastControlPoint;
 
 window.onload = function() {
-  canvas = document.getElementById('canvas');
-  contrast = document.getElementById('contrast');
-  sharpness = document.getElementById('sharpness');
-  save = document.getElementById('save');
-  undo = document.getElementById('undo');
-  clear = document.getElementById('clear');
-  img = document.getElementById("img");
-  plugin = document.getElementById('wtPlugin');
+  initDOMElements();
+  initEvents();
+  clearCanvas();
+}
+
+function initDOMElements() {canvas = document.getElementById('canvas');
   canvas.setAttribute('width', w * ratio);
   canvas.setAttribute('height', h * ratio);
   canvas.style.width = w;
   canvas.style.height = h;
+  save = document.getElementById('save');
+  clear = document.getElementById('clear');
+  texture = document.getElementById("texture");
+  plugin = document.getElementById('wtPlugin');
   ctx = canvas.getContext('2d');
-  pat = ctx.createPattern(img,"repeat");
   ctx.scale(ratio, ratio);
-  ctx.strokeStyle = pat;
-  clearCanvas();
 
+  // texture image data
+  var wt = texture.width;
+  var ht = texture.height;
+  var c = document.createElement('canvas');
+  var x = c.getContext('2d');
+  c.style.width = wt;
+  c.style.height = ht;
+  x.drawImage(texture, 0, 0);
+  textureImageData = x.getImageData(0,0,wt,ht);
+  textureImageData = textureImageData.data;
+  //console.log(textureImageData);
+}
+
+function initEvents() {
   save.onclick = function(e) {
     window.open(canvas.toDataURL());
   }
-
-  sharpness.onclick = function(e) {
-    var newImageData;
-    var weights;
-    weights = [0, -1,  0, -1,  5, -1, 0, -1,  0];
-    storedImageData = ctx.getImageData(0, 0, w*ratio, h*ratio);
-    newImageData = convolute(storedImageData, weights);
-    ctx.putImageData(newImageData, 0, 0, 0, 0, w*ratio, h*ratio);
-  }
-
-  contrast.onclick = function(e) {
-    var newImageData;
-    var factor = 40;
-    storedImageData = ctx.getImageData(0, 0, w*ratio, h*ratio);
-    newImageData = contrastImage(storedImageData, factor);
-    ctx.putImageData(newImageData, 0, 0, 0, 0, w*ratio, h*ratio);
-  }
-
   clear.onclick = function(e) {
     clearCanvas();
   }
-
   canvas.onmousedown = function(e) {
-    isDrawing = true;
-    penDownFrame = 0;
-    recordPoint(e);
-    penDownTime = Date.now();
+    isDrawing = true;    recordPoint(e);
   };
-
   canvas.onmousemove = function(e) {
     var self = this;
-
     if (!isDrawing) return;
-    if (intervalID) return;
-
-    penDownFrame++;
     recordPoint(e);
     redraw();
-
-    intervalID = setInterval(function() {
-      if (isDrawing) {
-
-        penDownFrame++;
-        recordPoint(e);
-        redraw();
-
-        clearInterval(intervalID);
-        intervalID = null;
-
-      }
-    }, 16);
   }
-
   canvas.onmouseup = function(e) {
     isDrawing = false;
-    recordPoint(e);
-    drawCurve(getSampledPoints(points));
-    clearInterval(intervalID);
-    intervalID = null;
+    //recordPoint(e);
     points = [];
+    lastControlPoint = null;
   };
-  
 }
 
 function redraw() {
-
   if (!isDrawing) {
     return;
   }
-
-  if((Date.now() - penDownTime) > 40 && (points.length > 10)) {
-    var sampledCurve = getSampledPoints(points);
-    sampledCurve.push(sampledCurve[sampledCurve.length-1]);
-    drawCurve(sampledCurve);
+  // 3 points needed for a quadratic bezier
+  if(points.length === 2) {
+    var lastPoint = points[points.length - 1];  // TODO: change control point math
+    drawCurve(points);
     points = [];
-    points.push(sampledCurve[sampledCurve.length-1]);
-    penDownTime = Date.now();
+    points.push(lastPoint);                     // TODO: change control point math
   }
-
 };
 
+// draws a quadratic bezier according to 3 input points
 function drawCurve(pts) {
-  var p1 = pts[0];
-  var p2 = pts[1];
-  var from = p1;
-  for (var i = 1; i < pts.length; i++) {
-    if(p1) {
-      var midPoint = getMidPt(p1, p2);
-      var to = midPoint;
-      var ctrl = p1;
-      var a = [];
-      for (var t = 0; t <= 1; t += 0.5) {
-        var newPoint = {};
-        newPoint.x =
-          (1 - t) * (1 - t) * from.x +
-          2 * (1 - t) * t * ctrl.x +
-          t * t * to.x;
-        newPoint.y =
-          (1 - t) * (1 - t) * from.y +
-          2 * (1 - t) * t * ctrl.y +
-          t * t * to.y;
-        newPoint.p = (from.p + to.p + ctrl.p) / 3;
-        newPoint.t = from.t + ((to.t - from.t) /2);
-        a.push(newPoint);
-      }
-      drawSegments(a);
-    }
-    p1 = pts[i];
-    p2 = pts[i+1];
-    from = midPoint;
+  var imageData = ctx.getImageData(0, 0, w * ratio, h * ratio);
+  var from = pts[0];                            // TODO: change control point math
+  var ctrl = lastControlPoint ? {x: 2*pts[0].x - lastControlPoint.x, y: 2*pts[0].y - lastControlPoint.y} : getMidPt(pts[0], pts[1]);
+  var to = pts[1];                              // TODO: change control point math
+  lastControlPoint = ctrl;
+  //console.log(lastControlPoint);
+
+  //Mirrored = (2Bx−Ax, 2By−Ay)
+  // controlPoint2.x = 2*EndPoint.x - controlPoint1.x;
+  // controlPoint2.y = 2*EndPoint.y - controlPoint1.y;
+
+  // bezier length
+  var bezierLength = (2/3)*getDistance(from, to) + (1/3)*(getDistance(from, ctrl) + getDistance(ctrl, to)); // Dan Amelang
+
+  var p = (from.p + ctrl.p + to.p) / 3;
+  var spread;
+  var stepLength;
+  var numPoints;
+  var alpha;
+
+  p = 0.67;
+  // look up rendering values
+  if(p < 0.2) {
+    spread = 0.45;
+    stepLength = 0.5;
+    numPoints = 6;
+    alpha = 0.98;
   }
-}
+  if((p >= 0.2) && (p < 0.3)) {
+    spread = 0.55;
+    stepLength = 0.45;
+    numPoints = 6;
+    alpha = 0.96;
+  }
+  if((p >= 0.3) && (p < 0.4)) {
+    spread = 0.85;
+    stepLength = 0.35;
+    numPoints = 6;
+    alpha = 0.94;
+  }
+  if((p >= 0.4) && (p < 0.5)) {
+    spread = 1.05;
+    stepLength = 0.25;
+    numPoints = 5;
+    alpha = 0.92;
+  }
+  if((p >= 0.5) && (p < 0.95)) {
+    spread = 1.30;
+    stepLength = 1;
+    numPoints = p;
+    alpha = 0.95;
+  }
+  if(p >= 0.95) {
+    spread = 1.45;
+    stepLength = 0.25;
+    numPoints = 35;
+    alpha = 0.9;
+  }
 
-function drawSegments(pts) {
-  var px;
-  var py;
-  var dist;
-  var angle;
-  var p;
-  var numStrokes;
-  var spacing;
-  var scattering;
-  var radius;
-
-  for(var i = 0; i < pts.length-1; i++) {
-    px = pts[i].x;
-    py = pts[i].y;
-    x = pts[i+1].x;
-    y = pts[i+1].y;
-    p = pts[i].p;
-    dist = distanceBetween(pts[i], pts[i+1]);
-    angle = angleBetween(pts[i], pts[i+1]);
-
-    if(p < 0.2) {
-      numStrokes = 10;
-      spacing = 2;
-      scattering = 0.2;
-      radius = 0.2*p;
-      ctx.globalAlpha = 0.08;
+  /*if(Math.floor(Math.random()*70) === 5) {
+    alpha = 0.99;
+  } else {
+    if(Math.floor(Math.random()*70) === 4) {
+      alpha = alpha-0.2;
     }
+  }*/
 
-    if((p >= 0.2) && (p < 0.3)) {
-      numStrokes = 10;
-      spacing = 0.8;
-      scattering = 0.6;
-      radius = 0.4*p;
-      ctx.globalAlpha = 0.08;
+  // step along bezier
+  var alphaDelta = Math.random();
+  for (var t = 0; t <= 1; t += (1/(bezierLength/stepLength))) {
+    // calculate point along quadratic bezier
+    var newPoint = {};
+    newPoint.x = (1 - t) * (1 - t) * from.x + 2 * (1 - t) * t * ctrl.x + t * t * to.x;
+    newPoint.y = (1 - t) * (1 - t) * from.y + 2 * (1 - t) * t * ctrl.y + t * t * to.y;
+    newPoint.p = p;
+
+    // TEST RANDOM SCATTER
+    /*
+    for(var i = 0; i < numPoints; i++){
+      // scatter
+      var scatterX = -spread + Math.random()*spread*2;
+      var scatterY = -spread + Math.random()*spread*2;
+      var index = (Math.floor(newPoint.x + scatterX) + Math.floor(newPoint.y + scatterY) * w * ratio)*4;
+
+      // over blending26, 21, 51
+      imageData.data[index + 0] = imageData.data[index + 0] * alpha + 26 * alpha * (1 - alpha);
+      imageData.data[index + 1] = imageData.data[index + 1] * alpha + 21 * alpha * (1 - alpha);
+      imageData.data[index + 2] = imageData.data[index + 2] * alpha + 51 * alpha * (1 - alpha);
+      imageData.data[index + 3] = 255;
     }
+    */
 
-    if((p >= 0.3) && (p < 0.4)) {
-      numStrokes = 40;
-      spacing = 1.5;
-      scattering = 0.8;
-      radius = 0.4;
-      ctx.globalAlpha = 0.08;
-    }
-
-    if((p >= 0.4) && (p < 0.5)) {  
-      numStrokes = 40;
-      spacing = 1.2;
-      scattering = 0.8;
-      radius = 0.4;
-      ctx.globalAlpha = 0.08;
-    }
-
-    if((p >= 0.5) && (p < 0.95)) {
-      numStrokes = 50;
-      spacing = 1;
-      scattering = 1.2;
-      radius = 0.4;
-      ctx.globalAlpha = 0.08;
-    }
-
-    if(p >= 0.95) {
-      numStrokes = 50;
-      spacing = 0.9;
-      scattering = 1.5;
-      radius = 0.4;
-      ctx.globalAlpha = 0.15;
-    }
-
-    if(Math.floor(Math.random()*70) === 5) {
-      ctx.globalAlpha = 0.2;
-    } else {
-      if(Math.floor(Math.random()*70) === 4) {
-        ctx.globalAlpha = 0.03;
-      }
-    }
-
-    for (var r=0; r < numStrokes; r++) {
-      for (var j = 0.01; j < dist; j+=spacing) {
-        var dotX = px + (Math.sin(angle) * j) + (-scattering + Math.random()*scattering*2);
-        var dotY = py + (Math.cos(angle) * j) + (-scattering + Math.random()*scattering*2);
-        ctx.beginPath();
-        ctx.arc(
-          dotX,
-          dotY,
-          radius,
-          false,
-          Math.PI * 2,
-          false
-        );
-        ctx.closePath();
-        ctx.fill();
+    // TEST [size x size] TEXTURE FILL
+    var size = 4;
+    var theta = Math.random()*Math.PI + Math.random()*Math.PI;
+    theta = 0;
+    for(var i = 0; i < size; i++) {
+      var pixelX = Math.floor(newPoint.x) + i;
+      for(var j = 0; j < size; j++) {
+        var pixelY = Math.floor(newPoint.y) + j;
+        //console.log(i);
+        var rotatedPixel = getRotatedPt({x: (size-1)/2, y: (size-1)/2}, {x: i, y: j}, theta);
+        //var rotatedPixel = getRotatedPt({x: (size/2)-1, y: (size/2)-1}, {x: i, y: j}, theta);
+        //console.log('i: ' + i + ' j: ' + j);
+        //console.log('x: ' + rotatedPixel.x + ' y: ' + rotatedPixel.y);
+        pixelX = Math.floor(newPoint.x) + Math.floor(rotatedPixel.x);
+        pixelY = Math.floor(newPoint.y) + Math.floor(rotatedPixel.y);
+        var index = (pixelX + pixelY*w*ratio)*4;
+        //var index = (rotatedPixel.x + rotatedPixel.y*w*ratio)*4;
+        var idIndex = (i + j*size)*4;
+        var alpha = textureImageData[idIndex + 3]/255;
+        if(alpha < 0.6) {
+          //console.log(alpha);
+          imageData.data[index + 0] = imageData.data[index + 0];
+          imageData.data[index + 1] = imageData.data[index + 1];
+          imageData.data[index + 2] = imageData.data[index + 2];
+        } else {
+          alpha -= alphaDelta;
+          alpha = Math.min(1, alpha);
+          alpha = Math.max(0.6, alpha);
+          //alpha = 1;
+          imageData.data[index + 0] = imageData.data[index + 0] * alpha + 26 * alpha * (1 - alpha);
+          imageData.data[index + 1] = imageData.data[index + 1] * alpha + 21 * alpha * (1 - alpha);
+          imageData.data[index + 2] = imageData.data[index + 2] * alpha + 51 * alpha * (1 - alpha);
+        }
+        imageData.data[index + 3] = 255;
       }
     }
   }
-}
-
-function distanceBetween(point1, point2) {
-  return Math.sqrt(Math.pow(point2.x - point1.x, 2) + Math.pow(point2.y - point1.y, 2));
-}
-function angleBetween(point1, point2) {
-  return Math.atan2( point2.x - point1.x, point2.y - point1.y );
+  ctx.putImageData(imageData, 0, 0);
 }
 
 function recordPoint(e) {
-  var x = e.clientX - cursorOffsetX;
-  var y = e.clientY - cursorOffsetY; 
   point = {
-    x   : x,
-    y   : y,
-    p   : plugin.penAPI.pressure,
-    t   : Date.now()
+    x   : e.clientX - cursorOffsetX,
+    y   : e.clientY - cursorOffsetY,
+    p   : plugin.penAPI.pressure
   };
   points.push(point);
 }
-
-function getSampledPoints(pts) {
-  var newPoints = [];
-  for(var i = 0; i < pts.length; i++) {
-    if (i%sample === 0) {
-      newPoints.push(pts[i]);
-    }
-    if (i === pts.length-1) {
-      newPoints.push(pts[i]);
-    }
-  }
-  return newPoints;
-}
-
-function getMidPt(p1, p2) {
-  return {
-    x: p1.x + (p2.x - p1.x) / 2,
-    y: p1.y + (p2.y - p1.y) / 2,
-    p: (p1.p + p2.p) / 2,
-    t: p1.t + ((p2.t - p1.t) / 2)
-  };
-}
-
-function contrastImage(imageData, contrast) {
-  var data = imageData.data;
-  var factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-  for(var i=0;i<data.length;i+=4) {
-    data[i] = factor * (data[i] - 128) + 128;
-    data[i+1] = factor * (data[i+1] - 128) + 128;
-    data[i+2] = factor * (data[i+2] - 128) + 128;
-    // reduce the saturation?
-  }
-  return imageData;
-}
-
-function convolute(pixels, weights, opaque) {
-  var side = Math.round(Math.sqrt(weights.length));
-  var halfSide = Math.floor(side/2);
-  var src = pixels.data;
-  var sw = pixels.width;
-  var sh = pixels.height;
-  // pad output by the convolution matrix
-  var w = sw;
-  var h = sh;
-  var tmpCanvas = document.createElement('canvas');
-  var tmpCtx = tmpCanvas.getContext('2d');
-  var output = tmpCtx.createImageData(w, h);
-  var dst = output.data;
-  // go through the destination image pixels
-  var alphaFac = opaque ? 1 : 0;
-  for (var y=0; y<h; y++) {
-    for (var x=0; x<w; x++) {
-      var sy = y;
-      var sx = x;
-      var dstOff = (y*w+x)*4;
-      // calculate the weighed sum of the source image pixels that
-      // fall under the convolution matrix
-      var r=0, g=0, b=0, a=0;
-      for (var cy=0; cy<side; cy++) {
-        for (var cx=0; cx<side; cx++) {
-          var scy = sy + cy - halfSide;
-          var scx = sx + cx - halfSide;
-          if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
-            var srcOff = (scy*sw+scx)*4;
-            var wt = weights[cy*side+cx];
-            r += src[srcOff] * wt;
-            g += src[srcOff+1] * wt;
-            b += src[srcOff+2] * wt;
-            a += src[srcOff+3] * wt;
-          }
-        }
-      }
-      dst[dstOff] = r;
-      dst[dstOff+1] = g;
-      dst[dstOff+2] = b;
-      dst[dstOff+3] = a + alphaFac*(255-a);
-    }
-  }
-  return output;
-};
 
 function clearCanvas(){
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = 'rgb(253, 254, 251)';
   ctx.globalAlpha = 1;
   ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = 'rgb(53, 40, 60)';
+}
+
+// UTILS
+
+function getMidPt(p1, p2) {
+  return {
+    x: p1.x + (p2.x - p1.x) / 2,
+    y: p1.y + (p2.y - p1.y) / 2,
+    p: (p1.p + p2.p) / 2
+  };
+}
+
+function getDistance(p1, p2) {
+  return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+}
+
+function getRotatedPt(p0, p1, theta) {
+   var p2 = {};
+   p2.x = Math.cos(theta) * (p1.x - p0.x) - Math.sin(theta) * (p1.y - p0.y) + p0.x;
+   p2.y = Math.sin(theta) * (p1.x - p0.x) + Math.cos(theta) * (p1.y - p0.y) + p0.y;
+   return p2;
 }
 
 </script>
-
 </html>

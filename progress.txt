@@ -1,3 +1,28 @@
+------------------------------
+8/29/14
+------------------------------
+
+- index_curve_texture_pixels.html
+	- need smoother curves: Bezier tangent?
+	- need to be able to resize the texture
+		- for width calculations
+		- for grain
+	- need to not have to scale down in the browser
+	- need to add antialiasing
+		- to reduce jaggies
+	- will texturing/alpha and antialiasing interfere?
+	- should resizing mean touching footprints of different sizes?
+	- how does footprint and width of line relate?
+
+------------------------------
+6/19/14
+------------------------------
+The tools in the WILL SDK can be texture or color filled.  If texture filled, then the texture can be shaped, and randomized and scattered according to some linear algorithms,  No table look up from what I can tell.
+
+- what does the speed path builder do?
+	- how are width and alpha configured depending on speed?
+- what does the pressure path builder do?
+	- how are width and alpha configured depending on pressure?
 
 ------------------------------
 6/17/14
@@ -12,15 +37,7 @@
 - WILL is using asm.js and is still slow on Cintiq HD13, will ask them if performance is better on the bigger tablets
 - WILL code is very tightly bound to the UI, which is unfortunate, so I have to spend time teasing them apart for my own app
 
-------------------------------
-6/19/14
-------------------------------
-The tools in the WILL SDK can be texture or color filled.  If texture filled, then the texture can be shaped, and randomized and scattered according to some linear algorithms,  No table look up from what I can tell.
 
-- what does the speed path builder do?
-	- how are width and alpha configured depending on speed?
-- what does the pressure path builder do?
-	- how are width and alpha configured depending on pressure?
 - what does a smoother do?
 
 
