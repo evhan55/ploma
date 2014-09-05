@@ -12,6 +12,7 @@
 
   Bezier Equation from StackOverflow
   http://stackoverflow.com/questions/5634460/quadratic-bezier-curve-calculate-point
+  http://math.stackexchange.com/questions/191672/cubic-bezier-curves-calculate-y-for-any-given-x
 
   Bezier Length
   http://books.google.com/books?id=8CGj9_ZlFKoC&lpg=PA199&ots=yB9xOx-sGF&dq=bezier%20control%20polygon%20length&pg=PA199#v=onepage&q=bezier%20control%20polygon%20length&f=false
@@ -96,6 +97,7 @@ var textureImageData;
 var plugin;
 var ctx;
 var lastControlPoint;
+var mouseRecordCount = 0;
 
 window.onload = function() {
   initDOMElements();
@@ -137,9 +139,12 @@ function initEvents() {
   }
   canvas.onmousedown = function(e) {
     isDrawing = true;    recordPoint(e);
+    mouseRecordCount++;
   };
   canvas.onmousemove = function(e) {
     var self = this;
+    mouseRecordCount++;
+    //if ((mouseRecordCount % 2) === 0) return;
     if (!isDrawing) return;
     recordPoint(e);
     redraw();
@@ -165,12 +170,24 @@ function redraw() {
   }
 };
 
-// draws a quadratic bezier according to 3 input points
+function getCtrlPt(lastControlPoint, from, to) {
+  // y = mx + b
+  // m = (y2 - y1)/(x2 - x1)
+  // b = y - m*x
+  var m = (from.y - lastControlPoint.y) / (from.x - lastControlPoint.x);
+  var ctrl = {};
+  ctrl.x = from.x + (to.x - from.x)/2;
+  ctrl.y = m*ctrl.x + (from.y - m*from.x);
+  return ctrl;
+}
+
+// draws a quadratic bezier according to 2 input points
 function drawCurve(pts) {
   var imageData = ctx.getImageData(0, 0, w * ratio, h * ratio);
-  var from = pts[0];                            // TODO: change control point math
-  var ctrl = lastControlPoint ? {x: 2*pts[0].x - lastControlPoint.x, y: 2*pts[0].y - lastControlPoint.y} : getMidPt(pts[0], pts[1]);
-  var to = pts[1];                              // TODO: change control point math
+  var from = pts[0];                            
+  var ctrl = lastControlPoint ? getMidPt({x: 2*pts[0].x - lastControlPoint.x, y: 2*pts[0].y - lastControlPoint.y}, getMidPt(pts[0], pts[1])) : getMidPt(pts[0], pts[1]); // same angle, length
+  //var ctrl = lastControlPoint ? getCtrlPt(lastControlPoint, pts[0], pts[1]) : getMidPt(pts[0], pts[1]); // same angel, length determined by width
+  var to = pts[1];                              
   lastControlPoint = ctrl;
   //console.log(lastControlPoint);
 
@@ -215,13 +232,13 @@ function drawCurve(pts) {
   }
   if((p >= 0.5) && (p < 0.95)) {
     spread = 1.30;
-    stepLength = 1;
+    stepLength = 2;
     numPoints = p;
     alpha = 0.95;
   }
   if(p >= 0.95) {
     spread = 1.45;
-    stepLength = 0.25;
+    stepLength = 5;
     numPoints = 35;
     alpha = 0.9;
   }
@@ -234,6 +251,7 @@ function drawCurve(pts) {
     }
   }*/
 
+
   // step along bezier
   var alphaDelta = Math.random();
   for (var t = 0; t <= 1; t += (1/(bezierLength/stepLength))) {
@@ -241,26 +259,42 @@ function drawCurve(pts) {
     var newPoint = {};
     newPoint.x = (1 - t) * (1 - t) * from.x + 2 * (1 - t) * t * ctrl.x + t * t * to.x;
     newPoint.y = (1 - t) * (1 - t) * from.y + 2 * (1 - t) * t * ctrl.y + t * t * to.y;
+
+    // how to get cubic control points? 2 of them? hmmm.
+    //newPoint.x = (1 − t) * 3X0+3(1−t)2tX1+3(1−t)t2X2+t3X3
+    //newPoint.y = (1 − t) * 3Y0+3(1−t)2tY1+3(1−t)t2Y2+t3Y3
+    
     newPoint.p = p;
 
-    // TEST RANDOM SCATTER
-    /*
-    for(var i = 0; i < numPoints; i++){
-      // scatter
-      var scatterX = -spread + Math.random()*spread*2;
-      var scatterY = -spread + Math.random()*spread*2;
-      var index = (Math.floor(newPoint.x + scatterX) + Math.floor(newPoint.y + scatterY) * w * ratio)*4;
+    // TEST SINGLE POINT
+    // var index = (Math.floor(newPoint.x) + Math.floor(newPoint.y)*w*ratio)*4;
+    // var alpha = 0;
+    // imageData.data[index + 0] = imageData.data[index + 0] * alpha + 26 * alpha * (1 - alpha);
+    // imageData.data[index + 1] = imageData.data[index + 1] * alpha + 21 * alpha * (1 - alpha);
+    // imageData.data[index + 2] = imageData.data[index + 2] * alpha + 51 * alpha * (1 - alpha);
+    // imageData.data[index + 3] = 255;
 
-      // over blending26, 21, 51
-      imageData.data[index + 0] = imageData.data[index + 0] * alpha + 26 * alpha * (1 - alpha);
-      imageData.data[index + 1] = imageData.data[index + 1] * alpha + 21 * alpha * (1 - alpha);
-      imageData.data[index + 2] = imageData.data[index + 2] * alpha + 51 * alpha * (1 - alpha);
-      imageData.data[index + 3] = 255;
-    }
-    */
+    // TEST 3x3 @ SINGLE POINT
+    drawPixel(imageData, Math.floor(newPoint.x), Math.floor(newPoint.y));
+
+    // TEST RANDOM SCATTER
+    //
+    //for(var i = 0; i < numPoints; i++){
+    //  // scatter
+    //  var scatterX = -spread + Math.random()*spread*2;
+    //  var scatterY = -spread + Math.random()*spread*2;
+    //  var index = (Math.floor(newPoint.x + scatterX) + Math.floor(newPoint.y + scatterY) * w * ratio)*4;
+    //
+    //  // over blending26, 21, 51
+    //  imageData.data[index + 0] = imageData.data[index + 0] * alpha + 26 * alpha * (1 - alpha);
+    //  imageData.data[index + 1] = imageData.data[index + 1] * alpha + 21 * alpha * (1 - alpha);
+    //  imageData.data[index + 2] = imageData.data[index + 2] * alpha + 51 * alpha * (1 - alpha);
+    //  imageData.data[index + 3] = 255;
+    //}
+    
 
     // TEST [size x size] TEXTURE FILL
-    var size = 4;
+    /*var size = 4;
     var theta = Math.random()*Math.PI + Math.random()*Math.PI;
     theta = 0;
     for(var i = 0; i < size; i++) {
@@ -294,9 +328,28 @@ function drawCurve(pts) {
         }
         imageData.data[index + 3] = 255;
       }
-    }
+    }*/
   }
   ctx.putImageData(imageData, 0, 0);
+  
+}
+
+function drawPixel(id, x, y) {
+  // at pixel x, y
+  // draw a 3x3 square
+  var counter = 0;
+  for(var i = -1; i < 2; i++) {
+    for(var j = -1; j < 2; j++) {
+      var idx = ((x+i) + (y+j)*w*ratio)*4;
+      var a = 0;
+      id.data[idx + 0] = id.data[idx + 0] * a + 26 * a * (1 - a);
+      id.data[idx + 1] = id.data[idx + 1] * a + 21 * a * (1 - a);
+      id.data[idx + 2] = id.data[idx + 2] * a + 51 * a * (1 - a);
+      id.data[idx + 3] = 255;
+      counter++;
+    }
+  }
+  //console.log(counter);
 }
 
 function recordPoint(e) {

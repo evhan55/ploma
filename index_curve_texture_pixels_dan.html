@@ -1,0 +1,287 @@
+<!--
+  @TODO: Find all original inspiration code
+
+  Empty Cursor website
+
+  Color Palette
+  http://www.colourlovers.com/palette/3412827/21st
+
+  Bezier Tangent End Point
+  ???
+  http://pomax.github.io/bezierinfo/
+
+  Bezier Equation from StackOverflow
+  http://stackoverflow.com/questions/5634460/quadratic-bezier-curve-calculate-point
+
+  Bezier Length
+  http://books.google.com/books?id=8CGj9_ZlFKoC&lpg=PA199&ots=yB9xOx-sGF&dq=bezier%20control%20polygon%20length&pg=PA199#v=onepage&q=bezier%20control%20polygon%20length&f=false
+
+  Alpha Compositing
+  http://en.wikipedia.org/wiki/Alpha_compositing
+
+  Line Scattering and General Techniques
+  http://perfectionkills.com/exploring-canvas-drawing-techniques/#_=_
+
+  Convolution/sharpness
+
+  Convolution/contrast
+
+  Wacom SDK?
+
+-->
+
+<html>
+<head>
+<style>
+body {
+  font-family: sans-serif;
+}
+canvas {
+  float: left;
+  cursor: url('cursors/cursor.cur'), crosshair;
+  border: 1px solid gray;
+}
+img {
+  display: none;
+}
+a {
+  padding: 10px;
+  line-height: 40px;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+  -moz-user-select: none;
+}
+#save {
+  background: #3B2D38;
+}
+#clear {
+  background: #F02475;
+}
+</style>
+</head>
+
+<body>
+<canvas id="canvas"></canvas>
+<div id="buttons">
+  <a id="save">Save</a>
+  <br>
+  <br>
+  <br>
+  <a id="clear">Clear</a>
+</div>
+<img src="img/circle_ballpoint_4.png" id="texture"/>
+<object id="wtPlugin" type="application/x-wacomtabletplugin">
+  <param name="onload" value="pluginLoaded"/>
+</object>
+</body>
+
+<script>
+// State
+var w = 1300;
+var h = 1000;
+var ratio = 1;
+var sample = 1;
+var cursorOffsetX = 13;
+var cursorOffsetY = 3;
+var points = [];
+var isDrawing = false;
+
+// DOM
+var canvas;
+var save;
+var clear;
+var texture;
+var textureImageData;
+var plugin;
+var ctx;
+var lastControlPoint;
+
+window.onload = function() {
+  initDOMElements();
+  initEvents();
+  clearCanvas();
+}
+
+function initDOMElements() {canvas = document.getElementById('canvas');
+  canvas.setAttribute('width', w * ratio);
+  canvas.setAttribute('height', h * ratio);
+  canvas.style.width = w;
+  canvas.style.height = h;
+  save = document.getElementById('save');
+  clear = document.getElementById('clear');
+  texture = document.getElementById("texture");
+  plugin = document.getElementById('wtPlugin');
+  ctx = canvas.getContext('2d');
+  ctx.scale(ratio, ratio);
+
+  // texture image data
+  var wt = texture.width;
+  var ht = texture.height;
+  var c = document.createElement('canvas');
+  var x = c.getContext('2d');
+  c.style.width = wt;
+  c.style.height = ht;
+  x.drawImage(texture, 0, 0);
+  textureImageData = x.getImageData(0,0,wt,ht);
+  textureImageData = textureImageData.data;
+  //console.log(textureImageData);
+}
+
+function initEvents() {
+  save.onclick = function(e) {
+    window.open(canvas.toDataURL());
+  }
+  clear.onclick = function(e) {
+    clearCanvas();
+  }
+  canvas.onmousedown = function(e) {
+    isDrawing = true;    recordPoint(e);
+  };
+  canvas.onmousemove = function(e) {
+    var self = this;
+    if (!isDrawing) return;
+    recordPoint(e);
+    redraw();
+  }
+  canvas.onmouseup = function(e) {
+    isDrawing = false;
+    //recordPoint(e);
+    points = [];
+    lastControlPoint = null;
+  };
+}
+
+function redraw() {
+  if (!isDrawing) {
+    return;
+  }
+  // 2 points needed for a quadratic bezier
+  if(points.length === 2) {
+    var lastPoint = points[points.length - 1];
+    drawCurve(points);
+    points = [];
+    points.push(lastPoint);
+  }
+};
+
+// draws a quadratic bezier according to 2 input points
+function drawCurve(pts) {
+  var imageData = ctx.getImageData(0, 0, w * ratio, h * ratio);
+  var from = pts[0];                            
+  var ctrl = lastControlPoint ? 
+    getMidPt({x: 2*pts[0].x - lastControlPoint.x, y: 2*pts[0].y - lastControlPoint.y}, getMidPt(pts[0], pts[1])) :
+    getMidPt(pts[0], pts[1])
+  ;
+  var to = pts[1];                              
+  lastControlPoint = ctrl;
+  var p = (from.p + to.p)/2;
+
+  // step along Bezier - Dan Amelang
+  var D_x = 2 * (ctrl.x - from.x);
+  var D_y = 2 * (ctrl.y - from.y);
+  var E_x = 2 * (from.x - 2 * ctrl.x + to.x);
+  var E_y = 2 * (from.y - 2 * ctrl.y + to.y);
+  var t = 0.0;
+  while (t <= 1.0) {
+    var u = 1 - t;
+    var B0 = u * u;
+    var B1 = 2 * u * t;
+    var B2 = t * t;
+    var step_x = B0 * from.x + B1 * ctrl.x + B2 * to.x;
+    var step_y = B0 * from.y + B1 * ctrl.y + B2 * to.y;
+    var s_x = D_x + t * E_x;
+    var s_y = D_y + t * E_y;
+    var s = Math.sqrt(s_x * s_x + s_y * s_y);
+    var dt = 1 / (4*s);
+    t = t + dt;
+
+    // draw 3x3 "pixel"
+    drawPixel(imageData, step_x, step_y, p);
+
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function drawPixel(id, x, y, p) {
+  for(var i = -1; i < 2; i++) {
+    for(var j = -1; j < 2; j++) {
+      var idx = ((Math.round(x) + i) + (Math.round(y) + j)*w*ratio)*4;
+      var dist = getDistance({x: x, y: y}, {x: Math.round(x) + i, y: Math.round(y) + j});
+      //var a = dist/1.4;
+      //var a = 1-(-0.1*Math.pow(dist,4)+1);
+      //var a = 1/(5*dist+1);
+      //var a = 1-(0.5/(Math.abs(dist)-2)+1.25)+0.55;
+      //var a = 0.25-(0.5/(Math.abs(dist)-1.8));
+      //var a = 0.4-(0.2/(Math.abs(dist)-1.8));
+      //var a = 0.28-(0.5/(Math.abs(dist)-1.8));
+      //var a = -(1/(dist+2))+1.15; // step 1/2
+      //var a = -(1/(dist+2))+1; // step 1
+      //var a = -(1/(dist+1))+1.2;
+      //var a = -0.5/(dist+0.5)+1.33;
+      //var a = -0.5/(dist+0.3)+1.2;
+      //var a = -0.4/(dist+0.3)+1.20; // <<<< very good for thin-ish lines at step distance: 1 / (1.1*s)
+      //var a = -0.4/(dist+0.3)+1.21; // <<<< very good for thin-ish lines at step distance: 1 / (1.2*s)
+      //var a = -0.4/(dist+0.3)+1.22; // <<<< very good for thin-ish lines at step distance: 1 / (1.3*s)
+      //var a = -0.4/(dist+0.3)+1.23; // <<<< very good for thin-ish lines at step distance: 1 / (1.4*s)
+      //var a = -0.4/(dist+0.35)+1.2; // <<<< very good for thin-ish lines at step distance: 1 / (1.4*s)
+      //var a = -0.7/(dist+0.35)+1.35; // <<<< very good for thin-ish lines at step distance: 1 / (1.4*2)
+      //var a = -0.1/(dist+0.1)+1.06; // <<<< very good for thin lines at step distance: 1 / (5*s)
+      //var a = -0.04/(dist+0.06)+1.02; // <<<< very, very good for thin lines at step distance: 1 / (9*s)
+      //var a = -0.035/(dist+0.06)+1.02; // <<<< ver, very good for very thin lines at step distance: 1 / (4*s)
+      //var a = -0.035/(dist-0.25)+1.015; // <<<< very, very good for very thin lines at step distance: 1 / (4*s)
+      //var a = -0.035/(dist-0.18)+1.015; // <<<< very, very good for very thin lines at step distance: 1 / (4*s) // TRY TO MAKE THESE DARKER
+      if (a < 0) a = 0;
+      if (a > 1) a = 1;
+      //a -= 0.01;
+      /////////////////////////////
+      // a = 0 = opaque
+      // a = 1 = transparent
+      /////////////////////////////
+      id.data[idx + 0] = id.data[idx + 0] * a + 0 * a * (1 - a);
+      id.data[idx + 1] = id.data[idx + 1] * a + 0 * a * (1 - a);
+      id.data[idx + 2] = id.data[idx + 2] * a + 0 * a * (1 - a);
+      id.data[idx + 3] = 255;
+    }
+  }
+}
+
+function recordPoint(e) {
+  point = {
+    x   : e.clientX - cursorOffsetX,
+    y   : e.clientY - cursorOffsetY,
+    p   : plugin.penAPI.pressure
+  };
+  points.push(point);
+}
+
+function clearCanvas(){
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = 'rgb(253, 254, 251)';
+  ctx.globalAlpha = 1;
+  ctx.fillRect(0, 0, w, h);
+}
+
+// UTILS
+
+function getMidPt(p1, p2) {
+  return {
+    x: p1.x + (p2.x - p1.x) / 2,
+    y: p1.y + (p2.y - p1.y) / 2,
+    p: (p1.p + p2.p) / 2
+  };
+}
+
+function getDistance(p1, p2) {
+  return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+}
+
+function getRotatedPt(p0, p1, theta) {
+   var p2 = {};
+   p2.x = Math.cos(theta) * (p1.x - p0.x) - Math.sin(theta) * (p1.y - p0.y) + p0.x;
+   p2.y = Math.sin(theta) * (p1.x - p0.x) + Math.cos(theta) * (p1.y - p0.y) + p0.y;
+   return p2;
+}
+
+</script>
+</html>
