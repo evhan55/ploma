@@ -193,7 +193,7 @@ function drawCurve(pts) {
     var s_x = D_x + t * E_x;
     var s_y = D_y + t * E_y;
     var s = Math.sqrt(s_x * s_x + s_y * s_y);
-    var dt = 1 / (4*s);
+    var dt = 1 / (0.9*s);
     t = t + dt;
 
     // draw 3x3 "pixel"
@@ -229,8 +229,27 @@ function drawPixel(id, x, y, p) {
       //var a = -0.1/(dist+0.1)+1.06; // <<<< very good for thin lines at step distance: 1 / (5*s)
       //var a = -0.04/(dist+0.06)+1.02; // <<<< very, very good for thin lines at step distance: 1 / (9*s)
       //var a = -0.035/(dist+0.06)+1.02; // <<<< ver, very good for very thin lines at step distance: 1 / (4*s)
-      //var a = -0.035/(dist-0.25)+1.015; // <<<< very, very good for very thin lines at step distance: 1 / (4*s)
-      //var a = -0.035/(dist-0.18)+1.015; // <<<< very, very good for very thin lines at step distance: 1 / (4*s) // TRY TO MAKE THESE DARKER
+      //var a = -0.035/(dist-0.25)+1.015; // <<<< very, very good for very thin lines at step distance: 1 / (4*s) // TRY TO MAKE THESE DARKER
+      //var a = -0.09/(dist-0.11)+1.05; // <<<< very, very good for very thin lines at step distance: 1 / (3*s)
+      //var a = -0.095/(dist-0.11)+1.055; // YAY @ 1/3s
+      //var a = -0.098/(dist-0.11)+1.058; // @ 1/3s
+      //var a = -0.1/(dist-0.11)+1.06; // WINNER SO FAR FOR VERY THIN, VERY DARK LINES @ 1/3s
+      //var a = -0.2/(dist-0.05)+1.12; // ALSO VERY GOOD SO FAR FOR VERY THIN< DARK LINES @ 1/2s
+      //var a = -0.25/(dist-0.05)+1.15; // ALSO VERY GOOD SO FAR FOR VERY THIN, DARK LINES @ 1/1.25S BUT WITH SOME TINY, TINY RANDOM GAPS
+      //var a = -0.25/(dist-0.05)+1.13; // VERY VERY GOOD FOR THIN< DARK LINES @ 1/1.3s
+      //var a = -0.25/(dist-0.05)+1.13; // USE AS MIDDLE BASIS, CAN GO THINNER AND LIGHTER FROM HERE @ 1/1.6s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      //var a = -0.33/(dist-0.04)+1.2; // USE AS THIN BASIS, HAS RANDOM WHITE GAPS @ 1/1.25s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      //
+      //
+      //
+      //var a = -0.39/(dist)+1.25; // @ 1/0.85s // TRY TO USE THIS ONE FOR NOW
+      //
+      //
+      //
+      var factor = 0.05*p;
+      //console.log(factor);
+      var a = (-0.39-factor)/(dist)+(1.21-factor);
+      var a = (-0.42-factor)/(dist)+(1.28-factor);
       if (a < 0) a = 0;
       if (a > 1) a = 1;
       //a -= 0.01;
@@ -240,7 +259,7 @@ function drawPixel(id, x, y, p) {
       /////////////////////////////
       id.data[idx + 0] = id.data[idx + 0] * a + 0 * a * (1 - a);
       id.data[idx + 1] = id.data[idx + 1] * a + 0 * a * (1 - a);
-      id.data[idx + 2] = id.data[idx + 2] * a + 0 * a * (1 - a);
+      id.data[idx + 2] = id.data[idx + 2] * a + 50 * a * (1 - a);
       id.data[idx + 3] = 255;
     }
   }
