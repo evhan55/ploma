@@ -7,6 +7,7 @@
   http://www.colourlovers.com/palette/3412827/21st
 
   Bezier Tangent End Point
+  Bezier mirrored control points
   ???
   http://pomax.github.io/bezierinfo/
 
@@ -83,9 +84,10 @@ var h = 1000;
 var ratio = 1;
 var sample = 1;
 var cursorOffsetX = 13;
-var cursorOffsetY = 3;
+var cursorOffsetY = 9;
 var points = [];
 var isDrawing = false;
+var mouseMoveCounter = 0;
 
 // DOM
 var canvas;
@@ -137,10 +139,13 @@ function initEvents() {
   }
   canvas.onmousedown = function(e) {
     isDrawing = true;    recordPoint(e);
+    mouseMoveCounter++;
   };
   canvas.onmousemove = function(e) {
     var self = this;
+    mouseMoveCounter++;
     if (!isDrawing) return;
+    //if ((mouseMoveCounter % 4) !== 0) return;
     recordPoint(e);
     redraw();
   }
@@ -156,24 +161,49 @@ function redraw() {
   if (!isDrawing) {
     return;
   }
-  // 2 points needed for a quadratic bezier
-  if(points.length === 2) {
-    var lastPoint = points[points.length - 1];
+  // 3 points needed for a look-ahead quadratic bezier
+  if(points.length === 3) {
+    var p1 = points[1];
+    var p2 = points[2];
     drawCurve(points);
     points = [];
-    points.push(lastPoint);
+    points.push(p1);
+    points.push(p2);
   }
 };
 
-// draws a quadratic bezier according to 2 input points
+// draws a quadratic bezier according to 3 input points
 function drawCurve(pts) {
   var imageData = ctx.getImageData(0, 0, w * ratio, h * ratio);
-  var from = pts[0];                            
-  var ctrl = lastControlPoint ? 
-    getMidPt({x: 2*pts[0].x - lastControlPoint.x, y: 2*pts[0].y - lastControlPoint.y}, getMidPt(pts[0], pts[1])) :
-    getMidPt(pts[0], pts[1])
-  ;
-  var to = pts[1];                              
+  var p0 = from = pts[0];
+  var p1 = to = pts[1];
+  var p2 = pts[2];
+
+  if(!lastControlPoint) {
+    lastControlPoint = getMidPt(p0, p1);
+  }
+   
+  // Evelyn's look ahead?                  
+  var p01 = getMidPt(p0, p1);
+  var p12 = getMidPt(p1, p2);
+  var ctrl = getMidPt(
+    getMidPt(getMirroredPt(lastControlPoint, p0), p01),
+    getMidPt(getMirroredPt(getMidPt(getMirroredPt(p01, p1), p12), p1), p01)
+  );
+  var ctrl = getMidPt(
+    getMidPt(getMirroredPt(lastControlPoint, p0), p01),
+    getMidPt(getMirroredPt(getMidPt(getMirroredPt(p01, p1), p12), p1), p01)
+  );
+  /*var ctrl = {
+    x: (13/16)*p0.x + (1/2)*p1.x - (1/4)*lastControlPoint.x - (1/16)*p2.x,
+    y: (13/16)*p0.y + (1/2)*p1.y - (1/4)*lastControlPoint.y - (1/16)*p2.y
+  }*/
+
+  /*var ctrl = {
+    x: (13/16)*p0.x + (8/16)*p1.x - (4/16)*lastControlPoint.x - (1/16)*p2.x,
+    y: (13/16)*p0.y + (8/16)*p1.y - (4/16)*lastControlPoint.y - (1/16)*p2.y
+  }*/
+
   lastControlPoint = ctrl;
   var p = (from.p + to.p)/2;
 
@@ -193,7 +223,42 @@ function drawCurve(pts) {
     var s_x = D_x + t * E_x;
     var s_y = D_y + t * E_y;
     var s = Math.sqrt(s_x * s_x + s_y * s_y);
-    var dt = 1 / (0.9*s);
+
+    var factor;
+    var dt;
+
+    p = 0.95;
+
+    if(p < 0.2) {
+
+      dt = 1 / (1.23*s);
+
+    }
+    if((p >= 0.2) && (p < 0.3)) {
+
+      dt = 1 / (1.25*s);
+
+    }
+    if((p >= 0.3) && (p < 0.4)) {
+
+      dt = 1 / (1.27*s);
+
+    }
+    if((p >= 0.4) && (p < 0.5)) {
+
+      dt = 1 / (1.29*s);
+
+    }
+    if((p >= 0.5) && (p < 0.95)) {
+
+      dt = 1 / (1.31*s);
+
+    }
+    if(p >= 0.95) {
+
+      dt = 1 / (1.33*s);
+
+    }
     t = t + dt;
 
     // draw 3x3 "pixel"
@@ -206,58 +271,54 @@ function drawCurve(pts) {
 function drawPixel(id, x, y, p) {
   for(var i = -1; i < 2; i++) {
     for(var j = -1; j < 2; j++) {
+
       var idx = ((Math.round(x) + i) + (Math.round(y) + j)*w*ratio)*4;
       var dist = getDistance({x: x, y: y}, {x: Math.round(x) + i, y: Math.round(y) + j});
-      //var a = dist/1.4;
-      //var a = 1-(-0.1*Math.pow(dist,4)+1);
-      //var a = 1/(5*dist+1);
-      //var a = 1-(0.5/(Math.abs(dist)-2)+1.25)+0.55;
-      //var a = 0.25-(0.5/(Math.abs(dist)-1.8));
-      //var a = 0.4-(0.2/(Math.abs(dist)-1.8));
-      //var a = 0.28-(0.5/(Math.abs(dist)-1.8));
-      //var a = -(1/(dist+2))+1.15; // step 1/2
-      //var a = -(1/(dist+2))+1; // step 1
-      //var a = -(1/(dist+1))+1.2;
-      //var a = -0.5/(dist+0.5)+1.33;
-      //var a = -0.5/(dist+0.3)+1.2;
-      //var a = -0.4/(dist+0.3)+1.20; // <<<< very good for thin-ish lines at step distance: 1 / (1.1*s)
-      //var a = -0.4/(dist+0.3)+1.21; // <<<< very good for thin-ish lines at step distance: 1 / (1.2*s)
-      //var a = -0.4/(dist+0.3)+1.22; // <<<< very good for thin-ish lines at step distance: 1 / (1.3*s)
-      //var a = -0.4/(dist+0.3)+1.23; // <<<< very good for thin-ish lines at step distance: 1 / (1.4*s)
-      //var a = -0.4/(dist+0.35)+1.2; // <<<< very good for thin-ish lines at step distance: 1 / (1.4*s)
-      //var a = -0.7/(dist+0.35)+1.35; // <<<< very good for thin-ish lines at step distance: 1 / (1.4*2)
-      //var a = -0.1/(dist+0.1)+1.06; // <<<< very good for thin lines at step distance: 1 / (5*s)
-      //var a = -0.04/(dist+0.06)+1.02; // <<<< very, very good for thin lines at step distance: 1 / (9*s)
-      //var a = -0.035/(dist+0.06)+1.02; // <<<< ver, very good for very thin lines at step distance: 1 / (4*s)
-      //var a = -0.035/(dist-0.25)+1.015; // <<<< very, very good for very thin lines at step distance: 1 / (4*s) // TRY TO MAKE THESE DARKER
-      //var a = -0.09/(dist-0.11)+1.05; // <<<< very, very good for very thin lines at step distance: 1 / (3*s)
-      //var a = -0.095/(dist-0.11)+1.055; // YAY @ 1/3s
-      //var a = -0.098/(dist-0.11)+1.058; // @ 1/3s
-      //var a = -0.1/(dist-0.11)+1.06; // WINNER SO FAR FOR VERY THIN, VERY DARK LINES @ 1/3s
-      //var a = -0.2/(dist-0.05)+1.12; // ALSO VERY GOOD SO FAR FOR VERY THIN< DARK LINES @ 1/2s
-      //var a = -0.25/(dist-0.05)+1.15; // ALSO VERY GOOD SO FAR FOR VERY THIN, DARK LINES @ 1/1.25S BUT WITH SOME TINY, TINY RANDOM GAPS
-      //var a = -0.25/(dist-0.05)+1.13; // VERY VERY GOOD FOR THIN< DARK LINES @ 1/1.3s
-      //var a = -0.25/(dist-0.05)+1.13; // USE AS MIDDLE BASIS, CAN GO THINNER AND LIGHTER FROM HERE @ 1/1.6s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      //var a = -0.33/(dist-0.04)+1.2; // USE AS THIN BASIS, HAS RANDOM WHITE GAPS @ 1/1.25s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-      //
-      //
-      //
-      //var a = -0.39/(dist)+1.25; // @ 1/0.85s // TRY TO USE THIS ONE FOR NOW
-      //
-      //
-      //
-      var factor = 0.05*p;
-      //console.log(factor);
-      //var a = (-0.39-factor)/(dist)+(1.21-factor);
-      var a = (-0.42-factor)/(dist)+(1.28-factor);
-      //var a = (-0.5-factor)/(dist+0.05)+(2-factor);
-      if (a < 0) a = 0;
-      if (a > 1) a = 1;
-      //a -= 0.01;
+
+      var factor;
+      var a;
+      if(p < 0.2) {
+
+        a = -0.33/(dist-0.02)+1.22;
+
+      }
+      if((p >= 0.2) && (p < 0.3)) {
+
+        a = -0.33/(dist-0.04)+1.20;
+
+      }
+      if((p >= 0.3) && (p < 0.4)) {
+
+        a = -0.33/(dist-0.06)+1.18;
+
+      }
+      if((p >= 0.4) && (p < 0.5)) {
+
+        a = -0.33/(dist-0.08)+1.16;
+
+      }
+      if((p >= 0.5) && (p < 0.95)) {
+
+        a = -0.33/(dist-0.10)+1.14;
+
+      }
+      if(p >= 0.95) {
+
+        a = -0.2/(dist-0.12)+1.12;
+
+      }
+      //factor *= p;
+
+      //var a = (-0.42-factor)/(dist)+(1.28-factor);
+      //var a = (-0.42)/(dist)+(1.28);
+
       /////////////////////////////
       // a = 0 = opaque
       // a = 1 = transparent
       /////////////////////////////
+      if (a < 0) a = 0;
+      if (a > 1) a = 1;
+
       id.data[idx + 0] = id.data[idx + 0] * a + 0 * a * (1 - a);
       id.data[idx + 1] = id.data[idx + 1] * a + 0 * a * (1 - a);
       id.data[idx + 2] = id.data[idx + 2] * a + 50 * a * (1 - a);
@@ -286,21 +347,21 @@ function clearCanvas(){
 
 function getMidPt(p1, p2) {
   return {
-    x: p1.x + (p2.x - p1.x) / 2,
-    y: p1.y + (p2.y - p1.y) / 2,
-    p: (p1.p + p2.p) / 2
+    x: (p1.x + p2.x) / 2,
+    y: (p1.y + p2.y) / 2
   };
+}
+
+function getMirroredPt(p1, p2) {
+  // mirror A through B (2Bx−Ax, 2By−Ay)
+  return {
+    x: 2*p2.x - p1.x,
+    y: 2*p2.y - p1.y
+  }
 }
 
 function getDistance(p1, p2) {
   return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-}
-
-function getRotatedPt(p0, p1, theta) {
-   var p2 = {};
-   p2.x = Math.cos(theta) * (p1.x - p0.x) - Math.sin(theta) * (p1.y - p0.y) + p0.x;
-   p2.y = Math.sin(theta) * (p1.x - p0.x) + Math.cos(theta) * (p1.y - p0.y) + p0.y;
-   return p2;
 }
 
 </script>
