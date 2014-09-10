@@ -88,6 +88,8 @@ var cursorOffsetY = 9;
 var points = [];
 var isDrawing = false;
 var mouseMoveCounter = 0;
+var skip = false;
+var skipTimer = null;
 
 // DOM
 var canvas;
@@ -127,7 +129,6 @@ function initDOMElements() {canvas = document.getElementById('canvas');
   x.drawImage(texture, 0, 0);
   textureImageData = x.getImageData(0,0,wt,ht);
   textureImageData = textureImageData.data;
-  //console.log(textureImageData);
 }
 
 function initEvents() {
@@ -145,6 +146,15 @@ function initEvents() {
     var self = this;
     mouseMoveCounter++;
     if (!isDrawing) return;
+    if(!skipTimer) {
+      if(Math.round(Math.random()*15) === 5) {
+        skip = true;
+        skipTimer = setTimeout(function() {
+          skip = false;
+          skipTimer = null;
+        }, 10);
+      }
+    }
     //if ((mouseMoveCounter % 4) !== 0) return;
     recordPoint(e);
     redraw();
@@ -199,11 +209,6 @@ function drawCurve(pts) {
     y: (13/16)*p0.y + (1/2)*p1.y - (1/4)*lastControlPoint.y - (1/16)*p2.y
   }*/
 
-  /*var ctrl = {
-    x: (13/16)*p0.x + (8/16)*p1.x - (4/16)*lastControlPoint.x - (1/16)*p2.x,
-    y: (13/16)*p0.y + (8/16)*p1.y - (4/16)*lastControlPoint.y - (1/16)*p2.y
-  }*/
-
   lastControlPoint = ctrl;
   var p = (from.p + to.p)/2;
 
@@ -227,36 +232,36 @@ function drawCurve(pts) {
     var factor;
     var dt;
 
-    p = 0.95;
+    //p = 0.35;
 
     if(p < 0.2) {
 
-      dt = 1 / (1.23*s);
+      dt = 1 / (1.75*s);
 
     }
     if((p >= 0.2) && (p < 0.3)) {
 
-      dt = 1 / (1.25*s);
+      dt = 1 / (1.95*s);
 
     }
     if((p >= 0.3) && (p < 0.4)) {
 
-      dt = 1 / (1.27*s);
+      dt = 1 / (1.95*s);
 
     }
     if((p >= 0.4) && (p < 0.5)) {
 
-      dt = 1 / (1.29*s);
+      dt = 1 / (1.95*s);
 
     }
     if((p >= 0.5) && (p < 0.95)) {
 
-      dt = 1 / (1.31*s);
+      dt = 1 / (1.95*s);
 
     }
     if(p >= 0.95) {
 
-      dt = 1 / (1.33*s);
+      dt = 1 / (1.95*s);
 
     }
     t = t + dt;
@@ -268,59 +273,62 @@ function drawCurve(pts) {
   ctx.putImageData(imageData, 0, 0);
 }
 
-function drawPixel(id, x, y, p) {
+function drawPixel(id, x, y, p, delta) {
   for(var i = -1; i < 2; i++) {
     for(var j = -1; j < 2; j++) {
 
       var idx = ((Math.round(x) + i) + (Math.round(y) + j)*w*ratio)*4;
       var dist = getDistance({x: x, y: y}, {x: Math.round(x) + i, y: Math.round(y) + j});
 
-      var factor;
       var a;
       if(p < 0.2) {
 
-        a = -0.33/(dist-0.02)+1.22;
+        a = (-0.2)/(dist-0.09)+1.15;
 
       }
       if((p >= 0.2) && (p < 0.3)) {
 
-        a = -0.33/(dist-0.04)+1.20;
+        a = (-0.2)/(dist-0.12)+1.12;
 
       }
       if((p >= 0.3) && (p < 0.4)) {
 
-        a = -0.33/(dist-0.06)+1.18;
+        //if(skip) {
+          //a = (-0.2)/(dist+0.5)+1.05;
+          //a = 0.95;
+        //} else {
+          a = (-0.2)/(dist-0.14)+1.10;
+        //}
 
       }
       if((p >= 0.4) && (p < 0.5)) {
 
-        a = -0.33/(dist-0.08)+1.16;
+        a = (-0.2)/(dist-0.14)+1.10;
 
       }
       if((p >= 0.5) && (p < 0.95)) {
 
-        a = -0.33/(dist-0.10)+1.14;
+        a = (-0.2)/(dist-0.14)+1.10;
 
       }
       if(p >= 0.95) {
 
-        a = -0.2/(dist-0.12)+1.12;
+        a = (-0.2)/(dist-0.14)+1.10;
 
       }
-      //factor *= p;
 
-      //var a = (-0.42-factor)/(dist)+(1.28-factor);
-      //var a = (-0.42)/(dist)+(1.28);
+      //console.log(a);
 
-      /////////////////////////////
-      // a = 0 = opaque
-      // a = 1 = transparent
-      /////////////////////////////
-      if (a < 0) a = 0;
-      if (a > 1) a = 1;
+      
+      if (a < 0) a = 0; // a = 0 = opaque
+      if (a > 1) a = 1; // a = 1 = transparent
+      //if(Math.round(Math.random()) === 1 ) {
+      //  a = 0.85;
+     // }
+      //a = 1;
 
-      id.data[idx + 0] = id.data[idx + 0] * a + 0 * a * (1 - a);
-      id.data[idx + 1] = id.data[idx + 1] * a + 0 * a * (1 - a);
+      id.data[idx + 0] = id.data[idx + 0] * a + 00 * a * (1 - a);
+      id.data[idx + 1] = id.data[idx + 1] * a + 00 * a * (1 - a);
       id.data[idx + 2] = id.data[idx + 2] * a + 50 * a * (1 - a);
       id.data[idx + 3] = 255;
     }
