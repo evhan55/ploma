@@ -13,6 +13,7 @@
 
   Bezier Equation from StackOverflow
   http://stackoverflow.com/questions/5634460/quadratic-bezier-curve-calculate-point
+  http://math.stackexchange.com/questions/191672/cubic-bezier-curves-calculate-y-for-any-given-x
 
   Bezier Length
   http://books.google.com/books?id=8CGj9_ZlFKoC&lpg=PA199&ots=yB9xOx-sGF&dq=bezier%20control%20polygon%20length&pg=PA199#v=onepage&q=bezier%20control%20polygon%20length&f=false
@@ -28,6 +29,12 @@
   Convolution/contrast
 
   Wacom SDK?
+
+  TODO:
+  - add final lookahead point
+  - add variable width
+  - add texture
+  - add skipping
 
 -->
 
@@ -104,8 +111,6 @@ var cursorOffsetY = 3;
 var points = [];
 var isDrawing = false;
 var mouseMoveCounter = 0;
-var skip = false;
-var skipTimer = null;
 
 // DOM
 var canvas;
@@ -145,17 +150,6 @@ function initDOMElements() {canvas = document.getElementById('canvas');
   ctx = canvas.getContext('2d');
   ctx.scale(ratio, ratio);
   cursorOffsetY = document.getElementById('equation').clientHeight + 5;
-
-  // texture image data
-  /*var wt = texture.width;
-  var ht = texture.height;
-  var c = document.createElement('canvas');
-  var x = c.getContext('2d');
-  c.style.width = wt;
-  c.style.height = ht;
-  x.drawImage(texture, 0, 0);
-  textureImageData = x.getImageData(0,0,wt,ht);
-  textureImageData = textureImageData.data;*/
 }
 
 function initEvents() {
@@ -173,16 +167,7 @@ function initEvents() {
     var self = this;
     mouseMoveCounter++;
     if (!isDrawing) return;
-    if(!skipTimer) {
-      if(Math.round(Math.random()*15) === 5) {
-        skip = true;
-        skipTimer = setTimeout(function() {
-          skip = false;
-          skipTimer = null;
-        }, 10);
-      }
-    }
-    //if ((mouseMoveCounter % 4) !== 0) return;
+    if ((mouseMoveCounter % 5) !== 0) return;
     recordPoint(e);
     redraw();
   }
@@ -198,7 +183,7 @@ function redraw() {
   if (!isDrawing) {
     return;
   }
-  // 3 points needed for a look-ahead quadratic bezier
+  // 3 points needed for a look-ahead cubic bezier
   if(points.length === 3) {
     var p1 = points[1];
     var p2 = points[2];
@@ -212,99 +197,73 @@ function redraw() {
 // draws a quadratic bezier according to 3 input points
 function drawCurve(pts) {
   var imageData = ctx.getImageData(0, 0, w * ratio, h * ratio);
-  var p0 = from = pts[0];
-  var p1 = to = pts[1];
-  var p2 = pts[2];
 
+  /*
+  (c) 2014 Dan Amelang
+
+  Let "Q" be the look ahead coordinate (i.e., input event coordinate
+  number "n - 1", the most recent one)
+
+  p0 = (input event coordinate number n - 3)
+  p1 = (the previous Bezier's p2 mirrored across this Bezier's p0)
+  p2 = p3 - (((p3 - p0) + (Q - p3)) / 2 / 3);
+  p3 = (input event coordinate number n - 2)
+
+  For the first Bezier in the path, there is no "previous Bezier", so
+  you can just do this for the first Bezier's p1:
+
+  p1 = p0 + (p3 - p0) * 0.33;
+
+  And for the last Bezier, there is no look ahead point, so you can just
+  do this for the last Bezier's p2:
+
+  p2 = p0 + (p3 - p0) * 0.66;
+
+  approximateLength = 0.5 * chordLength + 0.5 * polygonLength
+
+  where
+
+  chordLength = distanceBetween(p0, p3)
+
+  polygonLength = distanceBetween(p0, p1) + distanceBetween(p1, p2) +
+  distanceBetween(p2, p3)
+  */
+  
+  // endpoints
+  var p0 = pts[0];
+  var p3 = pts[1];
+
+  // control points
   if(!lastControlPoint) {
-    lastControlPoint = getMidPt(p0, p1);
+    lastControlPoint = {
+      x: p0.x + (p3.x - p0.x) * 0.33,
+      y: p0.y + (p3.y - p0.y) * 0.33
+    };
   }
-   
-  // Evelyn's look ahead?                  
-  var p01 = getMidPt(p0, p1);
-  var p12 = getMidPt(p1, p2);
-  var ctrl = getMidPt(
-    getMidPt(getMirroredPt(lastControlPoint, p0), p01),
-    getMidPt(getMirroredPt(getMidPt(getMirroredPt(p01, p1), p12), p1), p01)
-  );
-  var ctrl = getMidPt(
-    getMidPt(getMirroredPt(lastControlPoint, p0), p01),
-    getMidPt(getMirroredPt(getMidPt(getMirroredPt(p01, p1), p12), p1), p01)
-  );
-  /*var ctrl = {
-    x: (13/16)*p0.x + (1/2)*p1.x - (1/4)*lastControlPoint.x - (1/16)*p2.x,
-    y: (13/16)*p0.y + (1/2)*p1.y - (1/4)*lastControlPoint.y - (1/16)*p2.y
-  }*/
+  var p1 = getMirroredPt(lastControlPoint, p0);
+  var p2 = {
+    x: p3.x - (((p3.x - p0.x) + (pts[2].x - p3.x)) / 2 / 3),
+    y: p3.y - (((p3.y - p0.y) + (pts[2].y - p3.y)) / 2 / 3)
+  };
+  lastControlPoint = p2;
 
-  lastControlPoint = ctrl;
-  var p = (from.p + to.p)/2;
+  // length
+  var bezierLength =
+    (1/2) * getDistance(p0, p3) + 
+    (1/2) * (getDistance(p0, p1) + getDistance(p1, p2) + getDistance(p2, p3))
+  ;
+  var stepLength = 0.6;
 
-  // step along Bezier - Dan Amelang
-  var D_x = 2 * (ctrl.x - from.x);
-  var D_y = 2 * (ctrl.y - from.y);
-  var E_x = 2 * (from.x - 2 * ctrl.x + to.x);
-  var E_y = 2 * (from.y - 2 * ctrl.y + to.y);
-  var t = 0.0;
-  while (t <= 1.0) {
-    var u = 1 - t;
-    var B0 = u * u;
-    var B1 = 2 * u * t;
-    var B2 = t * t;
-    var step_x = B0 * from.x + B1 * ctrl.x + B2 * to.x;
-    var step_y = B0 * from.y + B1 * ctrl.y + B2 * to.y;
-    var s_x = D_x + t * E_x;
-    var s_y = D_y + t * E_y;
-    var s = Math.sqrt(s_x * s_x + s_y * s_y);
+  // pressure
+  var p = (p0.p + p3.p)/2;
 
-    var factor;
-    var dt;
-
-    p = 0.95;
-
-    if(p < 0.2) {
-
-      //dt = 1 / (1.75*s);
-      dt = 1 / (1.6*s);
-
-    }
-    if((p >= 0.2) && (p < 0.3)) {
-
-      //dt = 1 / (1.95*s);
-      dt = 1 / (1.6*s);
-
-    }
-    if((p >= 0.3) && (p < 0.4)) {
-
-      //dt = 1 / (1.95*s);
-      dt = 1 / (1.6*s);
-
-    }
-    if((p >= 0.4) && (p < 0.5)) {
-
-      //dt = 1 / (1.95*s);
-      dt = 1 / (1.6*s);
-
-    }
-    if((p >= 0.5) && (p < 0.95)) {
-
-      //dt = 1 / (1.95*s);
-      dt = 1 / (1.6*s);
-
-    }
-    if(p >= 0.95) {
-
-      //dt = 1 / (1.6*s);
-      var sa = parseFloat(inputStepA.value);
-      var sb = parseFloat(inputStepB.value);
-      dt = (sa / sb) * (1 /s);
-
-    }
-    t = t + dt;
-
-    // draw 3x3 "pixel"
+  for(var t = 0; t < 1; t += (1/(bezierLength/stepLength))) {
+    //(1-t)^3 * x0 + 3*(1-t)^2 * t * x1 + 3*(1-t) * t^2 * x2 + t^3 * x3
+    var step_x = Math.pow((1-t),3)*p0.x + 3*Math.pow((1-t),2)*t*p1.x + 3*(1-t)*Math.pow(t,2)*p2.x + Math.pow(t,3)*p3.x;
+    var step_y = Math.pow((1-t),3)*p0.y + 3*Math.pow((1-t),2)*t*p1.y + 3*(1-t)*Math.pow(t,2)*p2.y + Math.pow(t,3)*p3.y;
     drawPixel(imageData, step_x, step_y, p);
-
   }
+
   ctx.putImageData(imageData, 0, 0);
 }
 
@@ -315,57 +274,10 @@ function drawPixel(id, x, y, p, delta) {
       var idx = ((Math.round(x) + i) + (Math.round(y) + j)*w*ratio)*4;
       var dist = getDistance({x: x, y: y}, {x: Math.round(x) + i, y: Math.round(y) + j});
 
-      var a;
-      if(p < 0.2) {
-
-        //a = (-0.2)/(dist-0.09)+1.15;
-        a = -0.2/(dist-0.12)+1.12;
-
-      }
-      if((p >= 0.2) && (p < 0.3)) {
-
-        //a = (-0.2)/(dist-0.12)+1.12;
-        a = -0.2/(dist-0.12)+1.12;
-
-      }
-      if((p >= 0.3) && (p < 0.4)) {
-
-        //a = (-0.2)/(dist-0.14)+1.10;
-        a = -0.2/(dist-0.12)+1.12;
-
-      }
-      if((p >= 0.4) && (p < 0.5)) {
-
-        //a = (-0.2)/(dist-0.14)+1.10;
-        a = -0.2/(dist-0.12)+1.12;
-
-      }
-      if((p >= 0.5) && (p < 0.95)) {
-
-        //a = (-0.2)/(dist-0.14)+1.10;
-        a = -0.2/(dist-0.12)+1.12;
-
-      }
-      if(p >= 0.95) {
-
-        //a = -0.2/(dist-0.12)+1.12;
-        var aa = parseFloat(inputA.value);
-        var bb = parseFloat(inputB.value);
-        var cc = parseFloat(inputC.value);
-        a = aa/(dist+bb)+cc;
-        //a = fx;
-
-      }
-
-      //console.log(a);
-
+      var a = -0.2/(dist-0.12)+1.12;
       
       if (a < 0) a = 0; // a = 0 = opaque
       if (a > 1) a = 1; // a = 1 = transparent
-      //if(Math.round(Math.random()) === 1 ) {
-      //  a = 0.85;
-     // }
-      //a = 1;
 
       id.data[idx + 0] = id.data[idx + 0] * a + 00 * a * (1 - a);
       id.data[idx + 1] = id.data[idx + 1] * a + 00 * a * (1 - a);
