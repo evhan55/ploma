@@ -258,7 +258,7 @@ function recordPoint(e) {
   point = {
     x   : e.clientX - cursorOffsetX,
     y   : e.clientY - cursorOffsetY,
-    p   : plugin.penAPI.pressure
+    p   : (plugin ? plugin.penAPI.pressure : 1)
   };
   points.push(point);
 }
