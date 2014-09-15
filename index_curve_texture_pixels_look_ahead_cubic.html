@@ -2,33 +2,14 @@
   @TODO: Find all original inspiration code
 
   Empty Cursor website
-
-  Color Palette
+  Dan Amelang's emails
   http://www.colourlovers.com/palette/3412827/21st
-
-  Bezier Tangent End Point
-  Bezier mirrored control points
-  ???
   http://pomax.github.io/bezierinfo/
-
-  Bezier Equation from StackOverflow
   http://stackoverflow.com/questions/5634460/quadratic-bezier-curve-calculate-point
   http://math.stackexchange.com/questions/191672/cubic-bezier-curves-calculate-y-for-any-given-x
-
-  Bezier Length
   http://books.google.com/books?id=8CGj9_ZlFKoC&lpg=PA199&ots=yB9xOx-sGF&dq=bezier%20control%20polygon%20length&pg=PA199#v=onepage&q=bezier%20control%20polygon%20length&f=false
-
-  Alpha Compositing
   http://en.wikipedia.org/wiki/Alpha_compositing
-
-  Line Scattering and General Techniques
   http://perfectionkills.com/exploring-canvas-drawing-techniques/#_=_
-
-  Convolution/sharpness
-
-  Convolution/contrast
-
-  Wacom SDK?
 
   TODO:
   - add final lookahead point
@@ -167,7 +148,7 @@ function initEvents() {
     var self = this;
     mouseMoveCounter++;
     if (!isDrawing) return;
-    if ((mouseMoveCounter % 5) !== 0) return;
+    if ((mouseMoveCounter % 7) !== 0) return;
     recordPoint(e);
     redraw();
   }
@@ -198,42 +179,11 @@ function redraw() {
 function drawCurve(pts) {
   var imageData = ctx.getImageData(0, 0, w * ratio, h * ratio);
 
-  /*
-  (c) 2014 Dan Amelang
-
-  Let "Q" be the look ahead coordinate (i.e., input event coordinate
-  number "n - 1", the most recent one)
-
-  p0 = (input event coordinate number n - 3)
-  p1 = (the previous Bezier's p2 mirrored across this Bezier's p0)
-  p2 = p3 - (((p3 - p0) + (Q - p3)) / 2 / 3);
-  p3 = (input event coordinate number n - 2)
-
-  For the first Bezier in the path, there is no "previous Bezier", so
-  you can just do this for the first Bezier's p1:
-
-  p1 = p0 + (p3 - p0) * 0.33;
-
-  And for the last Bezier, there is no look ahead point, so you can just
-  do this for the last Bezier's p2:
-
-  p2 = p0 + (p3 - p0) * 0.66;
-
-  approximateLength = 0.5 * chordLength + 0.5 * polygonLength
-
-  where
-
-  chordLength = distanceBetween(p0, p3)
-
-  polygonLength = distanceBetween(p0, p1) + distanceBetween(p1, p2) +
-  distanceBetween(p2, p3)
-  */
-  
-  // endpoints
+  //********************
+  //(c) 2014 Dan Amelang
+  // endpoints and control points
   var p0 = pts[0];
   var p3 = pts[1];
-
-  // control points
   if(!lastControlPoint) {
     lastControlPoint = {
       x: p0.x + (p3.x - p0.x) * 0.33,
@@ -246,16 +196,21 @@ function drawCurve(pts) {
     y: p3.y - (((p3.y - p0.y) + (pts[2].y - p3.y)) / 2 / 3)
   };
   lastControlPoint = p2;
-
   // length
   var bezierLength =
     (1/2) * getDistance(p0, p3) + 
     (1/2) * (getDistance(p0, p1) + getDistance(p1, p2) + getDistance(p2, p3))
   ;
-  var stepLength = 0.6;
+  //********************
 
   // pressure
   var p = (p0.p + p3.p)/2;
+  //p = 0;
+
+  // step length based on pressure
+  var stepLength = 0.55;
+  //var stepLength = map(p, 0, 1, 0.55, 1.5);
+  //console.log(stepLength);
 
   for(var t = 0; t < 1; t += (1/(bezierLength/stepLength))) {
     //(1-t)^3 * x0 + 3*(1-t)^2 * t * x1 + 3*(1-t) * t^2 * x2 + t^3 * x3
@@ -274,11 +229,18 @@ function drawPixel(id, x, y, p, delta) {
       var idx = ((Math.round(x) + i) + (Math.round(y) + j)*w*ratio)*4;
       var dist = getDistance({x: x, y: y}, {x: Math.round(x) + i, y: Math.round(y) + j});
 
-      var a = -0.2/(dist-0.12)+1.12;
-      
+      // distance function
+      var factor = map(p, 0, 1, -0.75, 0.5);
+      var a = 0.2/(dist - 0.12) - 0.12;
+      var a = 0.2/(dist - factor) - 0.12;
+      //var a = 0.2/(dist - factor) - map(p, 0, 1, 0.12, 0.3);
+
+      // post process alpha
+      a = 1 - a;
       if (a < 0) a = 0; // a = 0 = opaque
       if (a > 1) a = 1; // a = 1 = transparent
 
+      // pixel placement within array
       id.data[idx + 0] = id.data[idx + 0] * a + 00 * a * (1 - a);
       id.data[idx + 1] = id.data[idx + 1] * a + 00 * a * (1 - a);
       id.data[idx + 2] = id.data[idx + 2] * a + 50 * a * (1 - a);
@@ -322,6 +284,11 @@ function getMirroredPt(p1, p2) {
 
 function getDistance(p1, p2) {
   return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+}
+
+function map(value, valueMin, valueMax, from, to) {
+  var ratio = (value - valueMin) / (valueMax - valueMin);
+  return from + ratio * (to - from);
 }
 
 </script>
