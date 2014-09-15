@@ -205,8 +205,8 @@ function drawCurve(pts) {
   // pressure
   var p = (p0.p + p3.p)/2;
 
-  // step length based on pressure
-  var stepLength = 0.55;
+  // step length based on app input
+  var stepLength = parseFloat(inputStep.value);
 
   // step along curve
   for(var t = 0; t < 1; t += (1/(bezierLength/stepLength))) {
