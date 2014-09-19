@@ -71,7 +71,7 @@ a {
   <center>
    <input value="0.2/(x - factor) - 0.12" id="expression"/> &nbsp;&nbsp;@&nbsp;&nbsp;
    <input value="0" id="width"/> w
-   <input value="0.55" id="step">px
+   <input value="0.8" id="step">px
  </center>
 </div>
 <canvas id="canvas"></canvas>
@@ -188,13 +188,15 @@ function drawCurve(pts) {
   // endpoints and control points
   var p0 = pts[0];
   var p3 = pts[1];
+  var p1;
   if(!lastControlPoint) {
-    lastControlPoint = {
+    p1 = {
       x: p0.x + (p3.x - p0.x) * 0.33,
       y: p0.y + (p3.y - p0.y) * 0.33
     };
+  } else {
+    p1 = getMirroredPt(lastControlPoint, p0);
   }
-  var p1 = getMirroredPt(lastControlPoint, p0);
   var p2 = {
     x: p3.x - (((p3.x - p0.x) + (pts[2].x - p3.x)) / 2 / 3),
     y: p3.y - (((p3.y - p0.y) + (pts[2].y - p3.y)) / 2 / 3)
@@ -209,6 +211,7 @@ function drawCurve(pts) {
 
   // pressure
   var p = (p0.p + p3.p)/2;
+  var p = p3.p;
 
   // step length based on app input
   var stepLength = parseFloat(inputStep.value);
@@ -225,8 +228,8 @@ function drawCurve(pts) {
 }
 
 function drawPixel(id, x, y, p, delta) {
-  for(var i = -1; i < 2; i++) {
-    for(var j = -1; j < 2; j++) {
+  for(var i = -2; i < 3; i++) {
+    for(var j = -2; j < 3; j++) {
 
       // distance
       var idx = ((Math.round(x) + i) + (Math.round(y) + j)*w*ratio)*4;
@@ -241,17 +244,17 @@ function drawPixel(id, x, y, p, delta) {
         }
       );
 
-      
-      //WORKS WELL
-      //var a = -0.2/(dist - 0.12) + 1.12;
-      //var a = -0.2/(dist + 0.20) + 1.12;
-      //if(dist < 0) {
-      //  a = 0;
-      //}
+      //p = 0;
+      //p = 1;
+      //var a = -0.2/(dist - 0.12) + 1.12; // p = 0
+      //var a = -0.1/(dist - 1.30) + 1.03; // p = 1
 
-      var factor = map(p, 0, 1, -0.22, 0.12)
-      var a = -0.2/(dist - factor) + 1.12;
-      if(dist < (0 - factor)) {
+      var slope = map(p, 0, 1, -0.2, -0.1);
+      var size = map(p, 0, 1, -0.04, 1.3);
+      var offset = map(p, 0, 1, 1.12, 1.03);
+
+      var a = slope/(dist - size) + offset;
+      if(dist < size) {
         a = 0;
       }
       
