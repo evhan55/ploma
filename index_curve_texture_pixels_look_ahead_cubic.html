@@ -30,6 +30,7 @@ body {
 canvas {
   float: left;
   cursor: url('cursors/cursor.cur'), crosshair;
+  /*cursor: crosshair;*/
   border: 1px solid gray;
 }
 img {
@@ -68,7 +69,9 @@ a {
 <body>
 <div id="equation">
   <center>
-   <input value="0.2/(x - 0.12) - 0.12" width="300px" id="expression"/> &nbsp;&nbsp;@&nbsp;&nbsp; <input width="200px" value="0.55" id="step">px
+   <input value="0.2/(x - factor) - 0.12" id="expression"/> &nbsp;&nbsp;@&nbsp;&nbsp;
+   <input value="0" id="width"/> w
+   <input value="0.55" id="step">px
  </center>
 </div>
 <canvas id="canvas"></canvas>
@@ -91,8 +94,8 @@ var w = 1300;
 var h = 1000;
 var ratio = 1;
 var sample = 1;
-var cursorOffsetX = 13;
-var cursorOffsetY = 3;
+var cursorOffsetX = 5;
+var cursorOffsetY = 0;
 var points = [];
 var isDrawing = false;
 var mouseMoveCounter = 0;
@@ -108,6 +111,7 @@ var ctx;
 var lastControlPoint;
 var inputExpression;
 var inputStep;
+var inputWidth;
 
 window.onload = function() {
   initDOMElements();
@@ -126,6 +130,7 @@ function initDOMElements() {canvas = document.getElementById('canvas');
   plugin = document.getElementById('wtPlugin');
   inputExpression = document.getElementById('expression');
   inputStep = document.getElementById('step');
+  inputWidth = document.getElementById('width');
   ctx = canvas.getContext('2d');
   ctx.scale(ratio, ratio);
   cursorOffsetY = document.getElementById('equation').clientHeight + 5;
@@ -236,12 +241,21 @@ function drawPixel(id, x, y, p, delta) {
         }
       );
 
-      // var a = 0.2/(dist - 0.12) - 0.12;
-      // var a = 0.05 * (1 / (dist - 1) + 1) + 1;
-      var a = eval(inputExpression.value.replace("x", "dist"));
+      
+      //WORKS WELL
+      //var a = -0.2/(dist - 0.12) + 1.12;
+      //var a = -0.2/(dist + 0.20) + 1.12;
+      //if(dist < 0) {
+      //  a = 0;
+      //}
 
+      var factor = map(p, 0, 1, -0.22, 0.12)
+      var a = -0.2/(dist - factor) + 1.12;
+      if(dist < (0 - factor)) {
+        a = 0;
+      }
+      
       // post process alpha
-      a = 1 - a;
       if (a < 0) a = 0; // 0 = opaque
       if (a > 1) a = 1; // 1 = transparent
 
