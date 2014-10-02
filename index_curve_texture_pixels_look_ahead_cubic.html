@@ -15,8 +15,8 @@
   http://perfectionkills.com/exploring-canvas-drawing-techniques/#_=_
 
   @TODO:
-  - Add final lookahead point
-  - Add variable width
+  - Fix beginning/end width glitch
+  - Add input filtering for the beginnings/ends?
   - Add texture
   - Add skipping
 -->
@@ -29,8 +29,8 @@ body {
 }
 canvas {
   float: left;
-  cursor: url('cursors/cursor.cur'), crosshair;
-  /*cursor: crosshair;*/
+  /*cursor: url('cursors/cursor.cur'), crosshair;*/
+  cursor: crosshair;
   border: 1px solid gray;
 }
 img {
@@ -71,7 +71,7 @@ a {
   <center>
    <input value="0.2/(x - factor) - 0.12" id="expression"/> &nbsp;&nbsp;@&nbsp;&nbsp;
    <input value="0" id="width"/> w
-   <input value="0.8" id="step">px
+   <input value="0.55" id="step">px
  </center>
 </div>
 <canvas id="canvas"></canvas>
@@ -97,6 +97,8 @@ var sample = 1;
 var cursorOffsetX = 5;
 var cursorOffsetY = 0;
 var points = [];
+var storedPoints = [];
+var curStrokePoints = [];
 var isDrawing = false;
 var mouseMoveCounter = 0;
 
@@ -144,7 +146,9 @@ function initEvents() {
     clearCanvas();
   }
   canvas.onmousedown = function(e) {
-    isDrawing = true;    recordPoint(e);
+    isDrawing = true;
+    curStrokePoints = [];
+    recordPoint(e);
     mouseMoveCounter++;
   };
   canvas.onmousemove = function(e) {
@@ -156,11 +160,14 @@ function initEvents() {
     redraw();
   }
   canvas.onmouseup = function(e) {
-    isDrawing = false;
     recordPoint(e);
-    redraw();
+    redraw(); // draw next to last curve
+    drawCurve([points[0], points[1]]); // draw last curve
+    isDrawing = false;
     points = [];
     lastControlPoint = null;
+    storedPoints.push(curStrokePoints);
+    console.log(JSON.stringify(curStrokePoints));
   };
 }
 
@@ -176,8 +183,6 @@ function redraw() {
     points = [];
     points.push(p1);
     points.push(p2);
-  } else {
-    // draw last curve here based on Dan's email
   }
 };
 
@@ -189,7 +194,9 @@ function drawCurve(pts) {
   var p0 = pts[0];
   var p3 = pts[1];
   var p1;
+  var p2;
   if(!lastControlPoint) {
+    // first point
     p1 = {
       x: p0.x + (p3.x - p0.x) * 0.33,
       y: p0.y + (p3.y - p0.y) * 0.33
@@ -197,10 +204,18 @@ function drawCurve(pts) {
   } else {
     p1 = getMirroredPt(lastControlPoint, p0);
   }
-  var p2 = {
-    x: p3.x - (((p3.x - p0.x) + (pts[2].x - p3.x)) / 2 / 3),
-    y: p3.y - (((p3.y - p0.y) + (pts[2].y - p3.y)) / 2 / 3)
-  };
+  if (points.length === 2) {
+    // last point
+    p2 = {
+      x: p0.x + (p3.x - p0.x) * 0.66,
+      y: p0.y + (p3.y - p0.y) * 0.66
+    };
+  } else {
+    p2 = {
+      x: p3.x - (((p3.x - p0.x) + (pts[2].x - p3.x)) / 2 / 3),
+      y: p3.y - (((p3.y - p0.y) + (pts[2].y - p3.y)) / 2 / 3)
+    };
+  }
   lastControlPoint = p2;
 
   // length
@@ -211,7 +226,7 @@ function drawCurve(pts) {
 
   // pressure
   var p = (p0.p + p3.p)/2;
-  var p = p3.p;
+  //var p = p3.p;
 
   // step length based on app input
   var stepLength = parseFloat(inputStep.value);
@@ -221,13 +236,25 @@ function drawCurve(pts) {
     //(1-t)^3 * x0 + 3*(1-t)^2 * t * x1 + 3*(1-t) * t^2 * x2 + t^3 * x3
     var step_x = Math.pow((1-t),3)*p0.x + 3*Math.pow((1-t),2)*t*p1.x + 3*(1-t)*Math.pow(t,2)*p2.x + Math.pow(t,3)*p3.x;
     var step_y = Math.pow((1-t),3)*p0.y + 3*Math.pow((1-t),2)*t*p1.y + 3*(1-t)*Math.pow(t,2)*p2.y + Math.pow(t,3)*p3.y;
-    drawPixel(imageData, step_x, step_y, p);
+    var color;
+    if(t === 0){
+      color = 'red';
+    } else {
+      color = 'black';
+    }
+    drawPixel(imageData, step_x, step_y, p, color);
+    /*var idx = (step_x + step_y*w*ratio)*4;
+    var a = 0;
+    imageData.data[idx + 0] = imageData.data[idx + 0] * a + 00 * a * (1 - a);
+    imageData.data[idx + 1] = id.data[idx + 1] * a + 00 * a * (1 - a);
+    imageData.data[idx + 2] = id.data[idx + 2] * a + 00 * a * (1 - a);
+    imageData.data[idx + 3] = 255;*/
   }
 
   ctx.putImageData(imageData, 0, 0);
 }
 
-function drawPixel(id, x, y, p, delta) {
+function drawPixel(id, x, y, p, color) {
   for(var i = -2; i < 3; i++) {
     for(var j = -2; j < 3; j++) {
 
@@ -244,28 +271,49 @@ function drawPixel(id, x, y, p, delta) {
         }
       );
 
-      //p = 0;
+      p = 0;
       //p = 1;
-      //var a = -0.2/(dist - 0.12) + 1.12; // p = 0
+
+      // antialiasing thin/thick
+      var a = -0.2/(dist - 0.12) + 1.12; // p = 0
+      //var a = -0.1/(dist + 0.2) + 1.04;
       //var a = -0.1/(dist - 1.30) + 1.03; // p = 1
+      var size = 0.12;
 
-      var slope = map(p, 0, 1, -0.2, -0.1);
-      var size = map(p, 0, 1, -0.04, 1.3);
+      // antialiasing and feathering
+      /*var slope = map(p, 0, 1, -0.2, -0.1);
+      var size = map(p, 0, 1, -0.12, 1.3);
       var offset = map(p, 0, 1, 1.12, 1.03);
-
-      var a = slope/(dist - size) + offset;
+      var a = slope/(dist - size) + offset;*/
       if(dist < size) {
         a = 0;
       }
+
+      // non-saturating
+      if(a < 0.25) {
+        a = 0.25;
+      }
       
-      // post process alpha
-      if (a < 0) a = 0; // 0 = opaque
-      if (a > 1) a = 1; // 1 = transparent
+      // clamp alpha
+      if (a < 0) a = 0; // opaque
+      if (a > 1) a = 1; // transparent
+
+      // color for debugging
+      var r, g, b;
+      if(color === 'red') {
+        r = 255;
+        g = 00;
+        b = 00;
+      } else {
+        r = 00;
+        g = 00;
+        b = 50;
+      }
 
       // pixel placement within array
-      id.data[idx + 0] = id.data[idx + 0] * a + 00 * a * (1 - a);
-      id.data[idx + 1] = id.data[idx + 1] * a + 00 * a * (1 - a);
-      id.data[idx + 2] = id.data[idx + 2] * a + 50 * a * (1 - a);
+      id.data[idx + 0] = id.data[idx + 0] * a + r * a * (1 - a);
+      id.data[idx + 1] = id.data[idx + 1] * a + g * a * (1 - a);
+      id.data[idx + 2] = id.data[idx + 2] * a + b * a * (1 - a);
       id.data[idx + 3] = 255;
     }
   }
@@ -278,6 +326,7 @@ function recordPoint(e) {
     p   : (plugin ? plugin.penAPI.pressure : 1)
   };
   points.push(point);
+  curStrokePoints.push(point);
 }
 
 function clearCanvas(){
@@ -297,7 +346,6 @@ function getMidPt(p1, p2) {
 }
 
 function getMirroredPt(p1, p2) {
-  // mirror A through B (2Bx−Ax, 2By−Ay)
   return {
     x: 2*p2.x - p1.x,
     y: 2*p2.y - p1.y
