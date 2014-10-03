@@ -15,9 +15,11 @@
   http://perfectionkills.com/exploring-canvas-drawing-techniques/#_=_
 
   @TODO:
-  - Fix beginning/end width glitch
-  - Add input filtering for the beginnings/ends?
+  - Fix stepping to end/begin at the same spot (to remove dots)
+  - Fix beginning/end width glitch with new AA function (to remove insect legs)
+  - Add input filtering for the beginnings/ends? (to remove wiggles at ends)
   - Add texture
+    - worried about stepping ruining gaps?
   - Add skipping
 -->
 
@@ -29,9 +31,7 @@ body {
 }
 canvas {
   float: left;
-  /*cursor: url('cursors/cursor.cur'), crosshair;*/
   cursor: none;
-  /*cursor: crosshair;*/
   border: 1px solid gray;
 }
 img {
@@ -70,9 +70,9 @@ a {
 <body>
 <div id="equation">
   <center>
-   <input value="0.2/(x - factor) - 0.12" id="expression"/> &nbsp;&nbsp;@&nbsp;&nbsp;
-   <input value="0" id="width"/> w
-   <input value="0.55" id="step">px
+   <!-- <input value="0.2/(x - factor) - 0.12" id="expression"/> &nbsp;&nbsp;@&nbsp;&nbsp;-->
+   <!-- <input value="0" id="width"/> w -->
+   step &nbsp; <input value="0.55" id="step"> &nbsp; px
  </center>
 </div>
 <canvas id="canvas"></canvas>
@@ -82,6 +82,9 @@ a {
   <br>
   <br>
   <a id="clear">Clear</a>
+  <br>
+  <br>
+  <input type="checkbox" id="cursor"> cursor
 </div>
 <img src="img/circle_ballpoint_4.png" id="texture"/>
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
@@ -109,9 +112,9 @@ var maxy;
 // DOM
 var canvas;
 var imageData;
-var offscreen;
 var save;
 var clear;
+var cursor;
 var texture;
 var plugin;
 var ctx;
@@ -129,11 +132,9 @@ window.onload = function() {
 function initDOMElements() {canvas = document.getElementById('canvas');
   canvas.setAttribute('width', w);
   canvas.setAttribute('height', h);
-  offscreen = document.createElement('canvas');
-  offscreen.setAttribute('width', w);
-  offscreen.setAttribute('height', h);
   save = document.getElementById('save');
   clear = document.getElementById('clear');
+  cursor = document.getElementById('cursor');
   texture = document.getElementById("texture");
   plugin = document.getElementById('wtPlugin');
   inputExpression = document.getElementById('expression');
@@ -149,6 +150,13 @@ function initEvents() {
   }
   clear.onclick = function(e) {
     clearCanvas();
+  }
+  cursor.onclick = function(e) {
+    if(cursor.checked) {
+      canvas.style.cursor ='crosshair';
+    } else {
+      canvas.style.cursor = 'none';
+    }
   }
   canvas.onmousedown = function(e) {
     isDrawing = true;
