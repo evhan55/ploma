@@ -278,23 +278,23 @@ function drawPixel(id, x, y, p) {
       );
 
       // pressure test
-      p = 0;
+      //p = 0;
 
       // antialiasing thin/thick
-      var size = 1.12;
-      size = 0.12;
+      //var size = 1.12;
+      //size = 0.12;
       //var a = -0.2/(dist - size) + 1.12; // p = 0
-      var a = 0.2/(dist - size) - 0.2;
+      //var a = 0.2/(dist - size) - 0.12;
       //var a = -0.1/(dist + 0.2) + 1.04;
       //var a = -0.1/(dist - 1.30) + 1.03; // p = 1
 
       // antialiasing and feathering
-      /*var slope = map(p, 0, 1, -0.2, -0.1);
-      var size = map(p, 0, 1, -0.12, 1.3);
+      var slope = map(p, 0, 1, -0.2, -0.1);
+      var size = map(p, 0, 1, -0.12, 1.2);
       var offset = map(p, 0, 1, 1.12, 1.03);
-      var a = slope/(dist - size) + offset;*/
+      var a = slope/(dist - size) + offset;
       if(dist < size) {
-        a = 1;
+        a = 0;
       }
 
       // non-saturating
@@ -306,7 +306,7 @@ function drawPixel(id, x, y, p) {
       if (a < 0) a = 0; // opaque
       if (a > 1) a = 1; // transparent
 
-      //a = 1 - a; // invert
+      a = 1 - a; // invert
 
       // color
       var r = g = b = 0;
