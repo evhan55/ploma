@@ -1,4 +1,4 @@
-ploma: High-fidelity ballpoint-pen rendering
+Ploma: High-fidelity ballpoint-pen rendering
 ===============================
 
 Ploma is a research project exploring expressive ink rendering using Wacom interactive display tablets.
