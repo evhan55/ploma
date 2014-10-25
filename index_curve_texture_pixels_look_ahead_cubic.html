@@ -168,7 +168,7 @@ function initEvents() {
     var self = this;
     mouseMoveCounter++;
     if (!isDrawing) return;
-    if ((mouseMoveCounter % 7) !== 0) return;
+    //if ((mouseMoveCounter % 7) !== 0) return;
     recordPoint(e);
     redraw();
   }
@@ -205,13 +205,17 @@ function drawCurve(pts) {
   maxx = 0;
   maxy = 0;
 
+  // filter points
+  
+
   // endpoints and control points
   var p0 = pts[0];
   var p3 = pts[1];
   var p1;
   var p2;
+
+  // calculate p1
   if(!lastControlPoint) {
-    // first point
     p1 = {
       x: p0.x + (p3.x - p0.x) * 0.33,
       y: p0.y + (p3.y - p0.y) * 0.33
@@ -219,8 +223,9 @@ function drawCurve(pts) {
   } else {
     p1 = getMirroredPt(lastControlPoint, p0);
   }
+
+  // calculate p2
   if (points.length === 2) {
-    // last point
     p2 = {
       x: p0.x + (p3.x - p0.x) * 0.66,
       y: p0.y + (p3.y - p0.y) * 0.66
@@ -231,6 +236,8 @@ function drawCurve(pts) {
       y: p3.y - (((p3.y - p0.y) + (pts[2].y - p3.y)) / 2 / 3)
     };
   }
+
+  // set last control point
   lastControlPoint = p2;
 
   // length
@@ -242,10 +249,10 @@ function drawCurve(pts) {
   // pressure
   var p = (p0.p + p3.p)/2;
 
-  // step length based on app input
+  // step length based on user input
   var stepLength = parseFloat(inputStep.value);
 
-  // step along curve
+  // step along curve - cubic bezier
   for(var t = 0; t < 1; t += (1/(bezierLength/stepLength))) {
     //(1-t)^3 * x0 + 3*(1-t)^2 * t * x1 + 3*(1-t) * t^2 * x2 + t^3 * x3
     var step_x = Math.pow((1-t),3)*p0.x + 3*Math.pow((1-t),2)*t*p1.x + 3*(1-t)*Math.pow(t,2)*p2.x + Math.pow(t,3)*p3.x;
@@ -254,6 +261,7 @@ function drawCurve(pts) {
   }
 
   //ctx.putImageData(imageData, 0, 0);
+  // using a crude dirty rect
   ctx.putImageData(imageData, 0, 0, minx, miny, maxx-minx+1, maxy-miny+1);
 }
 
@@ -278,23 +286,15 @@ function drawPixel(id, x, y, p) {
       );
 
       // pressure test
-      p = 0;
-
-      // antialiasing thin/thick
-      var size = 1.12;
-      size = 0.12;
-      //var a = -0.2/(dist - size) + 1.12; // p = 0
-      var a = 0.2/(dist - size) - 0.2;
-      //var a = -0.1/(dist + 0.2) + 1.04;
-      //var a = -0.1/(dist - 1.30) + 1.03; // p = 1
+      //p = 0;
 
       // antialiasing and feathering
-      /*var slope = map(p, 0, 1, -0.2, -0.1);
-      var size = map(p, 0, 1, -0.12, 1.3);
+      var slope = map(p, 0, 1, -0.2, -0.1);
+      var size = map(p, 0, 1, -0.12, 1.2);
       var offset = map(p, 0, 1, 1.12, 1.03);
-      var a = slope/(dist - size) + offset;*/
+      var a = slope/(dist - size) + offset;
       if(dist < size) {
-        a = 1;
+        a = 0;
       }
 
       // non-saturating
@@ -306,13 +306,12 @@ function drawPixel(id, x, y, p) {
       if (a < 0) a = 0; // opaque
       if (a > 1) a = 1; // transparent
 
-      //a = 1 - a; // invert
+      a = 1 - a; // invert
 
       // color
       var r = g = b = 0;
 
       // pixel placement within array
-      // byte indexing (vs. pixel indexing)
       // a is all ink
       id.data[idx + 0] = id.data[idx + 0] * (1 - a) + r * a;
       id.data[idx + 1] = id.data[idx + 1] * (1 - a) + g * a;

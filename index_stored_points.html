@@ -1,0 +1,450 @@
+<!-- 
+  Evelyn Eastmond
+  Dan Amelang
+  Communications Design Group
+  SAP
+  2014
+-->
+
+<html>
+<head>
+<style>
+body {
+  font-family: sans-serif;
+}
+canvas {
+  float: left;
+  cursor: none;
+  border: 1px solid gray;
+}
+img {
+  display: none;
+}
+a {
+  padding: 10px;
+  line-height: 40px;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+  -moz-user-select: none;
+}
+#save {
+  background: #3B2D38;
+}
+#clear {
+  background: #F02475;
+}
+#equation {
+  width: 1242px;
+  background: white;
+  font-size: 18px;
+  padding: 30px;
+}
+#equation input{
+  width: 300px;
+  height: 30px;
+  font-size: 18px;
+  border: 1px solid #CCC;
+  padding: 2px;
+}
+</style>
+</head>
+
+<body>
+<canvas id="canvas"></canvas>
+<div id="buttons">
+  <a id="save">Save</a>
+  <br>
+  <br>
+  <br>
+  <a id="clear">Clear</a>
+  <br>
+  <br>
+  <input type="checkbox" id="cursor"> cursor
+</div>
+<img src="img/circle_ballpoint_4.png" id="texture"/>
+<object id="wtPlugin" type="application/x-wacomtabletplugin">
+  <param name="onload" value="pluginLoaded"/>
+</object>
+</body>
+
+<script>
+// State
+var w = 1300;
+var h = 1000;
+var sample = 1;
+var cursorOffsetX = 12;
+var cursorOffsetY = 6;
+var inputStrokes = [];
+var curInputStroke = null;
+var filteredStrokes = [];
+var curFilteredStroke = null;
+var isDrawing = false;
+var minx;
+var maxx;
+var miny;
+var maxy;
+var lastControlPoint;
+var stepOffset = 0;
+var stepInterval = 0.4;
+var filterWeight = 50;
+
+// DOM
+var canvas;
+var imageData;
+var save;
+var clear;
+var cursor;
+var texture;
+var plugin;
+var ctx;
+
+window.onload = function() {
+  initDOMElements();
+  initEvents();
+  clearCanvas();
+}
+
+function initDOMElements() {canvas = document.getElementById('canvas');
+  canvas.setAttribute('width', w);
+  canvas.setAttribute('height', h);
+  save = document.getElementById('save');
+  clear = document.getElementById('clear');
+  cursor = document.getElementById('cursor');
+  texture = document.getElementById("texture");
+  plugin = document.getElementById('wtPlugin');
+  ctx = canvas.getContext('2d');
+  //cursorOffsetY = 5;
+}
+
+function initEvents() {
+  save.onclick = function(e) {
+    window.open(canvas.toDataURL());
+  }
+  clear.onclick = function(e) {
+    clearCanvas();
+  }
+  cursor.onclick = function(e) {
+    if(cursor.checked) {
+      canvas.style.cursor = 'crosshair';
+    } else {
+      canvas.style.cursor = 'none';
+    }
+  }
+  canvas.onmousedown = function(e) {
+    var point = getEventPoint(e);
+    isDrawing = true;
+    stepOffset = stepInterval;
+
+    curInputStroke = [point];
+    inputStrokes.push(curInputStroke);
+
+    curFilteredStroke = [point];
+    filteredStrokes.push(curFilteredStroke);
+  };
+  canvas.onmousemove = function(e) {
+    if (!isDrawing) return;
+    
+    var point = getEventPoint(e);
+
+    // ignore duplicates in the same stroke
+    var lastPoint = curInputStroke.last();
+    if(lastPoint.x === point.x &&
+       lastPoint.y === point.y) {
+      return;
+    }
+    curInputStroke.push(point);
+
+    // filter
+    var len = curInputStroke.length;
+    var fpoint = calculateFilteredPoint(
+      curInputStroke[len - 3],
+      curInputStroke[len - 2],
+      curInputStroke[len - 1]
+    );
+    if(fpoint) {
+      curFilteredStroke.push(fpoint);
+    }
+
+    redraw();
+  }
+  canvas.onmouseup = function(e) {
+    // keep the mouseup point if it's not identical
+    // to the last point
+    var point = getEventPoint(e);
+    var lastInputPoint = curInputStroke.last();
+    if(lastInputPoint.x !== point.x ||
+       lastInputPoint.y !== point.y) {
+      canvas.onmousemove(e);
+    }
+    curFilteredStroke.push(point);
+    isDrawing = false;
+    lastControlPoint = null;
+  };
+}
+
+function redraw() {
+  if (!isDrawing) {
+    return;
+  }
+  // Can't handle single point and double point strokes
+  // 3 points needed for a look-ahead bezier
+  /*if(curInputStroke.length >= 3) {
+    var len = curInputStroke.length;
+    createAndDrawCurve([
+      curInputStroke[len - 3],
+      curInputStroke[len - 2],
+      curInputStroke[len - 1]
+    ]);
+  }*/
+  if(curFilteredStroke.length >= 3) {
+    var len = curFilteredStroke.length;
+    createAndDrawCurve([
+      curFilteredStroke[len - 3],
+      curFilteredStroke[len - 2],
+      curFilteredStroke[len - 1]
+    ]);
+  }
+};
+
+// draws a cubic bezier according to 3 input points
+function createAndDrawCurve(pts) {
+  minx = w;
+  miny = h;
+  maxx = 0;
+  maxy = 0;
+
+  // endpoints and control points
+  var p0 = pts[0];
+  var p3 = pts[1];
+  var p1;
+  var p2;
+
+  // calculate p1
+  if(!lastControlPoint) {
+    p1 = {
+      x: p0.x + (p3.x - p0.x) * 0.33,
+      y: p0.y + (p3.y - p0.y) * 0.33,
+      p: p0.p + (p3.p - p0.p) * 0.33
+    };
+  } else {
+    p1 = getMirroredPt(lastControlPoint, p0);
+  }
+
+  // calculate p2
+  if (pts[2]) {
+    p2 = {
+      x: p3.x - (((p3.x - p0.x) + (pts[2].x - p3.x)) / 2 / 3),
+      y: p3.y - (((p3.y - p0.y) + (pts[2].y - p3.y)) / 2 / 3),
+      p: p3.p - (((p3.p - p0.p) + (pts[2].p - p3.p)) / 2 / 3)
+    };
+  } else {
+    p2 = {
+      x: p0.x + (p3.x - p0.x) * 0.66,
+      y: p0.y + (p3.y - p0.y) * 0.66,
+      p: p0.p + (p3.p - p0.p) * 0.66
+    };
+  }
+
+  // set last control point
+  lastControlPoint = p2;
+
+  // step along curve - cubic bezier - evenly
+  var stepPoints = calculateStepPoints({
+    p0: p0,
+    p1: p1,
+    p2: p2,
+    p3: p3
+  });
+  for(var i = 0; i < stepPoints.length; i++) {
+    drawPixel(imageData, stepPoints[i]);
+  }
+
+  // set image using a crude dirty rect
+  ctx.putImageData(imageData, 0, 0, minx, miny, maxx-minx+10, maxy-miny+10);
+}
+
+function calculateStepPoints(bezier) {
+  var stepPoints = [];
+  var i = stepInterval;
+  var p0_x = bezier.p0.x;
+  var p0_y = bezier.p0.y;
+  var p0_p = bezier.p0.p;
+  var p1_x = bezier.p1.x;
+  var p1_y = bezier.p1.y;
+  var p1_p = bezier.p1.p;
+  var p2_x = bezier.p2.x;
+  var p2_y = bezier.p2.y;
+  var p2_p = bezier.p2.p;
+  var p3_x = bezier.p3.x;
+  var p3_y = bezier.p3.y;
+  var p3_p = bezier.p3.p;
+
+  // algebraic conveniences
+  // not geometric
+  var A_x = p3_x - 3 * p2_x + 3 * p1_x - p0_x;
+  var A_y = p3_y - 3 * p2_y + 3 * p1_y - p0_y;
+  var A_p = p3_p - 3 * p2_p + 3 * p1_p - p0_p;
+  var B_x = 3 * p2_x - 6 * p1_x + 3 * p0_x;
+  var B_y = 3 * p2_y - 6 * p1_y + 3 * p0_y;
+  var B_p = 3 * p2_p - 6 * p1_p + 3 * p0_p;
+  var C_x = 3 * p1_x - 3 * p0_x;
+  var C_y = 3 * p1_y - 3 * p0_y;
+  var C_p = 3 * p1_p - 3 * p0_p;
+
+  var TA_x = 3 * A_x; // triple A
+  var TA_y = 3 * A_y;
+  var TA_p = 3 * A_p;
+  var DB_x = 2 * B_x; // double B
+  var DB_y = 2 * B_y;
+  var DB_p = 2 * B_p;
+
+  var t = (i - stepOffset) / Math.sqrt(C_x * C_x + C_y * C_y); // s = derivative
+
+  while (t <= 1.0) {
+    // point
+    var step_x = t * (t * (t * A_x + B_x) + C_x) + p0_x;
+    var step_y = t * (t * (t * A_y + B_y) + C_y) + p0_y;
+    var step_p = t * (t * (t * A_p + B_p) + C_p) + p0_p;
+    stepPoints.push({x: step_x, y: step_y, p: step_p});
+
+    // step distance til next one
+    var s_x = t * (t * TA_x + DB_x) + C_x; // derivative x dx/dt
+    var s_y = t * (t * TA_y + DB_y) + C_y; // derivative y dy/dt
+    var s = Math.sqrt(s_x * s_x + s_y * s_y); // derivative in 2D space
+    var dt = i / s; // i = interval / derivative in 2D
+    t = t + dt;
+  }
+
+  // TODO maybe later use a better approximation for distance along the bezier?
+  if (stepPoints.length == 0) // We didn't step at all along this Bezier
+    stepOffset = stepOffset + getDistance(bezier.p0, bezier.p3);
+  else
+    stepOffset = getDistance(stepPoints.last(), bezier.p3);
+
+  return stepPoints;
+}
+
+function calculateFilteredPoint(p1, p2, p3) {
+  var w = filterWeight / 100; // Convert from the percentage
+  if (p1 == null || p2 == null || p3 == null) // Not enough points yet to filter
+    return null;
+  var m = getMidPt(p1, p3);
+  //debug("Calculated filtered point:");
+  //debug(new Point(w * p2.x + (1 - w) * m.x, w * p2.y + (1 - w) * m.y));
+  return {
+    x: w * p2.x + (1 - w) * m.x,
+    y: w * p2.y + (1 - w) * m.y,
+    p: w * p2.p + (1 - w) * m.p
+  };
+}
+
+function drawPixel(id, point) {
+  var x = point.x;
+  var y = point.y;
+  var p = point.p;
+  p = 0.2; // turn pressure off
+
+  // top left corner
+  for(var i = Math.round(x) - 2; i < Math.round(x) + 3; i++) {
+    for(var j = Math.round(y) - 2; j < Math.round(y) + 3; j++) {
+
+      // update bounding rect
+      minx = Math.min(minx, i);
+      maxx = Math.max(maxx, i);
+      miny = Math.min(miny, j);
+      maxy = Math.max(maxy, j);
+
+      // distance
+      var dist = getDistance(
+        {x: x, y: y},
+        {x: i, y: j}
+      );
+
+      // antialiasing and feathering
+      var slope = map(p, 0, 1, 0.0035, 0.1);
+      var size = map(p, 0, 1, -0.4, 1);
+      var offset = map(p, 0, 1, -0.0045, -0.06);
+      var a = slope/(dist - size) + offset;
+
+      // spike
+      if(dist < size) {
+        a = 1;
+      }
+
+      // non-saturating
+      //if(a < 0.25) {
+      //  a = 0.25;
+      //}
+      
+      // clamp alpha
+      if (a < 0) a = 0; // opaque
+      if (a > 1) a = 1; // transparent
+
+      // color
+      var r = g = b = 0;
+
+      // byte-index pixel placement within array
+      // old * (1-a) + new * a
+      var idx = (i + j*w)*4;
+      id.data[idx + 0] = id.data[idx + 0] * (1 - a) + r * a;
+      id.data[idx + 1] = id.data[idx + 1] * (1 - a) + g * a;
+      id.data[idx + 2] = id.data[idx + 2] * (1 - a) + b * a;
+      id.data[idx + 3] = 255;
+    }
+  }
+}
+
+function getEventPoint(e) {
+  var point = {
+    x   : e.clientX - cursorOffsetX,
+    y   : e.clientY - cursorOffsetY,
+    p   : (plugin ? plugin.penAPI.pressure : 1)
+  };
+  return point;
+}
+
+function clearCanvas(){
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = 'rgb(253, 254, 251)';
+  ctx.fillStyle = 'rgb(255, 255, 255)';
+  ctx.globalAlpha = 1;
+  ctx.fillRect(0, 0, w, h);
+  imageData = ctx.getImageData(0, 0, w, h);
+}
+
+// UTILS
+
+Array.prototype.last = function(){
+  return this[this.length - 1];
+}
+
+function getMidPt(p1, p2) {
+  return {
+    x: (p1.x + p2.x) / 2,
+    y: (p1.y + p2.y) / 2,
+    p: (p1.p + p2.p) / 2
+  };
+}
+
+function getMirroredPt(p1, p2) {
+  return {
+    x: 2*p2.x - p1.x,
+    y: 2*p2.y - p1.y,
+    p: 2*p2.p - p1.p
+  }
+}
+
+function getDistance(p1, p2) {
+  var dx = p1.x - p2.x;
+  var dy = p1.y - p2.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function map(value, valueMin, valueMax, from, to) {
+  var ratio = (value - valueMin) / (valueMax - valueMin);
+  return from + ratio * (to - from);
+}
+
+</script>
+</html>
