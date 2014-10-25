@@ -1,68 +1,64 @@
-<!-- 
+<!--
+  Ploma - High-fidelity ballpoint pen rendering
+
   Evelyn Eastmond
   Dan Amelang
   Communications Design Group
   SAP
-  2014
+  (c) 2014
 -->
 
 <html>
 <head>
 <style>
-body {
-  font-family: sans-serif;
-}
-canvas {
-  float: left;
-  cursor: none;
-  border: 1px solid gray;
-}
-img {
-  display: none;
-}
-a {
-  padding: 10px;
-  line-height: 40px;
-  cursor: pointer;
-  color: white;
-  text-decoration: none;
-  -moz-user-select: none;
-}
-#save {
-  background: #3B2D38;
-}
-#clear {
-  background: #F02475;
-}
-#equation {
-  width: 1242px;
-  background: white;
-  font-size: 18px;
-  padding: 30px;
-}
-#equation input{
-  width: 300px;
-  height: 30px;
-  font-size: 18px;
-  border: 1px solid #CCC;
-  padding: 2px;
-}
+  body {
+    font-family: sans-serif;
+  }
+  canvas {
+    float: left;
+    cursor: none;
+    border: 1px solid gray;
+  }
+  img {
+    display: none;
+  }
+  a {
+    padding: 10px;
+    line-height: 40px;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+  }
+  .noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  #save {
+    background: #3B2D38;
+  }
+  #clear {
+    background: #F02475;
+  }
 </style>
 </head>
 
 <body>
 <canvas id="canvas"></canvas>
 <div id="buttons">
-  <a id="save">Save</a>
+  <a id="save" class="noselect">Save</a>
   <br>
   <br>
   <br>
-  <a id="clear">Clear</a>
+  <a id="clear" class="noselect">Clear</a>
   <br>
   <br>
-  <input type="checkbox" id="cursor"> cursor
+  <input type="checkbox" id="cursor" class="noselect"/> cursor
 </div>
-<img src="img/circle_ballpoint_4.png" id="texture"/>
+<!-- <img src="img/circle_ballpoint_4.png" id="texture"/> -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded"/>
 </object>
@@ -72,7 +68,6 @@ a {
 // State
 var w = 1300;
 var h = 1000;
-var sample = 1;
 var cursorOffsetX = 12;
 var cursorOffsetY = 6;
 var inputStrokes = [];
@@ -80,14 +75,15 @@ var curInputStroke = null;
 var filteredStrokes = [];
 var curFilteredStroke = null;
 var isDrawing = false;
-var minx;
-var maxx;
-var miny;
-var maxy;
-var lastControlPoint;
+var minx = null;
+var maxx = null;
+var miny = null;
+var maxy = null;
+var lastControlPoint = null;
 var stepOffset = 0;
-var stepInterval = 0.4;
+var stepInterval = 0.35;
 var filterWeight = 50;
+var mouseMoveCounter = 0;
 
 // DOM
 var canvas;
@@ -98,6 +94,7 @@ var cursor;
 var texture;
 var plugin;
 var ctx;
+var paperColor = 'rgb(255, 255, 255)';
 
 window.onload = function() {
   initDOMElements();
@@ -114,7 +111,6 @@ function initDOMElements() {canvas = document.getElementById('canvas');
   texture = document.getElementById("texture");
   plugin = document.getElementById('wtPlugin');
   ctx = canvas.getContext('2d');
-  //cursorOffsetY = 5;
 }
 
 function initEvents() {
@@ -143,7 +139,9 @@ function initEvents() {
     filteredStrokes.push(curFilteredStroke);
   };
   canvas.onmousemove = function(e) {
+    mouseMoveCounter++;
     if (!isDrawing) return;
+    if (mouseMoveCounter % 2 === 0) return;
     
     var point = getEventPoint(e);
 
@@ -155,7 +153,7 @@ function initEvents() {
     }
     curInputStroke.push(point);
 
-    // filter
+    // filter inputs
     var len = curInputStroke.length;
     var fpoint = calculateFilteredPoint(
       curInputStroke[len - 3],
@@ -187,16 +185,8 @@ function redraw() {
   if (!isDrawing) {
     return;
   }
-  // Can't handle single point and double point strokes
+  // TODO: Handle single point and double point strokes
   // 3 points needed for a look-ahead bezier
-  /*if(curInputStroke.length >= 3) {
-    var len = curInputStroke.length;
-    createAndDrawCurve([
-      curInputStroke[len - 3],
-      curInputStroke[len - 2],
-      curInputStroke[len - 1]
-    ]);
-  }*/
   if(curFilteredStroke.length >= 3) {
     var len = curFilteredStroke.length;
     createAndDrawCurve([
@@ -207,7 +197,7 @@ function redraw() {
   }
 };
 
-// draws a cubic bezier according to 3 input points
+// draw a cubic bezier based on 3 points
 function createAndDrawCurve(pts) {
   minx = w;
   miny = h;
@@ -250,88 +240,64 @@ function createAndDrawCurve(pts) {
   lastControlPoint = p2;
 
   // step along curve - cubic bezier - evenly
-  var stepPoints = calculateStepPoints({
-    p0: p0,
-    p1: p1,
-    p2: p2,
-    p3: p3
-  });
+  var stepPoints = calculateStepPoints(p0, p1, p2, p3);
   for(var i = 0; i < stepPoints.length; i++) {
-    drawPixel(imageData, stepPoints[i]);
+    drawStep(imageData, stepPoints[i]);
   }
 
   // set image using a crude dirty rect
   ctx.putImageData(imageData, 0, 0, minx, miny, maxx-minx+10, maxy-miny+10);
 }
 
-function calculateStepPoints(bezier) {
+// calculate event steps along a bezier (p0, p1, p2, p3)
+function calculateStepPoints(p0, p1, p2, p3) {
   var stepPoints = [];
   var i = stepInterval;
-  var p0_x = bezier.p0.x;
-  var p0_y = bezier.p0.y;
-  var p0_p = bezier.p0.p;
-  var p1_x = bezier.p1.x;
-  var p1_y = bezier.p1.y;
-  var p1_p = bezier.p1.p;
-  var p2_x = bezier.p2.x;
-  var p2_y = bezier.p2.y;
-  var p2_p = bezier.p2.p;
-  var p3_x = bezier.p3.x;
-  var p3_y = bezier.p3.y;
-  var p3_p = bezier.p3.p;
 
   // algebraic conveniences
   // not geometric
-  var A_x = p3_x - 3 * p2_x + 3 * p1_x - p0_x;
-  var A_y = p3_y - 3 * p2_y + 3 * p1_y - p0_y;
-  var A_p = p3_p - 3 * p2_p + 3 * p1_p - p0_p;
-  var B_x = 3 * p2_x - 6 * p1_x + 3 * p0_x;
-  var B_y = 3 * p2_y - 6 * p1_y + 3 * p0_y;
-  var B_p = 3 * p2_p - 6 * p1_p + 3 * p0_p;
-  var C_x = 3 * p1_x - 3 * p0_x;
-  var C_y = 3 * p1_y - 3 * p0_y;
-  var C_p = 3 * p1_p - 3 * p0_p;
-
-  var TA_x = 3 * A_x; // triple A
-  var TA_y = 3 * A_y;
-  var TA_p = 3 * A_p;
-  var DB_x = 2 * B_x; // double B
-  var DB_y = 2 * B_y;
-  var DB_p = 2 * B_p;
+  var A_x = p3.x - 3 * p2.x + 3 * p1.x - p0.x;
+  var A_y = p3.y - 3 * p2.y + 3 * p1.y - p0.y;
+  var A_p = p3.p - 3 * p2.p + 3 * p1.p - p0.p;
+  var B_x = 3 * p2.x - 6 * p1.x + 3 * p0.x;
+  var B_y = 3 * p2.y - 6 * p1.y + 3 * p0.y;
+  var B_p = 3 * p2.p - 6 * p1.p + 3 * p0.p;
+  var C_x = 3 * p1.x - 3 * p0.x;
+  var C_y = 3 * p1.y - 3 * p0.y;
+  var C_p = 3 * p1.p - 3 * p0.p;
 
   var t = (i - stepOffset) / Math.sqrt(C_x * C_x + C_y * C_y); // s = derivative
 
   while (t <= 1.0) {
     // point
-    var step_x = t * (t * (t * A_x + B_x) + C_x) + p0_x;
-    var step_y = t * (t * (t * A_y + B_y) + C_y) + p0_y;
-    var step_p = t * (t * (t * A_p + B_p) + C_p) + p0_p;
+    var step_x = t * (t * (t * A_x + B_x) + C_x) + p0.x;
+    var step_y = t * (t * (t * A_y + B_y) + C_y) + p0.y;
+    var step_p = t * (t * (t * A_p + B_p) + C_p) + p0.p;
     stepPoints.push({x: step_x, y: step_y, p: step_p});
 
     // step distance til next one
-    var s_x = t * (t * TA_x + DB_x) + C_x; // derivative x dx/dt
-    var s_y = t * (t * TA_y + DB_y) + C_y; // derivative y dy/dt
+    var s_x = t * (t * 3 * A_x + 2 * B_x) + C_x; // dx/dt
+    var s_y = t * (t * 3 * A_y + 2 * B_y) + C_y; // dy/dt
     var s = Math.sqrt(s_x * s_x + s_y * s_y); // derivative in 2D space
     var dt = i / s; // i = interval / derivative in 2D
     t = t + dt;
   }
 
-  // TODO maybe later use a better approximation for distance along the bezier?
+  // TODO: maybe later use a better approximation for distance along the bezier?
   if (stepPoints.length == 0) // We didn't step at all along this Bezier
-    stepOffset = stepOffset + getDistance(bezier.p0, bezier.p3);
+    stepOffset = stepOffset + getDistance(p0, p3);
   else
-    stepOffset = getDistance(stepPoints.last(), bezier.p3);
+    stepOffset = getDistance(stepPoints.last(), p3);
 
   return stepPoints;
 }
 
+// calculate filtered point values to sanitize input
 function calculateFilteredPoint(p1, p2, p3) {
-  var w = filterWeight / 100; // Convert from the percentage
-  if (p1 == null || p2 == null || p3 == null) // Not enough points yet to filter
-    return null;
+  var w = filterWeight / 100;
+  if (p1 == null || p2 == null || p3 == null)
+    return null; // Not enough points yet to filter
   var m = getMidPt(p1, p3);
-  //debug("Calculated filtered point:");
-  //debug(new Point(w * p2.x + (1 - w) * m.x, w * p2.y + (1 - w) * m.y));
   return {
     x: w * p2.x + (1 - w) * m.x,
     y: w * p2.y + (1 - w) * m.y,
@@ -339,13 +305,43 @@ function calculateFilteredPoint(p1, p2, p3) {
   };
 }
 
-function drawPixel(id, point) {
+// calculate non-linear width (range [-2, 1]) based on pressure
+function calculateWidth(p) {
+  var width;
+  // TODO: use a switch somehow for these range checks?
+  if(p < 0) { // from bezier
+    width = -2;
+  }
+  if(p < 0.4) {
+    width = map(p, 0, 0.4, -2, 0.2);
+  } 
+  if((p >= 0.4) && (p < 0.45)) {
+    width = map(p, 0.4, 0.45, 0.2, 0.25);
+  }
+  if((p >= 0.45) && (p < 0.8)) {
+    width = map(p, 0.45, 0.8, 0.25, 0.50);
+  }
+  if((p >= 0.8) && (p < 0.95)) {
+    width = map(p, 0.8, 0.95, 0.5, 0.6);
+  }
+  if((p >= 0.95) && (p <=0.99)) {
+    width = map(p, 0.95, 0.99, 0.6, 0.65);
+  }
+  if((p >= 0.99) && (p <=1)) {
+    width = map(p, 0.99, 1, 0.65, 0.85);
+  }
+  if(p > 1) { // from bezier
+    width = 1;
+  }
+  return width;
+}
+
+// draw a pixel grid at a step point
+function drawStep(id, point) {
   var x = point.x;
   var y = point.y;
-  var p = point.p;
-  p = 0.2; // turn pressure off
+  var width = calculateWidth(point.p);
 
-  // top left corner
   for(var i = Math.round(x) - 2; i < Math.round(x) + 3; i++) {
     for(var j = Math.round(y) - 2; j < Math.round(y) + 3; j++) {
 
@@ -361,28 +357,22 @@ function drawPixel(id, point) {
         {x: i, y: j}
       );
 
-      // antialiasing and feathering
-      var slope = map(p, 0, 1, 0.0035, 0.1);
-      var size = map(p, 0, 1, -0.4, 1);
-      var offset = map(p, 0, 1, -0.0045, -0.06);
-      var a = slope/(dist - size) + offset;
+      // antialiasing
+      var a = 0.1/(dist - width) - 0.06;
 
       // spike
-      if(dist < size) {
+      if(dist < width) {
         a = 1;
       }
-
-      // non-saturating
-      //if(a < 0.25) {
-      //  a = 0.25;
-      //}
       
       // clamp alpha
-      if (a < 0) a = 0; // opaque
-      if (a > 1) a = 1; // transparent
+      if (a < 0) a = 0;
+      if (a > 1) a = 1;
 
       // color
-      var r = g = b = 0;
+      var r = 55;
+      var g = 55;
+      var b = 80;
 
       // byte-index pixel placement within array
       // old * (1-a) + new * a
@@ -397,17 +387,16 @@ function drawPixel(id, point) {
 
 function getEventPoint(e) {
   var point = {
-    x   : e.clientX - cursorOffsetX,
-    y   : e.clientY - cursorOffsetY,
-    p   : (plugin ? plugin.penAPI.pressure : 1)
+    x: e.clientX - cursorOffsetX,
+    y: e.clientY - cursorOffsetY,
+    p: (plugin ? plugin.penAPI.pressure : 1)
   };
   return point;
 }
 
 function clearCanvas(){
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = 'rgb(253, 254, 251)';
-  ctx.fillStyle = 'rgb(255, 255, 255)';
+  ctx.fillStyle = paperColor;
   ctx.globalAlpha = 1;
   ctx.fillRect(0, 0, w, h);
   imageData = ctx.getImageData(0, 0, w, h);
