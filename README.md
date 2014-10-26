@@ -29,12 +29,14 @@ TODO: License
 
 * RGB of stroke is probably inaccurate, the app should probably be using black for now
 * Last mouseup stroke may be missing and not being drawn
+* Curves not completely accurate
 * Latency
 
 ##### TODO
 
 * Add texturing and inkflow anomalies
 * Switch to CIELab color space?
+* Address curves with more input filtering or sampling?
 * Refactor Point and Bezier objects
 * Rewrite as stream that accepts pre-recorded strokes for non-realtime use
 * Optimize to decrease input latency
