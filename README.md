@@ -27,7 +27,7 @@ TODO: License
 
 ##### TODO
 
-* Add texturing
+* Add texturing and inkflow anomalies
 * Refactor Point and Bezier objects
 * Rewrite as stream that accepts pre-recorded strokes for non-realtime use
 * Optimize to decrease input latency
