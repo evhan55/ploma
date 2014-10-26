@@ -18,8 +18,10 @@ TODO: License
 *Check with Dan Amelang for color consistency across screens*
 
 1. Open `index.html` in a WebKit browser
-2. Use mouse or Wacom input device to draw on canvas
-3. (OPTIONAL) Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
+2. Draw on canvas with a Wacom pen input or check 'Use Mouse' to use a mouse
+3. (OPTIONAL)
+    * Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
+    * Toggle 'Show Cursor' to show a mouse cursor
 
 ##### API Notes
 
