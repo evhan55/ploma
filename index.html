@@ -60,7 +60,9 @@ TODO: License
   <br>
   <br>
   <br>
-  <input type="checkbox" id="cursor" class="noselect"/> Cursor
+  <input type="checkbox" id="cursor" class="noselect"/> Show Cursor
+  <br>
+  <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
 </div>
 <!-- <img src="img/circle_ballpoint_4.png" id="texture"/> -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
@@ -89,6 +91,7 @@ var stepInterval = 0.35;
 var filterWeight = 50;
 var mouseMoveCounter = 0;
 var mouseLifted = false;
+var useMouse = false;
 
 // DOM
 var canvas;
@@ -131,6 +134,9 @@ function initEvents() {
     } else {
       canvas.style.cursor = 'none';
     }
+  }
+  mouse.onclick = function(e) {
+    useMouse = mouse.checked;
   }
   canvas.onmousedown = function(e) {
     var point = getEventPoint(e);
@@ -398,7 +404,7 @@ function getEventPoint(e) {
   var point = {
     x: e.clientX - cursorOffsetX,
     y: e.clientY - cursorOffsetY,
-    p: (plugin.penAPI ? plugin.penAPI.pressure : 1)
+    p: (useMouse ? 1: plugin.penAPI.pressure)
   };
   return point;
 }
