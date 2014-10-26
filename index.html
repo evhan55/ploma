@@ -1,11 +1,15 @@
 <!--
-  Ploma - High-fidelity ballpoint pen rendering
+Ploma - High-fidelity ballpoint pen rendering
+v0.1
+Optimized for Wacom Cintiq 13HD
 
-  Evelyn Eastmond
-  Dan Amelang
-  Communications Design Group
-  SAP
-  (c) 2014
+Evelyn Eastmond
+Dan Amelang
+Communications Design Group
+SAP
+(c) 2014
+
+TODO: License
 -->
 
 <html>
@@ -52,11 +56,11 @@
   <a id="save" class="noselect">Save</a>
   <br>
   <br>
-  <br>
   <a id="clear" class="noselect">Clear</a>
   <br>
   <br>
-  <input type="checkbox" id="cursor" class="noselect"/> cursor
+  <br>
+  <input type="checkbox" id="cursor" class="noselect"/> Cursor
 </div>
 <!-- <img src="img/circle_ballpoint_4.png" id="texture"/> -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
@@ -189,7 +193,7 @@ function redraw() {
   // 3 points needed for a look-ahead bezier
   if(curFilteredStroke.length >= 3) {
     var len = curFilteredStroke.length;
-    createAndDrawCurve([
+    createAndDrawBezier([
       curFilteredStroke[len - 3],
       curFilteredStroke[len - 2],
       curFilteredStroke[len - 1]
@@ -198,7 +202,7 @@ function redraw() {
 };
 
 // draw a cubic bezier based on 3 points
-function createAndDrawCurve(pts) {
+function createAndDrawBezier(pts) {
   minx = w;
   miny = h;
   maxx = 0;
