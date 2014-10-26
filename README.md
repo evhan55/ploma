@@ -14,11 +14,6 @@ TODO: License
 
 ------------
 
-##### v0.1 Notes
-
-* Test version for November 2014
-* Testers: pay attention to the pressure/width response and the antialiasing (but not texture), feedback welcome via email!
-
 ##### Getting Started
 *Best used on a Wacom Cintiq 13HD*  
 *Check with Dan Amelang for color consistency across screens*
@@ -28,6 +23,11 @@ TODO: License
 3. (OPTIONAL)
     * Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
     * Toggle 'Show Cursor' to show a mouse cursor
+
+##### v0.1 Notes
+
+* Test version for November 2014
+* Testers: pay attention to the pressure/width response and the antialiasing (but not texture), feedback welcome via email!
 
 ##### API Notes
 
