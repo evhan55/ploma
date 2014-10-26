@@ -1,4 +1,4 @@
-##### Ploma - High-fidelity ballpoint pen rendering  
+##### Ploma - High-fidelity ballpoint pen rendering
 v0.1  
 Optimized for Wacom Cintiq 13HD  
 
@@ -18,6 +18,7 @@ TODO: License
 
 ##### Getting Started
 
+0. **Best used on a Wacom Cintiq 13HD**
 1. Open `index.html` in a browser
 2. Use mouse or Wacom input device to draw on canvas
 3. (OPTIONAL) Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
