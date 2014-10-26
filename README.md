@@ -28,7 +28,8 @@ TODO: License
 ##### Known Issues
 
 * RGB of stroke is probably inaccurate, the app should probably be using black for now
-* Last mouseup stroke may be missing and not being drawing
+* Last mouseup stroke may be missing and not being drawn
+* Latency
 
 ##### TODO
 
