@@ -254,7 +254,7 @@ function createAndDrawBezier(pts) {
   // set last control point
   lastControlPoint = p2;
 
-  // step along curve - cubic bezier - evenly
+  // step along curve
   var stepPoints = calculateStepPoints(p0, p1, p2, p3);
   for(var i = 0; i < stepPoints.length; i++) {
     drawStep(imageData, stepPoints[i]);
@@ -264,7 +264,7 @@ function createAndDrawBezier(pts) {
   ctx.putImageData(imageData, 0, 0, minx, miny, maxx-minx+10, maxy-miny+10);
 }
 
-// calculate event steps along a bezier (p0, p1, p2, p3)
+// calculate even steps along a bezier (p0, p1, p2, p3)
 function calculateStepPoints(p0, p1, p2, p3) {
   var stepPoints = [];
   var i = stepInterval;
