@@ -17,7 +17,7 @@ TODO: License
 *Best used on a Wacom Cintiq 13HD*  
 *Check with Dan Amelang for color consistency across screens*
 
-1. Open `index.html` in a browser
+1. Open `index.html` in Firefox *(Safari and Chrome work with pen only, no mouse)*
 2. Use mouse or Wacom input device to draw on canvas
 3. (OPTIONAL) Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
 

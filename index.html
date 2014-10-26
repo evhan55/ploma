@@ -398,7 +398,7 @@ function getEventPoint(e) {
   var point = {
     x: e.clientX - cursorOffsetX,
     y: e.clientY - cursorOffsetY,
-    p: (plugin ? plugin.penAPI.pressure : 1)
+    p: (plugin.penAPI ? plugin.penAPI.pressure : 1)
   };
   return point;
 }
