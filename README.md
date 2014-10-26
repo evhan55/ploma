@@ -23,10 +23,11 @@ TODO: License
 ##### API Notes
 
 * `filteredStrokes` contains the collected point information
-* Input filtering, bezier geometry and even stepping from Dan Amelang's research
+* Input filtering, bezier geometry and even stepping is taken from Dan Amelang's research
 
 ##### TODO
 
 * Add texturing
 * Refactor Point and Bezier objects
+* Rewrite as stream that accepts pre-recorded strokes for non-realtime use
 * Optimize to decrease input latency
