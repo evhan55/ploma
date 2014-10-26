@@ -1,7 +1,8 @@
 ##### Ploma - High-fidelity ballpoint pen rendering
 v0.1   
 
-Evelyn Eastmond, Dan Amelang    
+Evelyn Eastmond, Dan Amelang   
+evhan55@gmail.com   
 Communications Design Group, SAP  
 &copy; 2014  
   
@@ -12,6 +13,11 @@ TODO: License
 ![](http://38.media.tumblr.com/2bd5a0e58685fc5f5e92ae5d67cd9da6/tumblr_ne0yxflMCX1tvh0uyo1_500.png)
 
 ------------
+
+##### v0.1 Notes
+
+* Test version for November 2014
+* Testers: pay attention to the pressure/width response and the antialiasing (but not texture), feedback welcome via email!
 
 ##### Getting Started
 *Best used on a Wacom Cintiq 13HD*  
