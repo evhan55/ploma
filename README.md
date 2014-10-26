@@ -25,9 +25,16 @@ TODO: License
 * `filteredStrokes` contains the collected point information
 * Input filtering, bezier geometry and even stepping is taken from Dan Amelang's research
 
+##### Known Issues
+
+* RGB of stroke is probably inaccurate, the app should probably be using black for now
+* Last mouseup stroke may be missing and not being drawing
+
 ##### TODO
 
 * Add texturing and inkflow anomalies
+* Switch to CIELab color space?
 * Refactor Point and Bezier objects
 * Rewrite as stream that accepts pre-recorded strokes for non-realtime use
 * Optimize to decrease input latency
+* Test, etc. ?

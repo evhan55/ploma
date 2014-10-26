@@ -88,6 +88,7 @@ var stepOffset = 0;
 var stepInterval = 0.35;
 var filterWeight = 50;
 var mouseMoveCounter = 0;
+var mouseLifted = false;
 
 // DOM
 var canvas;
@@ -145,7 +146,10 @@ function initEvents() {
   canvas.onmousemove = function(e) {
     mouseMoveCounter++;
     if (!isDrawing) return;
-    if (mouseMoveCounter % 2 === 0) return;
+    if (!mouseLifted) {
+      if (mouseMoveCounter % 2 === 0) return;
+    }
+    mouseLifted = false;
     
     var point = getEventPoint(e);
 
@@ -177,6 +181,7 @@ function initEvents() {
     var lastInputPoint = curInputStroke.last();
     if(lastInputPoint.x !== point.x ||
        lastInputPoint.y !== point.y) {
+      mouseLifted = true;
       canvas.onmousemove(e);
     }
     curFilteredStroke.push(point);
