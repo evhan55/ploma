@@ -14,7 +14,7 @@ TODO: License
 ------------
 
 ##### Getting Started
-**Best used on a Wacom Cintiq 13HD**  
+*Best used on a Wacom Cintiq 13HD*  
 
 1. Open `index.html` in a browser
 2. Use mouse or Wacom input device to draw on canvas
