@@ -52,11 +52,11 @@ TODO: License
 
 ##### v0.1
 
-* Test version for November 2014:
+* Test version for November 2014
 * Includes:
     * input santizing
     * on-the-fly cubic bezier fitting using a look-ahead point
     * even stepping along beziers for drawing steps
-    * variable-width anti-aliasing
+    * variable-width antialiasing
     * 'Clear' and 'Save' functionality
 * **Testers**: Pay attention to the pressure/width response and the antialiasing (but not texture), feedback welcome via email!
