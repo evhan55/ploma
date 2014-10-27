@@ -24,17 +24,6 @@ TODO: License
     * Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
     * Toggle 'Show Cursor' to show a mouse cursor
 
-##### v0.1 Notes
-
-* Test version for November 2014:
-* Includes:
-    * input santizing
-    * on-the-fly cubic bezier fitting using a look-ahead point
-    * even stepping along beziers for drawing steps
-    * variable-width anti-aliasing
-    * 'Clear' and 'Save' functionality
-* **Testers**: Pay attention to the pressure/width response and the antialiasing (but not texture), feedback welcome via email!
-
 ##### API Notes
 
 * `filteredStrokes` contains the collected point information
@@ -57,3 +46,17 @@ TODO: License
 * Rewrite as stream that accepts pre-recorded strokes for non-realtime use
 * Optimize to decrease input latency
 * Test, etc. ?
+
+------------
+##### Version Notes
+
+##### v0.1
+
+* Test version for November 2014:
+* Includes:
+    * input santizing
+    * on-the-fly cubic bezier fitting using a look-ahead point
+    * even stepping along beziers for drawing steps
+    * variable-width anti-aliasing
+    * 'Clear' and 'Save' functionality
+* **Testers**: Pay attention to the pressure/width response and the antialiasing (but not texture), feedback welcome via email!
