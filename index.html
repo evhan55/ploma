@@ -401,6 +401,10 @@ function drawStep(id, point) {
 }
 
 function getEventPoint(e) {
+  if (!useMouse || !plugin.penAPI || !plugin.penAPI.pressure){
+    alert("Whoops. Unable to determine Pen Pressure. Please ensure your stylus is properly set up.");
+  }
+
   var point = {
     x: e.clientX - cursorOffsetX,
     y: e.clientY - cursorOffsetY,
