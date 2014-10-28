@@ -123,6 +123,8 @@ function initDOMElements() {
 
   // If pen is not detected at startup
   // assume that we're using a mouse
+  // TODO: check for plugin loading time, it is
+  // not as synchronous as it seems
   if (!plugin.penAPI || !plugin.penAPI.pressure) {
     useMouse = true;
     mouse.checked = true;
