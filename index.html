@@ -401,6 +401,13 @@ function drawStep(id, point) {
 }
 
 function getEventPoint(e) {
+  
+  // If pen pressure can't be retrieved,
+  // assume that we're using a mouse
+  if (!plugin.penAPI || !plugin.penAPI.pressure) {
+    useMouse = true;
+  }
+
   var point = {
     x: e.clientX - cursorOffsetX,
     y: e.clientY - cursorOffsetY,
