@@ -18,6 +18,7 @@ TODO: License
 *Best used on a Wacom Cintiq 13HD*  
 *Check with Dan Amelang for color consistency across screens*
 
+0. Make sure Wacom browser plugin is installed (automatically included when you install any Wacom stylus)
 1. Open `index.html` in a WebKit browser
 2. Draw on canvas with a Wacom pen input or check 'Use Mouse' to use a mouse
 3. (OPTIONAL)
@@ -60,3 +61,4 @@ TODO: License
     * variable-width antialiasing
     * 'Clear' and 'Save' functionality
 * **Testers**: Pay attention to the pressure/width response and the antialiasing (but not texture), feedback welcome via email!
+* Needs more testing with/without plugin, across all browsers.  Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
