@@ -125,6 +125,7 @@ function initDOMElements() {
   // assume that we're using a mouse
   if (!plugin.penAPI || !plugin.penAPI.pressure) {
     useMouse = true;
+    mouse.checked = true;
   }
 }
 
