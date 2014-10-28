@@ -110,7 +110,8 @@ window.onload = function() {
   clearCanvas();
 }
 
-function initDOMElements() {canvas = document.getElementById('canvas');
+function initDOMElements() {
+  canvas = document.getElementById('canvas');
   canvas.setAttribute('width', w);
   canvas.setAttribute('height', h);
   save = document.getElementById('save');
@@ -119,6 +120,12 @@ function initDOMElements() {canvas = document.getElementById('canvas');
   texture = document.getElementById("texture");
   plugin = document.getElementById('wtPlugin');
   ctx = canvas.getContext('2d');
+
+  // If pen is not detected at startup
+  // assume that we're using a mouse
+  if (!plugin.penAPI || !plugin.penAPI.pressure) {
+    useMouse = true;
+  }
 }
 
 function initEvents() {
@@ -401,13 +408,6 @@ function drawStep(id, point) {
 }
 
 function getEventPoint(e) {
-  
-  // If pen pressure can't be retrieved,
-  // assume that we're using a mouse
-  if (!plugin.penAPI || !plugin.penAPI.pressure) {
-    useMouse = true;
-  }
-
   var point = {
     x: e.clientX - cursorOffsetX,
     y: e.clientY - cursorOffsetY,
