@@ -32,6 +32,7 @@ TODO: License
 
 ##### Known Issues
 
+* Canvas edge cases not yet handled
 * RGB of stroke is probably inaccurate, the app should probably be using black for now
 * Last mouseup stroke may be missing and not being drawn
 * Even stepping deteriorates as step size increases
