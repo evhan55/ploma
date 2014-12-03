@@ -42,12 +42,17 @@ TODO: License
 ##### TODO
 
 * Add texturing and inkflow anomalies
-* Switch to CIELab color space?
-* Address curves with more input filtering or sampling?
-* Refactor Point and Bezier objects
-* Rewrite as stream that accepts pre-recorded strokes for non-realtime use
+* Address curve shapes
+    * wider input filtering
+    * input downsampling?
+* Refactor Bezier object
 * Optimize to decrease input latency
+    * asm.js?
+* Rewrite as stream that accepts pre-recorded strokes for non-realtime use
+* Try Catmull-Rom instead?
+* Switch to CIELab color space?
 * Test, etc. ?
+* ~~Refactor Point object~~
 
 ------------
 ##### Version Notes
