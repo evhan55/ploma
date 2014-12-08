@@ -65,7 +65,7 @@ TODO: License
   <br>
   <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
 </div>
-<img src="img/scan.png" id="texture"/>
+<img src="img/scan dark 4.png" id="texture"/>
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded"/>
 </object>
@@ -88,8 +88,8 @@ var miny = null;
 var maxy = null;
 var lastControlPoint = null;
 var stepOffset = 0;
-var stepInterval = 0.35;
-var stepInterval = 0.55;
+//var stepInterval = 0.35;
+var stepInterval = 0.75;
 var filterWeight = 50;
 var textureOffsetX = 0;
 var textureOffsetY = 0;
@@ -357,19 +357,20 @@ function calculateWidth(p) {
     width = map(p, 0.4, 0.45, 0.2, 0.25);
   }
   if((p >= 0.45) && (p < 0.8)) {
-    width = map(p, 0.45, 0.8, 0.25, 0.50);
+    width = map(p, 0.45, 0.8, 0.25, 0.90);
   }
   if((p >= 0.8) && (p < 0.95)) {
-    width = map(p, 0.8, 0.95, 0.5, 0.6);
+    width = map(p, 0.8, 0.95, 0.9, 1.2);
   }
   if((p >= 0.95) && (p <=0.99)) {
-    width = map(p, 0.95, 0.99, 0.6, 0.65);
+    width = map(p, 0.95, 0.99, 1.2, 1.3);
   }
   if((p >= 0.99) && (p <=1)) {
-    width = map(p, 0.99, 1, 0.65, 0.85);
+    //width = map(p, 0.99, 1, 0.65, 0.85);
+    width = map(p, 0.99, 1, 1.3, 1.3)
   }
   if(p > 1) { // from bezier
-    width = 1;
+    width = 1.4;
   }
 
   return width;
@@ -415,7 +416,7 @@ function drawStep(id, point) {
 
       var r = 55;
       var g = 55;
-      var b = 80;
+      var b = 90;
 
       // byte-index pixel placement within array
       // old * (1-a) + new * a
