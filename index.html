@@ -18,7 +18,7 @@ TODO: License
   body {
     font-family: sans-serif;
   }
-  canvas {
+  canvas#canvas {
     float: left;
     cursor: none;
     border: 1px solid gray;
@@ -52,6 +52,7 @@ TODO: License
 
 <body>
 <canvas id="canvas"></canvas>
+<canvas id="texture-canvas"></canvas>
 <div id="buttons">
   <a id="save" class="noselect">Save</a>
   <br>
@@ -64,7 +65,7 @@ TODO: License
   <br>
   <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
 </div>
-<!-- <img src="img/circle_ballpoint_4.png" id="texture"/> -->
+<img src="img/scan.png" id="texture"/>
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded"/>
 </object>
@@ -74,11 +75,11 @@ TODO: License
 // State
 var w = 1300;
 var h = 1000;
-var cursorOffsetX = 12;
+var cursorOffsetX = 8;
 var cursorOffsetY = 6;
 var inputStrokes = [];
-var curInputStroke = null;
 var filteredStrokes = [];
+var curInputStroke = null;
 var curFilteredStroke = null;
 var isDrawing = false;
 var minx = null;
@@ -88,18 +89,22 @@ var maxy = null;
 var lastControlPoint = null;
 var stepOffset = 0;
 var stepInterval = 0.35;
+var stepInterval = 0.55;
 var filterWeight = 50;
+var textureOffsetX = 0;
+var textureOffsetY = 0;
 var mouseMoveCounter = 0;
-var mouseLifted = false;
 var useMouse = false;
 
 // DOM
 var canvas;
+var textureCanvas;
 var imageData;
 var save;
 var clear;
 var cursor;
 var texture;
+var textureImageData;
 var plugin;
 var ctx;
 var paperColor = 'rgb(255, 255, 255)';
@@ -118,7 +123,19 @@ function initDOMElements() {
   clear = document.getElementById('clear');
   cursor = document.getElementById('cursor');
   texture = document.getElementById("texture");
+  textureCanvas = document.getElementById("texture-canvas");
   plugin = document.getElementById('wtPlugin');
+
+  // prepare texture
+  textureCanvas.width = texture.width;
+  textureCanvas.height = texture.height;
+  textureCanvas.getContext('2d').drawImage(texture, 0, 0, texture.width, texture.height);
+  textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, texture.width, texture.height).data;
+  console.log('textureImageData: ' + textureImageData);
+  console.log('width = ' + texture.width);
+  console.log('height = ' + texture.height);
+
+  // prepare canvas context
   ctx = canvas.getContext('2d');
 
   // If pen is not detected at startup
@@ -126,10 +143,10 @@ function initDOMElements() {
   //
   // TODO: check for plugin loading time, it is
   // not as synchronous as it seems
-  if (!plugin.penAPI || !plugin.penAPI.pressure) {
-    useMouse = true;
-    mouse.checked = true;
-  }
+  //if (!plugin.penAPI || !plugin.penAPI.pressure) {
+  //  useMouse = true;
+  //  mouse.checked = true;
+  //}
 }
 
 function initEvents() {
@@ -163,20 +180,15 @@ function initEvents() {
   canvas.onmousemove = function(e) {
     mouseMoveCounter++;
     if (!isDrawing) return;
-    if (!mouseLifted) {
-      if (mouseMoveCounter % 2 === 0) return;
-    }
-    mouseLifted = false;
     
     var point = getEventPoint(e);
 
     // ignore duplicates in the same stroke
-    var lastPoint = curInputStroke.last();
-    if(lastPoint.x === point.x &&
-       lastPoint.y === point.y &&
-       lastPoint.p === point.p) {
+    if(curInputStroke.last().equals(point) || (mouseMoveCounter % 2 === 0)) {
       return;
     }
+
+    // push current point
     curInputStroke.push(point);
 
     // filter inputs
@@ -193,15 +205,12 @@ function initEvents() {
     redraw();
   }
   canvas.onmouseup = function(e) {
-    // keep the mouseup point if it's not identical
-    // to the last point
     var point = getEventPoint(e);
-    var lastInputPoint = curInputStroke.last();
-    if(!point.equals(lastInputPoint)) {
-      mouseLifted = true;
-      canvas.onmousemove(e);
-    }
+    // keep the last point as is for now
+    // TODO: Try to address the "tapering on mouseup" issue
+    curInputStroke.push(point);
     curFilteredStroke.push(point);
+    redraw();
     isDrawing = false;
     lastControlPoint = null;
   }
@@ -223,7 +232,7 @@ function redraw() {
   }
 };
 
-// draw a cubic bezier based on 3 points
+// draw a look-ahead cubic bezier based on 3 points
 function createAndDrawBezier(pts) {
   minx = w;
   miny = h;
@@ -334,10 +343,10 @@ function calculateFilteredPoint(p1, p2, p3) {
   );
 }
 
-// calculate non-linear width (range [-2, 1]) based on pressure
+// calculate non-linear width offset (range [-2, 1]) based on pressure
 function calculateWidth(p) {
   var width;
-  // TODO: use a switch somehow for these range checks?
+  
   if(p < 0) { // from bezier
     width = -2;
   }
@@ -362,6 +371,7 @@ function calculateWidth(p) {
   if(p > 1) { // from bezier
     width = 1;
   }
+
   return width;
 }
 
@@ -388,12 +398,21 @@ function drawStep(id, point) {
       if(dist < width) {
         a = 1;
       }
+
+      // TEST ALPHA
       
       // clamp alpha
       if (a < 0) a = 0;
       if (a > 1) a = 1;
 
       // color
+      //var r = 55;
+      //var g = 55;
+      //var b = 80;
+
+      var dat = getNextTexturePixel();
+      a = a * (dat/ 255); // clamp down to texture alpha?
+
       var r = 55;
       var g = 55;
       var b = 80;
@@ -409,11 +428,54 @@ function drawStep(id, point) {
   }
 }
 
+/*
+∀ (x, y)
+  T = (x / w, y / h)
+  (s, t) = |(|(T - 1)| % 2 - 1)|
+  >> (sw, th)
+
+Where x and y are your texture coordinates, which can be anywhere from
+negative infinity to positive infinity in both x and y. The variables
+w and h are the width and height of the texture.
+
+You might have to round the result to get an integer at the end.
+*/
+function getNextTexturePixel() {
+  // Get normalized pixel within texture
+  var T_s = textureOffsetX / texture.width;
+  var T_t = textureOffsetY / texture.height;
+  var s = Math.abs(Math.abs(T_s - 1) % 2 - 1);
+  var t = Math.abs(Math.abs(T_t - 1) % 2 - 1);
+  var x = Math.max(0, Math.round(s * texture.width) - 1);
+  var y = Math.max(0, Math.round(t * texture.height) - 1);
+  var idx = (x + y * texture.width) * 4;
+  var r = textureImageData[idx + 0];
+  var g = textureImageData[idx + 1];
+  var b = textureImageData[idx + 2];
+  var l = 0.2126*r + 0.7152*g + 0.0722*b;
+
+  // Step texture offset randomly [-1, 1]
+  var textureStep = getTextureStep();
+  textureOffsetX += textureStep.x;
+  textureOffsetY += textureStep.y;
+  
+  return l;
+}
+
+function getTextureStep() {
+  var offset = {
+    x: Math.floor(Math.random() * 2) === 1 ? -1 : 1,
+    y: Math.floor(Math.random() * 2) === 1 ? -1 : 1,
+  }
+  return offset;
+}
+
 function getEventPoint(e) {
   var point = new Point(
     e.clientX - cursorOffsetX,
     e.clientY - cursorOffsetY,
-    (useMouse ? 1: plugin.penAPI.pressure)
+    //(useMouse ? 1: plugin.penAPI.pressure)
+    plugin.penAPI.pressure
   );
   return point;
 }
@@ -446,12 +508,7 @@ function Point(x, y, p) {
 }
 
 Point.prototype.equals = function(pt) {
-  return
-    pt && 
-    this.x === pt.x &&
-    this.y === pt.y &&
-    this.p === pt.p
-  ;
+  return pt && this.x === pt.x && this.y === pt.y && this.p === pt.p;
 }
 
 Point.prototype.getMidPt = function(pt) {
