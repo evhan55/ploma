@@ -4,6 +4,7 @@ v0.1
 Evelyn Eastmond, Dan Amelang   
 evhan55@gmail.com   
 Communications Design Group, SAP  
+VPRI  
 &copy; 2014  
   
 TODO: License  
