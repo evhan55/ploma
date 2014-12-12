@@ -10,7 +10,7 @@ TODO: License
   
 [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  
   
-![](http://38.media.tumblr.com/2bd5a0e58685fc5f5e92ae5d67cd9da6/tumblr_ne0yxflMCX1tvh0uyo1_500.png)
+![](http://40.media.tumblr.com/ec2b413030e0fd96f0c7365bcee59b4a/tumblr_nghsnnOYc01tvh0uyo1_500.png)
 
 ------------
 
