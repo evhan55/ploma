@@ -466,15 +466,14 @@ w and h are the width and height of the texture.
 */
 function getNextTexturePixel(p) {
   // Pick texture to use
-  var texture;
-  var textureImageData;
-  if(p > 0.5) {
-    texture = texture1;
+  var texture = texture1;
+  var textureImageData = textureImageData1;
+  /*if(p > 0.5) {
     textureImageData = textureImageData1;
   } else {
-    texture = texture2;
-    textureImageData = textureImageData2;
-  }
+    texture = texture1;
+    textureImageData = textureImageData1;
+  }*/
 
   // Get normalized pixel within texture
   var T_s = textureOffsetX / (texture.width - 1);
@@ -488,6 +487,9 @@ function getNextTexturePixel(p) {
   var g = textureImageData[idx + 1];
   var b = textureImageData[idx + 2];
   var l = (r + g + b) / 3; // crude average luminance
+  if(p < 0.4) {
+    l += 50; // lighter texture for grain
+  }
 
   // Step texture offset randomly [-1, 1]
   var textureStep = getTextureStep();
