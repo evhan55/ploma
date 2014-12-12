@@ -65,7 +65,8 @@ TODO: License
   <br>
   <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
 </div>
-<img src="img/scan dark 4.png" id="texture"/>
+<img src="img/rubbing_to_mask 3.jpeg" id="texture1"/>
+<img src="img/rubbing_to_mask 1.jpeg" id="texture2"/>
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded"/>
 </object>
@@ -88,8 +89,7 @@ var miny = null;
 var maxy = null;
 var lastControlPoint = null;
 var stepOffset = 0;
-//var stepInterval = 0.35;
-var stepInterval = 0.75;
+var stepInterval = 0.30;
 var filterWeight = 50;
 var textureOffsetX = 0;
 var textureOffsetY = 0;
@@ -103,8 +103,10 @@ var imageData;
 var save;
 var clear;
 var cursor;
-var texture;
-var textureImageData;
+var texture1;
+var texture2;
+var textureImageData1;
+var textureImageData2;
 var plugin;
 var ctx;
 var paperColor = 'rgb(255, 255, 255)';
@@ -122,18 +124,21 @@ function initDOMElements() {
   save = document.getElementById('save');
   clear = document.getElementById('clear');
   cursor = document.getElementById('cursor');
-  texture = document.getElementById("texture");
+  texture1 = document.getElementById("texture1");
+  texture2 = document.getElementById("texture2");
   textureCanvas = document.getElementById("texture-canvas");
   plugin = document.getElementById('wtPlugin');
 
-  // prepare texture
-  textureCanvas.width = texture.width;
-  textureCanvas.height = texture.height;
-  textureCanvas.getContext('2d').drawImage(texture, 0, 0, texture.width, texture.height);
-  textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, texture.width, texture.height).data;
-  console.log('textureImageData: ' + textureImageData);
-  console.log('width = ' + texture.width);
-  console.log('height = ' + texture.height);
+  // prepare textures
+  textureCanvas.width = texture1.width + texture2.width;
+  textureCanvas.height = texture1.height;
+  textureCanvas.getContext('2d').drawImage(texture1, 0, 0, texture1.width, texture1.height);
+  textureCanvas.getContext('2d').drawImage(texture2, texture1.width, 0, texture2.width, texture2.height);
+  textureImageData1 = textureCanvas.getContext('2d').getImageData(0, 0, texture1.width, texture1.height).data;
+  textureImageData2 = textureCanvas.getContext('2d').getImageData(texture1.width, 0, texture2.width, texture2.height).data;
+  //console.log('textureImageData1: ' + textureImageData1);
+  //console.log('width = ' + texture1.width);
+  //console.log('height = ' + texture1.height);
 
   // prepare canvas context
   ctx = canvas.getContext('2d');
@@ -347,6 +352,32 @@ function calculateFilteredPoint(p1, p2, p3) {
 function calculateWidth(p) {
   var width;
   
+  /*if(p < 0) { // from bezier
+    width = -2;
+  }
+  if(p < 0.4) {
+    width = map(p, 0, 0.4, -2, 0.2);
+  } 
+  if((p >= 0.4) && (p < 0.45)) {
+    width = map(p, 0.4, 0.45, 0.2, 0.25);
+  }
+  if((p >= 0.45) && (p < 0.8)) {
+    width = map(p, 0.45, 0.8, 0.25, 0.50);
+  }
+  if((p >= 0.8) && (p < 0.95)) {
+    width = map(p, 0.8, 0.95, 0.5, 0.6);
+  }
+  if((p >= 0.95) && (p <=0.99)) {
+    width = map(p, 0.95, 0.99, 0.6, 0.65);
+  }
+  if((p >= 0.99) && (p <=1)) {
+    //width = map(p, 0.99, 1, 0.65, 0.85);
+    width = map(p, 0.99, 1, 0.65, 0.85)
+  }
+  if(p > 1) { // from bezier
+    width = 1;
+  }*/
+
   if(p < 0) { // from bezier
     width = -2;
   }
@@ -357,20 +388,20 @@ function calculateWidth(p) {
     width = map(p, 0.4, 0.45, 0.2, 0.25);
   }
   if((p >= 0.45) && (p < 0.8)) {
-    width = map(p, 0.45, 0.8, 0.25, 0.90);
+    width = map(p, 0.45, 0.8, 0.25, 0.50);
   }
   if((p >= 0.8) && (p < 0.95)) {
-    width = map(p, 0.8, 0.95, 0.9, 1.2);
+    width = map(p, 0.8, 0.95, 0.5, 0.7);
   }
   if((p >= 0.95) && (p <=0.99)) {
-    width = map(p, 0.95, 0.99, 1.2, 1.3);
+    width = map(p, 0.95, 0.99, 0.7, 0.95);
   }
   if((p >= 0.99) && (p <=1)) {
     //width = map(p, 0.99, 1, 0.65, 0.85);
-    width = map(p, 0.99, 1, 1.3, 1.3)
+    width = map(p, 0.99, 1, 0.95, 1.05)
   }
   if(p > 1) { // from bezier
-    width = 1.4;
+    width = 1.2;
   }
 
   return width;
@@ -399,24 +430,19 @@ function drawStep(id, point) {
       if(dist < width) {
         a = 1;
       }
-
-      // TEST ALPHA
       
       // clamp alpha
       if (a < 0) a = 0;
       if (a > 1) a = 1;
 
+      // TEST ALPHA
+      var dat = getNextTexturePixel(point.p);
+      a = a * dat;
+
       // color
-      //var r = 55;
-      //var g = 55;
-      //var b = 80;
-
-      var dat = getNextTexturePixel();
-      a = a * (dat/ 255); // clamp down to texture alpha?
-
-      var r = 55;
-      var g = 55;
-      var b = 90;
+      var r = 35;
+      var g = 35;
+      var b = 60;
 
       // byte-index pixel placement within array
       // old * (1-a) + new * a
@@ -431,36 +457,44 @@ function drawStep(id, point) {
 
 /*
 ∀ (x, y)
-  T = (x / w, y / h)
+  T = (x / (w-1), y / (h-1))
   (s, t) = |(|(T - 1)| % 2 - 1)|
-  >> (sw, th)
-
+  >> (s * (w-1), t * (h-1))
 Where x and y are your texture coordinates, which can be anywhere from
 negative infinity to positive infinity in both x and y. The variables
 w and h are the width and height of the texture.
-
-You might have to round the result to get an integer at the end.
 */
-function getNextTexturePixel() {
+function getNextTexturePixel(p) {
+  // Pick texture to use
+  var texture;
+  var textureImageData;
+  if(p > 0.5) {
+    texture = texture1;
+    textureImageData = textureImageData1;
+  } else {
+    texture = texture2;
+    textureImageData = textureImageData2;
+  }
+
   // Get normalized pixel within texture
-  var T_s = textureOffsetX / texture.width;
-  var T_t = textureOffsetY / texture.height;
+  var T_s = textureOffsetX / (texture.width - 1);
+  var T_t = textureOffsetY / (texture.height - 1);
   var s = Math.abs(Math.abs(T_s - 1) % 2 - 1);
   var t = Math.abs(Math.abs(T_t - 1) % 2 - 1);
-  var x = Math.max(0, Math.round(s * texture.width) - 1);
-  var y = Math.max(0, Math.round(t * texture.height) - 1);
+  var x = Math.floor(s * (texture.width - 1));
+  var y = Math.floor(t * (texture.height - 1));
   var idx = (x + y * texture.width) * 4;
   var r = textureImageData[idx + 0];
   var g = textureImageData[idx + 1];
   var b = textureImageData[idx + 2];
-  var l = 0.2126*r + 0.7152*g + 0.0722*b;
+  var l = (r + g + b) / 3; // crude average luminance
 
   // Step texture offset randomly [-1, 1]
   var textureStep = getTextureStep();
   textureOffsetX += textureStep.x;
   textureOffsetY += textureStep.y;
-  
-  return l;
+
+  return (1 - l/255);
 }
 
 function getTextureStep() {
@@ -475,8 +509,8 @@ function getEventPoint(e) {
   var point = new Point(
     e.clientX - cursorOffsetX,
     e.clientY - cursorOffsetY,
-    //(useMouse ? 1: plugin.penAPI.pressure)
-    plugin.penAPI.pressure
+    (useMouse ? 1: plugin.penAPI.pressure)
+    //plugin.penAPI.pressure
   );
   return point;
 }
@@ -529,7 +563,7 @@ Point.prototype.getMirroredPt = function(pt) {
 }
 
 Point.prototype.getDistance = function(pt) {
-  // TODO use manhattan distance?
+  // TODO use Manhattan distance?
   var dx = this.x - pt.x;
   var dy = this.y - pt.y;
   return Math.sqrt(dx * dx + dy * dy);
