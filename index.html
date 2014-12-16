@@ -65,8 +65,8 @@ TODO: License
   <br>
   <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
 </div>
-<img src="img/rubbing_to_mask 3.jpeg" id="texture1"/>
-<img src="img/rubbing_to_mask 1.jpeg" id="texture2"/>
+<img src="img/rubbing_to_mask 9.jpeg" id="texture1"/>
+<img src="img/rubbing_to_mask 9.jpeg" id="texture2"/>
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded"/>
 </object>
@@ -351,32 +351,6 @@ function calculateFilteredPoint(p1, p2, p3) {
 // calculate non-linear width offset (range [-2, 1]) based on pressure
 function calculateWidth(p) {
   var width;
-  
-  /*if(p < 0) { // from bezier
-    width = -2;
-  }
-  if(p < 0.4) {
-    width = map(p, 0, 0.4, -2, 0.2);
-  } 
-  if((p >= 0.4) && (p < 0.45)) {
-    width = map(p, 0.4, 0.45, 0.2, 0.25);
-  }
-  if((p >= 0.45) && (p < 0.8)) {
-    width = map(p, 0.45, 0.8, 0.25, 0.50);
-  }
-  if((p >= 0.8) && (p < 0.95)) {
-    width = map(p, 0.8, 0.95, 0.5, 0.6);
-  }
-  if((p >= 0.95) && (p <=0.99)) {
-    width = map(p, 0.95, 0.99, 0.6, 0.65);
-  }
-  if((p >= 0.99) && (p <=1)) {
-    //width = map(p, 0.99, 1, 0.65, 0.85);
-    width = map(p, 0.99, 1, 0.65, 0.85)
-  }
-  if(p > 1) { // from bezier
-    width = 1;
-  }*/
 
   if(p < 0) { // from bezier
     width = -2;
@@ -391,14 +365,10 @@ function calculateWidth(p) {
     width = map(p, 0.45, 0.8, 0.25, 0.50);
   }
   if((p >= 0.8) && (p < 0.95)) {
-    width = map(p, 0.8, 0.95, 0.5, 0.7);
+    width = map(p, 0.8, 0.95, 0.7, 0.9);
   }
-  if((p >= 0.95) && (p <=0.99)) {
-    width = map(p, 0.95, 0.99, 0.7, 0.95);
-  }
-  if((p >= 0.99) && (p <=1)) {
-    //width = map(p, 0.99, 1, 0.65, 0.85);
-    width = map(p, 0.99, 1, 0.95, 1.05)
+  if((p >= 0.95) && (p <= 1)) {
+    width = map(p, 0.95, 0.99, 0.9, 0.95);
   }
   if(p > 1) { // from bezier
     width = 1.2;
@@ -434,15 +404,18 @@ function drawStep(id, point) {
       // clamp alpha
       if (a < 0) a = 0;
       if (a > 1) a = 1;
+      if ( a === 1 && point.p > 0.6) {
+         a = 0.3;
+      }
 
       // TEST ALPHA
       var dat = getNextTexturePixel(point.p);
       a = a * dat;
 
       // color
-      var r = 35;
-      var g = 35;
-      var b = 60;
+      var r = 20;
+      var g = 20;
+      var b = 45;
 
       // byte-index pixel placement within array
       // old * (1-a) + new * a
@@ -460,9 +433,6 @@ function drawStep(id, point) {
   T = (x / (w-1), y / (h-1))
   (s, t) = |(|(T - 1)| % 2 - 1)|
   >> (s * (w-1), t * (h-1))
-Where x and y are your texture coordinates, which can be anywhere from
-negative infinity to positive infinity in both x and y. The variables
-w and h are the width and height of the texture.
 */
 function getNextTexturePixel(p) {
   // Pick texture to use
@@ -487,7 +457,7 @@ function getNextTexturePixel(p) {
   var g = textureImageData[idx + 1];
   var b = textureImageData[idx + 2];
   var l = (r + g + b) / 3; // crude average luminance
-  if(p < 0.4) {
+  if(p < 0.2) {
     l += 50; // lighter texture for grain
   }
 
