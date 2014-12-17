@@ -23,6 +23,9 @@ TODO: License
     cursor: none;
     border: 1px solid gray;
   }
+  canvas#texture-canvas {
+    display: none;
+  }
   img {
     display: none;
   }
@@ -54,6 +57,7 @@ TODO: License
 <canvas id="canvas"></canvas>
 <canvas id="texture-canvas"></canvas>
 <div id="buttons">
+  <!-- buttons -->
   <a id="save" class="noselect">Save</a>
   <br>
   <br>
@@ -61,26 +65,29 @@ TODO: License
   <br>
   <br>
   <br>
+  <!-- checkboxes -->
   <input type="checkbox" id="cursor" class="noselect"/> Show Cursor
   <br>
   <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
 </div>
-<img src="img/rubbing_to_mask 9.jpeg" id="texture1"/>
-<img src="img/rubbing_to_mask 9.jpeg" id="texture2"/>
+<!-- texture -->
+<img src="img/rubbing_to_mask 9.jpeg" id="texture"/>
+<!-- Wacom plugin -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded"/>
 </object>
 </body>
 
 <script>
+
 // State
 var w = 1300;
 var h = 1000;
 var cursorOffsetX = 8;
 var cursorOffsetY = 6;
-var inputStrokes = [];
+var rawInputStrokes = [];
+var curRawInputStroke = null;
 var filteredStrokes = [];
-var curInputStroke = null;
 var curFilteredStroke = null;
 var isDrawing = false;
 var minx = null;
@@ -103,10 +110,8 @@ var imageData;
 var save;
 var clear;
 var cursor;
-var texture1;
-var texture2;
-var textureImageData1;
-var textureImageData2;
+var texture;
+var textureImageData;
 var plugin;
 var ctx;
 var paperColor = 'rgb(255, 255, 255)';
@@ -117,6 +122,11 @@ window.onload = function() {
   clearCanvas();
 }
 
+// ------------------------------------------
+// initDOMElements
+//
+// Initializes DOM elements.
+//
 function initDOMElements() {
   canvas = document.getElementById('canvas');
   canvas.setAttribute('width', w);
@@ -124,36 +134,33 @@ function initDOMElements() {
   save = document.getElementById('save');
   clear = document.getElementById('clear');
   cursor = document.getElementById('cursor');
-  texture1 = document.getElementById("texture1");
-  texture2 = document.getElementById("texture2");
+  texture = document.getElementById("texture");
   textureCanvas = document.getElementById("texture-canvas");
   plugin = document.getElementById('wtPlugin');
 
   // prepare textures
-  textureCanvas.width = texture1.width + texture2.width;
-  textureCanvas.height = texture1.height;
-  textureCanvas.getContext('2d').drawImage(texture1, 0, 0, texture1.width, texture1.height);
-  textureCanvas.getContext('2d').drawImage(texture2, texture1.width, 0, texture2.width, texture2.height);
-  textureImageData1 = textureCanvas.getContext('2d').getImageData(0, 0, texture1.width, texture1.height).data;
-  textureImageData2 = textureCanvas.getContext('2d').getImageData(texture1.width, 0, texture2.width, texture2.height).data;
-  //console.log('textureImageData1: ' + textureImageData1);
-  //console.log('width = ' + texture1.width);
-  //console.log('height = ' + texture1.height);
+  textureCanvas.width = texture.width;
+  textureCanvas.height = texture.height;
+  textureCanvas.getContext('2d').drawImage(texture, 0, 0, texture.width, texture.height);
+  textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, texture.width, texture.height).data;
 
   // prepare canvas context
   ctx = canvas.getContext('2d');
 
   // If pen is not detected at startup
   // assume that we're using a mouse
-  //
-  // TODO: check for plugin loading time, it is
-  // not as synchronous as it seems
+  // TODO: check and test thoroughly
   //if (!plugin.penAPI || !plugin.penAPI.pressure) {
   //  useMouse = true;
   //  mouse.checked = true;
   //}
 }
 
+// ------------------------------------------
+// initEvents
+//
+// Initializes DOM events.
+//
 function initEvents() {
   save.onclick = function(e) {
     window.open(canvas.toDataURL());
@@ -176,8 +183,8 @@ function initEvents() {
     isDrawing = true;
     stepOffset = stepInterval;
 
-    curInputStroke = [point];
-    inputStrokes.push(curInputStroke);
+    curRawInputStroke = [point];
+    rawInputStrokes.push(curRawInputStroke);
 
     curFilteredStroke = [point];
     filteredStrokes.push(curFilteredStroke);
@@ -188,20 +195,20 @@ function initEvents() {
     
     var point = getEventPoint(e);
 
-    // ignore duplicates in the same stroke
-    if(curInputStroke.last().equals(point) || (mouseMoveCounter % 2 === 0)) {
+    // Ignore duplicates in the same stroke
+    if(curRawInputStroke.last().equals(point) || (mouseMoveCounter % 2 === 0)) {
       return;
     }
 
-    // push current point
-    curInputStroke.push(point);
+    // Push current point
+    curRawInputStroke.push(point);
 
-    // filter inputs
-    var len = curInputStroke.length;
+    // Filter inputs
+    var len = curRawInputStroke.length;
     var fpoint = calculateFilteredPoint(
-      curInputStroke[len - 3],
-      curInputStroke[len - 2],
-      curInputStroke[len - 1]
+      curRawInputStroke[len - 3],
+      curRawInputStroke[len - 2],
+      curRawInputStroke[len - 1]
     );
     if(fpoint) {
       curFilteredStroke.push(fpoint);
@@ -211,9 +218,9 @@ function initEvents() {
   }
   canvas.onmouseup = function(e) {
     var point = getEventPoint(e);
-    // keep the last point as is for now
+    // Keep the last point as is for now
     // TODO: Try to address the "tapering on mouseup" issue
-    curInputStroke.push(point);
+    curRawInputStroke.push(point);
     curFilteredStroke.push(point);
     redraw();
     isDrawing = false;
@@ -221,6 +228,28 @@ function initEvents() {
   }
 }
 
+// ------------------------------------------
+// getEventPoint
+//
+// Get the client location data plus pressure
+// input from the tablet plugin, or 1 for
+// pressure if using the mouse for input.
+//
+function getEventPoint(e) {
+  var point = new Point(
+    e.clientX - cursorOffsetX,
+    e.clientY - cursorOffsetY,
+    (useMouse ? 1: plugin.penAPI.pressure)
+  );
+  return point;
+}
+
+// ------------------------------------------
+// redraw
+//
+// Calls the curve drawing primitive if there
+// are enough points for a bezier.
+//
 function redraw() {
   if (!isDrawing) {
     return;
@@ -237,20 +266,25 @@ function redraw() {
   }
 };
 
-// draw a look-ahead cubic bezier based on 3 points
+// ------------------------------------------
+// createAndDrawBezier
+//
+// Draw a look-ahead cubic bezier based on 3
+// input points.
+//
 function createAndDrawBezier(pts) {
   minx = w;
   miny = h;
   maxx = 0;
   maxy = 0;
 
-  // endpoints and control points
+  // Endpoints and control points
   var p0 = pts[0];
   var p3 = pts[1];
   var p1;
   var p2;
 
-  // calculate p1
+  // Calculate p1
   if(!lastControlPoint) {
     p1 = new Point(
       p0.x + (p3.x - p0.x) * 0.33,
@@ -261,7 +295,7 @@ function createAndDrawBezier(pts) {
     p1 = lastControlPoint.getMirroredPt(p0);
   }
 
-  // calculate p2
+  // Calculate p2
   if (pts[2]) {
     p2 = new Point(
       p3.x - (((p3.x - p0.x) + (pts[2].x - p3.x)) / 2 / 3),
@@ -276,26 +310,30 @@ function createAndDrawBezier(pts) {
     );
   }
 
-  // set last control point
+  // Set last control point
   lastControlPoint = p2;
 
-  // step along curve
+  // Step along curve
   var stepPoints = calculateStepPoints(p0, p1, p2, p3);
   for(var i = 0; i < stepPoints.length; i++) {
     drawStep(imageData, stepPoints[i]);
   }
 
-  // set image using a crude dirty rect
+  // Put image using a crude dirty rect
   ctx.putImageData(imageData, 0, 0, minx, miny, maxx - minx + 10, maxy - miny + 10);
 }
 
-// calculate even steps along a bezier (p0, p1, p2, p3)
+// ------------------------------------------
+// calculateStepPoints
+//
+// Calculates even steps along a bezier with
+// control points (p0, p1, p2, p3).
+//
 function calculateStepPoints(p0, p1, p2, p3) {
   var stepPoints = [];
   var i = stepInterval;
 
-  // algebraic conveniences
-  // not geometric
+  // Algebraic conveniences, not geometric
   var A_x = p3.x - 3 * p2.x + 3 * p1.x - p0.x;
   var A_y = p3.y - 3 * p2.y + 3 * p1.y - p0.y;
   var A_p = p3.p - 3 * p2.p + 3 * p1.p - p0.p;
@@ -309,7 +347,7 @@ function calculateStepPoints(p0, p1, p2, p3) {
   var t = (i - stepOffset) / Math.sqrt(C_x * C_x + C_y * C_y);
 
   while (t <= 1.0) {
-    // point
+    // Point
     var step_x = t * (t * (t * A_x + B_x) + C_x) + p0.x;
     var step_y = t * (t * (t * A_y + B_y) + C_y) + p0.y;
     var step_p = t * (t * (t * A_p + B_p) + C_p) + p0.p;
@@ -319,7 +357,7 @@ function calculateStepPoints(p0, p1, p2, p3) {
       step_p
     ));
 
-    // step distance til next one
+    // Step distance until next one
     var s_x = t * (t * 3 * A_x + 2 * B_x) + C_x; // dx/dt
     var s_y = t * (t * 3 * A_y + 2 * B_y) + C_y; // dy/dt
     var s = Math.sqrt(s_x * s_x + s_y * s_y); // s = derivative in 2D space
@@ -327,7 +365,7 @@ function calculateStepPoints(p0, p1, p2, p3) {
     t = t + dt;
   }
 
-  // TODO: maybe later use a better approximation for distance along the bezier?
+  // TODO: Maybe later use a better approximation for distance along the bezier?
   if (stepPoints.length == 0) // We didn't step at all along this Bezier
     stepOffset = stepOffset + p0.getDistance(p3);
   else
@@ -336,6 +374,12 @@ function calculateStepPoints(p0, p1, p2, p3) {
   return stepPoints;
 }
 
+// ------------------------------------------
+// calculateFilteredPoint
+//
+// Returns a filtered, sanitized version of 
+// point p2 between points p1 and p3.
+//
 function calculateFilteredPoint(p1, p2, p3) {
   var w = filterWeight / 100;
   if (p1 == null || p2 == null || p3 == null)
@@ -348,11 +392,16 @@ function calculateFilteredPoint(p1, p2, p3) {
   );
 }
 
-// calculate non-linear width offset (range [-2, 1]) based on pressure
+// ------------------------------------------
+// calculateWidth
+//
+// Calculates a non-linear width offset in
+// the range [-2, 1] based on pressure.
+//
 function calculateWidth(p) {
   var width;
 
-  if(p < 0) { // from bezier
+  if(p < 0) { // Possible output from bezier
     width = -2;
   }
   if(p < 0.4) {
@@ -370,55 +419,62 @@ function calculateWidth(p) {
   if((p >= 0.95) && (p <= 1)) {
     width = map(p, 0.95, 0.99, 0.9, 0.95);
   }
-  if(p > 1) { // from bezier
+  if(p > 1) { // Possible output from bezier
     width = 1.2;
   }
 
   return width;
 }
 
-// draw a pixel grid at a step point
+// ------------------------------------------
+// drawStep
+//
+// Draws a 5x5 pixel grid at a step point
+// with proper antialiasing and texture.
+//
 function drawStep(id, point) {
   var width = calculateWidth(point.p);
 
   for(var i = Math.round(point.x) - 2; i < Math.round(point.x) + 3; i++) {
     for(var j = Math.round(point.y) - 2; j < Math.round(point.y) + 3; j++) {
 
-      // update bounding rect
+      // Update bounding rect
       minx = Math.min(minx, i);
       maxx = Math.max(maxx, i);
       miny = Math.min(miny, j);
       maxy = Math.max(maxy, j);
 
-      // distance
+      // Distance
       var dist = point.getDistance(new Point(i, j));
 
-      // antialiasing
+      // Antialiasing
       var a = 0.1/(dist - width) - 0.06;
 
-      // spike
+      // Spike
       if(dist < width) {
         a = 1;
       }
       
-      // clamp alpha
+      // Clamp alpha
       if (a < 0) a = 0;
       if (a > 1) a = 1;
+
+      // Lighten for heavy touches
       if ( a === 1 && point.p > 0.6) {
          a = 0.3;
       }
 
-      // TEST ALPHA
-      var dat = getNextTexturePixel(point.p);
-      a = a * dat;
+      // Get texture for alpha
+      var l = getNextTexturePixel(point.p);
+      a = a * l;
 
-      // color
+      // Color
       var r = 20;
       var g = 20;
       var b = 45;
 
-      // byte-index pixel placement within array
-      // old * (1-a) + new * a
+      // Byte-index pixel placement within array
+      // Alpha blending: old * (1 - a) + new * a
       var idx = (i + j * w) * 4;
       id.data[idx + 0] = id.data[idx + 0] * (1 - a) + r * a;
       id.data[idx + 1] = id.data[idx + 1] * (1 - a) + g * a;
@@ -428,22 +484,14 @@ function drawStep(id, point) {
   }
 }
 
-/*
-∀ (x, y)
-  T = (x / (w-1), y / (h-1))
-  (s, t) = |(|(T - 1)| % 2 - 1)|
-  >> (s * (w-1), t * (h-1))
-*/
+// ------------------------------------------
+// getNextTexturePixel
+//
+// Get a brightness value at a pixel location
+// by meandering around an infinitely
+// mirrored and tiled texture.
+// 
 function getNextTexturePixel(p) {
-  // Pick texture to use
-  var texture = texture1;
-  var textureImageData = textureImageData1;
-  /*if(p > 0.5) {
-    textureImageData = textureImageData1;
-  } else {
-    texture = texture1;
-    textureImageData = textureImageData1;
-  }*/
 
   // Get normalized pixel within texture
   var T_s = textureOffsetX / (texture.width - 1);
@@ -457,8 +505,10 @@ function getNextTexturePixel(p) {
   var g = textureImageData[idx + 1];
   var b = textureImageData[idx + 2];
   var l = (r + g + b) / 3; // crude average luminance
+
+  // Lighter texture for grain at light touches
   if(p < 0.2) {
-    l += 50; // lighter texture for grain
+    l += 50; 
   }
 
   // Step texture offset randomly [-1, 1]
@@ -469,6 +519,12 @@ function getNextTexturePixel(p) {
   return (1 - l/255);
 }
 
+// ------------------------------------------
+// getTextureStep
+//
+// Get a random x,y integer offset in the
+// range [-1,1].
+// 
 function getTextureStep() {
   var offset = {
     x: Math.floor(Math.random() * 2) === 1 ? -1 : 1,
@@ -477,16 +533,11 @@ function getTextureStep() {
   return offset;
 }
 
-function getEventPoint(e) {
-  var point = new Point(
-    e.clientX - cursorOffsetX,
-    e.clientY - cursorOffsetY,
-    (useMouse ? 1: plugin.penAPI.pressure)
-    //plugin.penAPI.pressure
-  );
-  return point;
-}
-
+// ------------------------------------------
+// clearCanvas
+//
+// Clears the canvas to paperColor.
+//
 function clearCanvas(){
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = paperColor;
@@ -495,19 +546,13 @@ function clearCanvas(){
   imageData = ctx.getImageData(0, 0, w, h);
 }
 
-// UTILS
-
-Array.prototype.last = function(){
-  return this[this.length - 1];
-}
-
-function map(value, valueMin, valueMax, from, to) {
-  var ratio = (value - valueMin) / (valueMax - valueMin);
-  return from + ratio * (to - from);
-}
-
-// POINT
-
+// ------------------------------------------
+// Point.prototype
+//
+// x - x coordinate
+// y - y coordinate
+// p - pressure
+//
 function Point(x, y, p) {
   this.x = x;
   this.y = y;
@@ -535,10 +580,22 @@ Point.prototype.getMirroredPt = function(pt) {
 }
 
 Point.prototype.getDistance = function(pt) {
-  // TODO use Manhattan distance?
+  // TODO: use Manhattan distance?
   var dx = this.x - pt.x;
   var dy = this.y - pt.y;
   return Math.sqrt(dx * dx + dy * dy);
+}
+
+// ------------------------------------------
+// UTILITIES
+//
+Array.prototype.last = function(){
+  return this[this.length - 1];
+}
+
+function map(value, valueMin, valueMax, from, to) {
+  var ratio = (value - valueMin) / (valueMax - valueMin);
+  return from + ratio * (to - from);
 }
 
 </script>

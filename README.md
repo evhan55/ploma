@@ -42,30 +42,43 @@ TODO: License
 
 ##### TODO
 
-* Add texturing and inkflow anomalies
+* Optimize to decrease input latency
+    * asm.js?
+* Add inkflow anomalies
+* Finetune textures at light and heavy touches
 * Address curve shapes
     * wider input filtering
     * input downsampling?
 * Refactor Bezier object
-* Optimize to decrease input latency
-    * asm.js?
 * Rewrite as stream that accepts pre-recorded strokes for non-realtime use
-* Try Catmull-Rom instead?
-* Switch to CIELab color space?
-* Test, etc. ?
+* Miscellaneous
+    * Try Catmull-Rom instead?
+    * Switch to CIELab color space?
+* Test
+* ~~Add texturing capability~~
 * ~~Refactor Point object~~
 
 ------------
 ##### Version Notes
 
+##### v0.2
+
+* Test version for December 2014
+* **New features**:
+    * texture capability, infinitely mirrored and tiled
+* **Other changes**:
+    * inline documentation added
+    * some functions renamed
+
 ##### v0.1
 
 * Test version for November 2014
-* Includes:
+* **Features**:
     * input santizing
     * on-the-fly cubic bezier fitting using a look-ahead point
     * even stepping along beziers for drawing steps
     * variable-width antialiasing
     * 'Clear' and 'Save' functionality
-* **Testers**: Pay attention to the pressure/width response and the antialiasing (but not texture), feedback welcome via email!
-* Needs more testing with/without plugin, across all browsers.  Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
+* **Hardware notes**:
+    * Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
+    * Needs more testing with/without plugin, across all browsers.  
