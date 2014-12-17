@@ -17,11 +17,17 @@ TODO: License
 
 ------------
 
-##### Getting Started
-*Best used on a Wacom Cintiq 13HD*  
-*Check with Dan Amelang for color consistency across screens*
+##### DEMO
 
-0. Make sure Wacom browser plugin is installed (automatically included when you install any Wacom stylus)
+[http://evhan55.github.io](Launch demo)
+
+##### Getting Started
+
+###### Prerequisites
+
+1. [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) installed in your browser (automatically included when you install any Wacom stylus)
+
+###### Launch Ploma
 1. Open `index.html` in a WebKit browser
 2. Draw on canvas with a Wacom pen input or check 'Use Mouse' to use a mouse
 3. (OPTIONAL)
