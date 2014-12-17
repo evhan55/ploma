@@ -17,9 +17,9 @@ TODO: License
 
 ------------
 
-##### DEMO
+##### LIVE DEMO
 
-[http://evhan55.github.io](Launch demo)
+[Launch demo](http://evhan55.github.io)
 
 ##### Getting Started
 
