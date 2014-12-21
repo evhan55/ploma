@@ -13,7 +13,7 @@ TODO: License
   
 [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  
   
-![](http://40.media.tumblr.com/ec2b413030e0fd96f0c7365bcee59b4a/tumblr_nghsnnOYc01tvh0uyo1_500.png)
+![](http://40.media.tumblr.com/f9f5e888378615a0cf254c0dcc75395b/tumblr_ngy8r5ZgH71tvh0uyo1_500.png)
 
 ------------
 
