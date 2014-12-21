@@ -24,7 +24,10 @@ TODO: License
     cursor: none;
     border: 1px solid gray;
   }
-  canvas#texture-canvas {
+  canvas#texture-canvas-1 {
+    display: none;
+  }
+  canvas#texture-canvas-2 {
     display: none;
   }
   img {
@@ -56,7 +59,8 @@ TODO: License
 
 <body>
 <canvas id="canvas"></canvas>
-<canvas id="texture-canvas"></canvas>
+<canvas id="texture-canvas-1"></canvas>
+<canvas id="texture-canvas-2"></canvas>
 <div id="buttons">
   <!-- buttons -->
   <a id="save" class="noselect">Save</a>
@@ -72,7 +76,8 @@ TODO: License
   <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
 </div>
 <!-- texture -->
-<img src="img/rubbing_to_mask 9.jpeg" id="texture"/>
+<img src="img/red2.jpeg" id="texture1"/>
+<img src="img/rubbing_to_mask 12.jpg" id="texture2"/>
 <!-- Wacom plugin -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded"/>
@@ -106,13 +111,16 @@ var useMouse = false;
 
 // DOM
 var canvas;
-var textureCanvas;
+var textureCanvas1;
+var textureCanvas2;
 var imageData;
 var save;
 var clear;
 var cursor;
-var texture;
-var textureImageData;
+var texture1;
+var texture2;
+var textureImageData1;
+var textureImageData2;
 var plugin;
 var ctx;
 var paperColor = 'rgb(255, 255, 255)';
@@ -135,15 +143,22 @@ function initDOMElements() {
   save = document.getElementById('save');
   clear = document.getElementById('clear');
   cursor = document.getElementById('cursor');
-  texture = document.getElementById("texture");
-  textureCanvas = document.getElementById("texture-canvas");
+  texture1 = document.getElementById("texture1");
+  texture2 = document.getElementById("texture2");
+  textureCanvas1 = document.getElementById("texture-canvas-1");
+  textureCanvas2 = document.getElementById("texture-canvas-2");
   plugin = document.getElementById('wtPlugin');
 
   // prepare textures
-  textureCanvas.width = texture.width;
-  textureCanvas.height = texture.height;
-  textureCanvas.getContext('2d').drawImage(texture, 0, 0, texture.width, texture.height);
-  textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, texture.width, texture.height).data;
+  textureCanvas1.width = texture1.width;
+  textureCanvas1.height = texture1.height;
+  textureCanvas1.getContext('2d').drawImage(texture1, 0, 0, texture1.width, texture1.height);
+  textureImageData1 = textureCanvas1.getContext('2d').getImageData(0, 0, texture1.width, texture1.height).data;
+
+  textureCanvas2.width = texture2.width;
+  textureCanvas2.height = texture2.height;
+  textureCanvas2.getContext('2d').drawImage(texture2, 0, 0, texture2.width, texture2.height);
+  textureImageData2 = textureCanvas2.getContext('2d').getImageData(0, 0, texture2.width, texture2.height).data;
 
   // prepare canvas context
   ctx = canvas.getContext('2d');
@@ -401,27 +416,28 @@ function calculateFilteredPoint(p1, p2, p3) {
 //
 function calculateWidth(p) {
   var width;
+  //console.log(p);
 
   if(p < 0) { // Possible output from bezier
+    width = -2.5;
+  }
+  if((p >= 0) && (p < 0.1)) {
     width = -2;
   }
-  if(p < 0.4) {
-    width = map(p, 0, 0.4, -2, 0.2);
+  if((p >= 0.1) && (p < 0.2)) {
+    width = -1.5;
+  }
+  if((p >= 0.2) && (p < 0.3)) {
+    width = -0.5;
+  }
+  if((p >= 0.3) && (p < 0.5)) {
+    width = map(p, 0.3, 0.5, -0.5, 0.5);
   } 
-  if((p >= 0.4) && (p < 0.45)) {
-    width = map(p, 0.4, 0.45, 0.2, 0.25);
+  if((p >= 0.5) && (p < 0.95)) {
+    width = map(p, 0.5, 0.95, 0.5, 0.75);
   }
-  if((p >= 0.45) && (p < 0.8)) {
-    width = map(p, 0.45, 0.8, 0.25, 0.50);
-  }
-  if((p >= 0.8) && (p < 0.95)) {
-    width = map(p, 0.8, 0.95, 0.7, 0.9);
-  }
-  if((p >= 0.95) && (p <= 1)) {
-    width = map(p, 0.95, 0.99, 0.9, 0.95);
-  }
-  if(p > 1) { // Possible output from bezier
-    width = 1.2;
+  if(p >= 0.95) { // >1 Possible output from bezier
+    width = 0.75;
   }
 
   return width;
@@ -458,21 +474,16 @@ function drawStep(id, point) {
       
       // Clamp alpha
       if (a < 0) a = 0;
-      if (a > 1) a = 1;
-
-      // Lighten for heavy touches
-      if ( a === 1 && point.p > 0.6) {
-         a = 0.3;
-      }
+      if (a >= 1) a = 0.3; // lighten ink
 
       // Get texture for alpha
       var l = getNextTexturePixel(point.p);
       a = a * l;
 
       // Color
-      var r = 20;
-      var g = 20;
-      var b = 45;
+      var r = 40;
+      var g = 25;
+      var b = 50;
 
       // Byte-index pixel placement within array
       // Alpha blending: old * (1 - a) + new * a
@@ -494,6 +505,10 @@ function drawStep(id, point) {
 // 
 function getNextTexturePixel(p) {
 
+  // Pick texture to use
+  var texture = (p < 0.4) ? texture1 : texture2;
+  var textureImageData = (p < 0.4) ? textureImageData1 : textureImageData2;
+
   // Get normalized pixel within texture
   var T_s = textureOffsetX / (texture.width - 1);
   var T_t = textureOffsetY / (texture.height - 1);
@@ -508,9 +523,9 @@ function getNextTexturePixel(p) {
   var l = (r + g + b) / 3; // crude average luminance
 
   // Lighter texture for grain at light touches
-  if(p < 0.2) {
-    l += 50; 
-  }
+  //if(p < 0.2) {
+  //  l += 50; 
+  //}
 
   // Step texture offset randomly [-1, 1]
   var textureStep = getTextureStep();
