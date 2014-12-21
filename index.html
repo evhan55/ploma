@@ -238,8 +238,8 @@ function initEvents() {
 //
 function getEventPoint(e) {
   var point = new Point(
-    e.clientX - cursorOffsetX,
-    e.clientY - cursorOffsetY,
+    e.clientX - cursorOffsetX + document.getElementsByTagName('body')[0].scrollLeft,
+    e.clientY - cursorOffsetY + document.getElementsByTagName('body')[0].scrollTop,
     (useMouse ? 1: plugin.penAPI.pressure)
   );
   return point;
