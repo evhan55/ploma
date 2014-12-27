@@ -12,8 +12,6 @@ Viewpoints Research Institute
 TODO: License  
   
 [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  
-  
-![](http://40.media.tumblr.com/ec2b413030e0fd96f0c7365bcee59b4a/tumblr_nghsnnOYc01tvh0uyo1_500.png)
 
 ------------
 
