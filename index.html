@@ -9,10 +9,7 @@
     cursor: none;
     border: 1px solid gray;
   }
-  canvas#texture-canvas-1 {
-    display: none;
-  }
-  canvas#texture-canvas-2 {
+  canvas#texture-canvas {
     display: none;
   }
   img {
@@ -44,8 +41,7 @@
 
 <body>
 <canvas id="canvas"></canvas>
-<canvas id="texture-canvas-1"></canvas>
-<canvas id="texture-canvas-2"></canvas>
+<canvas id="texture-canvas"></canvas>
 <div id="buttons">
   <!-- buttons -->
   <a id="save" class="noselect">Save</a>
@@ -61,18 +57,133 @@
   <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
 </div>
 <!-- texture -->
-<img src="img/red2.jpeg" id="texture1"/>
-<img src="img/rubbing_to_mask 9.jpeg" id="texture2"/>
+<img src="img/rubbing_to_mask 9.jpeg" id="texture"/>
 <!-- Wacom plugin -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded"/>
 </object>
 </body>
 
+<script type='text/javascript' src="js/ploma.js"></script>
+<script type="text/javascript">
+  // state
+var mouseMoveCounter = 0;
+var useMouse = false;
+var w = 1300;
+var h = 1000;
+var cursorOffsetX = 8;
+var cursorOffsetY = 8;
 
-<script type='text/javascript' src="scripts/ploma.js"></script>
-<script type="text/javascript" src="scripts/init.js"></script>
+// DOM
+var textureCanvas;
+var save;
+var clear;
+var plugin;
+var cursor;
+var sketcherA;
 
+window.onload = function() {
+  initDOMElements();
+  initEvents();
+  // load module
+  sketcherA = new Ploma.Sketcher(canvas, textureCanvas);
+  clearCanvas();
+}
+
+// ------------------------------------------
+// initDOMElements
+//
+// Initializes DOM elements.
+//
+function initDOMElements() {
+  canvas = document.getElementById('canvas');
+  canvas.setAttribute('width', w);
+  canvas.setAttribute('height', h);
+  save = document.getElementById('save');
+  clear = document.getElementById('clear');
+  cursor = document.getElementById('cursor');
+  texture = document.getElementById("texture");
+  textureCanvas = document.getElementById("texture-canvas");
+  plugin = document.getElementById('wtPlugin');
+
+  // prepare textures
+  textureCanvas.width = texture.width;
+  textureCanvas.height = texture.height;
+  textureCanvas.getContext('2d').drawImage(texture, 0, 0, texture.width, texture.height);
+
+  // If pen is not detected at startup
+  // assume that we're using a mouse
+  // TODO: check and test thoroughly
+  //if (!plugin.penAPI || !plugin.penAPI.pressure) {
+  //  useMouse = true;
+  //  mouse.checked = true;
+  //}
+}
+
+// ------------------------------------------
+// initEvents
+//
+// Initializes DOM events.
+//
+function initEvents() {
+  save.onclick = function(e) {
+    window.open(canvas.toDataURL());
+  }
+  clear.onclick = function(e) {
+    clearCanvas();
+  }
+  cursor.onclick = function(e) {
+    if(cursor.checked) {
+      canvas.style.cursor = 'crosshair';
+    } else {
+      canvas.style.cursor = 'none';
+    }
+  }
+  mouse.onclick = function(e) {
+    useMouse = mouse.checked;
+  }
+  canvas.onmousedown = function(e) {
+    var point = getEventPoint(e)
+    sketcherA.beginStroke(point.x, point.y, point.p);
+  }
+  canvas.onmousemove = function(e) {
+    mouseMoveCounter++;
+
+    if (mouseMoveCounter % 2 !== 0) {
+      var point = getEventPoint(e)
+      sketcherA.addPoint(point.x, point.y, point.p);
+    }
+  }
+  canvas.onmouseup = function(e) {
+    var point = getEventPoint(e);
+    sketcherA.finishStroke(point.x, point.y, point.p);
+  }
+}
+
+// ------------------------------------------
+// getEventPoint
+//
+// Get the client location data plus pressure
+// input from the tablet plugin, or 1 for
+// pressure if using the mouse for input.
+//
+function getEventPoint(e) {
+  return {
+    x: e.clientX - cursorOffsetX + document.getElementsByTagName('body')[0].scrollLeft,
+    y: e.clientY - cursorOffsetY + document.getElementsByTagName('body')[0].scrollTop,
+    p: (useMouse ? 1: plugin.penAPI.pressure)
+  }
+}
+
+// ------------------------------------------
+// clearCanvas
+//
+// Uses the ploma clearCanvas interface
+//
+function clearCanvas(){
+  sketcherA.clear();
+}
+</script>
 
 </script>
 </html>
