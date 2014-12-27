@@ -132,12 +132,12 @@
 
       if (mouseMoveCounter % 2 !== 0) {
         var point = getEventPoint(e)
-        sketcherA.addPoint(point.x, point.y, point.p);
+        sketcherA.extendStroke(point.x, point.y, point.p);
       }
     }
     canvas.onmouseup = function(e) {
       var point = getEventPoint(e);
-      sketcherA.finishStroke(point.x, point.y, point.p);
+      sketcherA.endStroke(point.x, point.y, point.p);
     }
 
     // load Ploma onto canvas and clear it

@@ -55,9 +55,10 @@ var Ploma = (function () {
     // public functions
 
     // ------------------------------------------
-    // clearCanvas
+    // clear
     //
-    // Clears the canvas to paperColor in given width and height
+    // Clears the canvas to paperColor in given
+    // width and height.
     //
 
     this.clear = function() {
@@ -69,11 +70,28 @@ var Ploma = (function () {
     };
 
     // ------------------------------------------
-    // addPoint
+    // beginStroke
     //
-    // Appends the filtered point to the last stroke array.
+    // Appends a new stroke array containing point
     //
-    this.addPoint = function (x,y,pressure) {
+    this.beginStroke = function (x,y,pressure) {
+      stepOffset = stepInterval;
+      var point = new Point(x,y,pressure);
+      curRawInputStroke = [point];
+      rawInputStrokes.push(curRawInputStroke);
+
+      curFilteredStroke = [point];
+      filteredStrokes.push(curFilteredStroke);
+      isDrawing = true;
+    }
+
+    // ------------------------------------------
+    // extendStroke
+    //
+    // Appends the filtered point to the last
+    // stroke array.
+    //
+    this.extendStroke = function (x,y,pressure) {
       if (!isDrawing) return;
 
       // Ignore duplicates in the same stroke
@@ -94,27 +112,11 @@ var Ploma = (function () {
     }
 
     // ------------------------------------------
-    // beginStroke
-    //
-    // Appends a new stroke array containing point
-    //
-    this.beginStroke = function (x,y,pressure) {
-      stepOffset = stepInterval;
-      var point = new Point(x,y,pressure);
-      curRawInputStroke = [point];
-      rawInputStrokes.push(curRawInputStroke);
-
-      curFilteredStroke = [point];
-      filteredStrokes.push(curFilteredStroke);
-      isDrawing = true;
-    }
-
-    // ------------------------------------------
-    // finishStroke
+    // endStroke
     //
     // Appends point to the last stroke array
     //
-    this.finishStroke = function (x,y,pressure) {
+    this.endStroke = function (x,y,pressure) {
       // Keep the last point as is for now
       // TODO: Try to address the "tapering on mouseup" issue
       var point = new Point(x,y,pressure);
