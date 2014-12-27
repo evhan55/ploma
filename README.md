@@ -1,7 +1,8 @@
 ##### Ploma - High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
 v0.3  
 
-Evelyn Eastmond - evhan55@gmail.com  
+Evelyn Eastmond  
+evhan55@gmail.com  
 Communications Design Group, SAP  
   
 Dan Amelang  
@@ -39,7 +40,7 @@ TODO: License
 
 ##### Known Issues
 
-* Canvas edge cases not yet handled
+* Canvas edge cases not yet handled?
 * RGB of stroke is probably inaccurate, the app should probably be using black for now
 * Last mouseup stroke may be missing and not being drawn
 * Even stepping deteriorates as step size increases
@@ -56,11 +57,11 @@ TODO: License
     * wider input filtering
     * input downsampling?
 * Refactor Bezier object
-* Rewrite as stream that accepts pre-recorded strokes for non-realtime use
 * Miscellaneous
     * Try Catmull-Rom instead?
     * Switch to CIELab color space?
 * Test
+* ~~Rewrite as stream that accepts pre-recorded strokes for non-realtime use~~
 * ~~Add texturing capability~~
 * ~~Refactor Point object~~
 
