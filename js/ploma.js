@@ -2,7 +2,8 @@
 Ploma - High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD
 v0.3
 
-Evelyn Eastmond - evhan55@gmail.com
+Evelyn Eastmond
+evhan55@gmail.com
 Communications Design Group, SAP
 
 Dan Amelang
@@ -14,34 +15,6 @@ TODO: License
 */
 
 var Ploma = function(canvas, textureCanvas) {
-
-  // DOM
-  var canvas = canvas;
-  var w = canvas.getAttribute('width');
-  var h = canvas.getAttribute('height');
-  var ctx = canvas.getContext('2d');
-  var imageData = ctx.getImageData(0, 0, w, h);
-  var textureCanvas = textureCanvas;
-  var textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, textureCanvas.width, textureCanvas.height).data;
-  var paperColor = 'rgb(255, 255, 255)';
-
-  // State
-  var rawInputStrokes = [];
-  var curRawInputStroke = [];
-  var filteredStrokes = [];
-  var curFilteredStroke = [];
-  var pointCounter = 0;
-  var minx = null;
-  var maxx = null;
-  var miny = null;
-  var maxy = null;
-  var lastControlPoint = null;
-  var filterWeight = 50;
-  var textureOffsetX = 0;
-  var textureOffsetY = 0;
-  var stepOffset = 0;
-  var stepInterval = 0.30;
-  var isDrawing = false;
 
   //////////////////////////////////////////////
   // PUBLIC
@@ -163,6 +136,34 @@ var Ploma = function(canvas, textureCanvas) {
   //////////////////////////////////////////////
   // PRIVATE
   //////////////////////////////////////////////
+
+  // DOM
+  var canvas = canvas;
+  var w = canvas.getAttribute('width');
+  var h = canvas.getAttribute('height');
+  var ctx = canvas.getContext('2d');
+  var imageData = ctx.getImageData(0, 0, w, h);
+  var textureCanvas = textureCanvas;
+  var textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, textureCanvas.width, textureCanvas.height).data;
+  var paperColor = 'rgb(255, 255, 255)';
+
+  // State
+  var rawInputStrokes = [];
+  var curRawInputStroke = [];
+  var filteredStrokes = [];
+  var curFilteredStroke = [];
+  var pointCounter = 0;
+  var minx = null;
+  var maxx = null;
+  var miny = null;
+  var maxy = null;
+  var lastControlPoint = null;
+  var filterWeight = 50;
+  var textureOffsetX = 0;
+  var textureOffsetY = 0;
+  var stepOffset = 0;
+  var stepInterval = 0.30;
+  var isDrawing = false;
 
   // ------------------------------------------
   // redraw
@@ -469,19 +470,13 @@ var Ploma = function(canvas, textureCanvas) {
     return offset;
   }
 
-  // Private objects for Ploma module
-
   // ------------------------------------------
-  // Point.prototype
-  //
-  // x - x coordinate
-  // y - y coordinate
-  // p - pressure
+  // POINT
   //
   function Point(x, y, p) {
-    this.x = x;
-    this.y = y;
-    this.p = p;
+    this.x = x; // x-coordinate
+    this.y = y; // y-coordinate
+    this.p = p; // pressure
   }
 
   Point.prototype.equals = function(pt) {
@@ -524,7 +519,7 @@ var Ploma = function(canvas, textureCanvas) {
   }
 
   // ------------------------------------------
-  // UTILITIES
+  // UTILS
   //
   Array.prototype.last = function(){
     return this[this.length - 1];
