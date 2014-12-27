@@ -1,3 +1,18 @@
+/*
+Ploma - High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD
+v0.3
+
+Evelyn Eastmond - evhan55@gmail.com
+Communications Design Group, SAP
+
+Dan Amelang
+Viewpoints Research Institute
+
+(c) 2014
+
+TODO: License
+*/
+
 var Ploma = (function () {
 
   var self = {}

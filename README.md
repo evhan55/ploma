@@ -1,5 +1,5 @@
 ##### Ploma - High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
-v0.2  
+v0.3  
 
 Evelyn Eastmond - evhan55@gmail.com  
 Communications Design Group, SAP  
@@ -67,24 +67,31 @@ TODO: License
 ------------
 ##### Version Notes
 
+##### v0.3
+
+* Test version for December 2014
+* **Features:**
+    * Refactored into a standalone-plugin with Astrid's help
+* **Misc Notes**:
+
 ##### v0.2
 
 * Test version for December 2014
-* **New features**:
-    * texture capability, infinitely mirrored and tiled
-* **Other changes**:
-    * inline documentation added
-    * some functions renamed
+* **Features**:
+    * Texture capability, infinitely mirrored and tiled
+* **Misc Notes**:
+    * Inline documentation added
+    * Some functions renamed
 
 ##### v0.1
 
 * Test version for November 2014
 * **Features**:
-    * input santizing
-    * on-the-fly cubic bezier fitting using a look-ahead point
-    * even stepping along beziers for drawing steps
-    * variable-width antialiasing
+    * Input santizing
+    * On-the-fly cubic bezier fitting using a look-ahead point
+    * Even stepping along beziers for drawing steps
+    * Variable-width antialiasing
     * 'Clear' and 'Save' functionality
-* **Hardware notes**:
+* **Misc Notes**:
     * Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
     * Needs more testing with/without plugin, across all browsers.  
