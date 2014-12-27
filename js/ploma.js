@@ -144,7 +144,9 @@ var Ploma = function(canvas, textureCanvas) {
   var ctx = canvas.getContext('2d');
   var imageData = ctx.getImageData(0, 0, w, h);
   var textureCanvas = textureCanvas;
-  var textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, textureCanvas.width, textureCanvas.height).data;
+  var textureWidth = textureCanvas.width;
+  var textureHeight = textureCanvas.height;
+  var textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, textureWidth, textureHeight).data;
   var paperColor = 'rgb(255, 255, 255)';
 
   // State
@@ -431,13 +433,13 @@ var Ploma = function(canvas, textureCanvas) {
   function getNextTexturePixel(p) {
 
     // Get normalized pixel within texture
-    var T_s = textureOffsetX / (texture.width - 1);
-    var T_t = textureOffsetY / (texture.height - 1);
+    var T_s = textureOffsetX / (textureWidth - 1);
+    var T_t = textureOffsetY / (textureHeight - 1);
     var s = Math.abs(Math.abs(T_s - 1) % 2 - 1);
     var t = Math.abs(Math.abs(T_t - 1) % 2 - 1);
-    var x = Math.floor(s * (texture.width - 1));
-    var y = Math.floor(t * (texture.height - 1));
-    var idx = (x + y * texture.width) * 4;
+    var x = Math.floor(s * (textureWidth - 1));
+    var y = Math.floor(t * (textureHeight - 1));
+    var idx = (x + y * textureWidth) * 4;
     var r = textureImageData[idx + 0];
     var g = textureImageData[idx + 1];
     var b = textureImageData[idx + 2];
