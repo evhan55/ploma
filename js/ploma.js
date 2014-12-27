@@ -20,15 +20,17 @@ var Ploma = (function () {
   // public Objects for Ploma module
 
   self.Sketcher = function (canvas, textureCanvas) {
-    // Parameters
+    // DOM
     var canvas = canvas;
-    var textureCanvas = textureCanvas;
-
-    // State
-    var ctx = canvas.getContext('2d');
-    var textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, textureCanvas.width, textureCanvas.height).data;
     var w = canvas.getAttribute('width');
     var h = canvas.getAttribute('height');
+    var ctx = canvas.getContext('2d');
+    var imageData = ctx.getImageData(0, 0, w, h);
+    var textureCanvas = textureCanvas;
+    var textureImageData = textureCanvas.getContext('2d').getImageData(0, 0, textureCanvas.width, textureCanvas.height).data;
+    var paperColor = 'rgb(255, 255, 255)';
+
+    // State
     var rawInputStrokes = [];
     var curRawInputStroke = null;
     var filteredStrokes = [];
@@ -44,11 +46,8 @@ var Ploma = (function () {
     var stepOffset = 0;
     var stepInterval = 0.30;
     var isDrawing = false;
-    var imageData;
-    var imageData = ctx.getImageData(0, 0, w, h);
-    var paperColor = 'rgb(255, 255, 255)';
 
-    // public state
+    // Public State
     this.strokes = filteredStrokes;
     this.curStroke = curFilteredStroke;
 
