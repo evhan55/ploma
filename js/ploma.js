@@ -50,12 +50,20 @@ var Ploma = function(canvas, textureCanvas) {
   // ------------------------------------------
   // strokes
   //
-  // The strokes that have been recorded as
-  // arrays of Point objects.
+  // Returns the strokes that have been stored
+  // as arrays of point data in objects.
   //
-  // TODO: Expose points as plain arrays
-  //
-  this.strokes = filteredStrokes;
+  this.strokes = function() {
+    var strokes = [];
+    for(var i = 0; i < filteredStrokes.length; i++){
+      var stroke = [];
+      strokes.push(stroke);
+      for(var j = 0; j < filteredStrokes[i].length; j++) {
+        stroke.push(filteredStrokes[i][j].asObj());
+      }
+    }
+    return strokes;
+  }
 
   // ------------------------------------------
   // curStroke
@@ -109,7 +117,9 @@ var Ploma = function(canvas, textureCanvas) {
     pointCounter++;
     if (!isDrawing) return;
 
+    // Skip every other point for curves
     if (pointCounter % 2 !== 0) {
+
       // Ignore duplicates in the same stroke
       var point = new Point(x,y,p);
       if(curRawInputStroke.last().equals(point)) {
@@ -494,6 +504,18 @@ var Ploma = function(canvas, textureCanvas) {
     var dx = this.x - pt.x;
     var dy = this.y - pt.y;
     return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  Point.prototype.asArray = function() {
+    return [this.x, this.y, this.p];
+  }
+
+  Point.prototype.asObj = function() {
+    return {
+      x: this.x,
+      y: this.y,
+      p: this.p
+    };
   }
 
   // ------------------------------------------
