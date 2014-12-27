@@ -50,8 +50,9 @@ var Ploma = function(canvas, textureCanvas) {
   // ------------------------------------------
   // strokes
   //
-  // Returns the strokes that have been stored
-  // as arrays of point data in objects.
+  // Returns an array of all strokes that have
+  // been recorded, each stroke itself is an
+  // array of point data objects.
   //
   this.strokes = function() {
     var strokes = [];
@@ -63,18 +64,22 @@ var Ploma = function(canvas, textureCanvas) {
       }
     }
     return strokes;
-  }
+  };
 
   // ------------------------------------------
   // curStroke
   //
-  // The current stroke of points since last
-  // mouse down, recorded as arrays of Point
-  // objects.
+  // Returns the current stroke of points that
+  // have been stored since the last mouse down
+  // as an array of point data objects.
   //
-  // TODO: Expose points as plain arrays
-  //
-  this.curStroke = curFilteredStroke;
+  this.curStroke = function() {
+    var curStroke = [];
+    for(var i = 0; i < curFilteredStroke.length; i++) {
+      curStroke.push(curFilteredStroke[i].asObj());
+    }
+    return curStroke;
+  };
 
   // ------------------------------------------
   // clear
