@@ -35,6 +35,7 @@ var Ploma = (function () {
     var curRawInputStroke = null;
     var filteredStrokes = [];
     var curFilteredStroke = null;
+    var pointCounter = 0;
     var minx = null;
     var maxx = null;
     var miny = null;
@@ -91,23 +92,26 @@ var Ploma = (function () {
     // stroke array.
     //
     this.extendStroke = function (x,y,pressure) {
+      pointCounter++;
       if (!isDrawing) return;
 
-      // Ignore duplicates in the same stroke
-      var point = new Point(x,y,pressure);
-      if(curRawInputStroke.last().equals(point)) {
-        return;
-      }
-      // Push current point
-      curRawInputStroke.push(point);
+      if (pointCounter % 2 !== 0) {
+        // Ignore duplicates in the same stroke
+        var point = new Point(x,y,pressure);
+        if(curRawInputStroke.last().equals(point)) {
+          return;
+        }
+        // Push current point
+        curRawInputStroke.push(point);
 
-      // Filter inputs
-      var fpoint = filterPoint(point);
-      if(fpoint) {
-        curFilteredStroke.push(fpoint);
-      }
+        // Filter inputs
+        var fpoint = filterPoint(point);
+        if(fpoint) {
+          curFilteredStroke.push(fpoint);
+        }
 
-      redraw();
+        redraw();
+      }
     }
 
     // ------------------------------------------

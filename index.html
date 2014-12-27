@@ -67,7 +67,6 @@
 <script type='text/javascript' src="js/ploma.js"></script>
 
 <script type="text/javascript">
-  var mouseMoveCounter = 0;
   var useMouse = false;
   var w = 1300;
   var h = 1000;
@@ -128,12 +127,8 @@
       sketcherA.beginStroke(point.x, point.y, point.p);
     }
     canvas.onmousemove = function(e) {
-      mouseMoveCounter++;
-
-      if (mouseMoveCounter % 2 !== 0) {
-        var point = getEventPoint(e)
-        sketcherA.extendStroke(point.x, point.y, point.p);
-      }
+      var point = getEventPoint(e)
+      sketcherA.extendStroke(point.x, point.y, point.p);
     }
     canvas.onmouseup = function(e) {
       var point = getEventPoint(e);
