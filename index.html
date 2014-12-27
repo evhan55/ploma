@@ -77,7 +77,7 @@
   var clear;
   var plugin;
   var cursor;
-  var sketcherA;
+  var ploma;
 
   window.onload = function() {
 
@@ -124,20 +124,20 @@
     }
     canvas.onmousedown = function(e) {
       var point = getEventPoint(e)
-      sketcherA.beginStroke(point.x, point.y, point.p);
+      ploma.beginStroke(point.x, point.y, point.p);
     }
     canvas.onmousemove = function(e) {
       var point = getEventPoint(e)
-      sketcherA.extendStroke(point.x, point.y, point.p);
+      ploma.extendStroke(point.x, point.y, point.p);
     }
     canvas.onmouseup = function(e) {
       var point = getEventPoint(e);
-      sketcherA.endStroke(point.x, point.y, point.p);
+      ploma.endStroke(point.x, point.y, point.p);
     }
 
     // load Ploma onto canvas and clear it
-    sketcherA = new Ploma(canvas, textureCanvas);
-    sketcherA.clear();
+    ploma = new Ploma(canvas, textureCanvas);
+    ploma.clear();
   }
 
   function getEventPoint(e) {
