@@ -70,14 +70,12 @@ TODO: License
 
 ##### v0.3
 
-* Test version for December 2014
 * **Features:**
     * Refactored into a standalone-plugin with Astrid's help
 * **Misc Notes**:
 
 ##### v0.2
 
-* Test version for December 2014
 * **Features**:
     * Texture capability, infinitely mirrored and tiled
 * **Misc Notes**:
@@ -86,7 +84,6 @@ TODO: License
 
 ##### v0.1
 
-* Test version for November 2014
 * **Features**:
     * Input santizing
     * On-the-fly cubic bezier fitting using a look-ahead point
