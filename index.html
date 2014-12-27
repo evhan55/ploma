@@ -133,10 +133,12 @@
     canvas.onmouseup = function(e) {
       var point = getEventPoint(e);
       sketcherA.endStroke(point.x, point.y, point.p);
+      console.log(sketcherA.strokes);
+      console.log(sketcherA.curStroke);
     }
 
     // load Ploma onto canvas and clear it
-    sketcherA = new Ploma.Sketcher(canvas, textureCanvas);
+    sketcherA = new Ploma(canvas, textureCanvas);
     sketcherA.clear();
   }
 
