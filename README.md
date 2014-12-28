@@ -16,7 +16,6 @@ License: TODO
 |  <color="#F00">DEMO</color>         | BLOG          |
 | ------------- | ------------- |
 | [Launch demo](http://evhan55.github.io)  | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  |
-  
 
 ##### Getting Started
 
