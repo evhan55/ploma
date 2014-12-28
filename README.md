@@ -25,7 +25,7 @@ Example: <code>index.html</code>
 <table>
 <tr>
   <td width="30%"><code>Ploma(canvas)</code></td>
-  <td width="70%">Constructor for Ploma instances.  Accepts an <code>HTMLCanvas</code> element to render strokes onto.</td>
+  <td width="70%">Constructor for Ploma instances.  Accepts an <code>HTML <canvas> Element</code> element to render strokes onto.</td>
 </tr>
 <tr>
   <td><code>clear()</code></td>
