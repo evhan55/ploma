@@ -28,7 +28,7 @@ View `index.html` source for example of how to use Ploma on your own site
 </tr>
 <tr>
   <td><code>beginStroke(x, y, p)</code></td>
-  <td>Begins a new stroke containing the given point.</td>
+  <td>Begins a new stroke containing the given point <code>x</code>, <code>y</code> and <code>p</code> (pressure) values.</td>
 </tr>
 <tr>
   <td><code>extendStroke(x, y, p)</code></td>
