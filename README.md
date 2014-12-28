@@ -1,14 +1,14 @@
 # Ploma
-### High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
+### High-fidelity ballpoint pen rendering for tablets with pressure-sensitive styluses  
 
 
 DEMO                                    | BLOG
 --------------------------------------- | ---------------------------------------------------------
 [Launch demo](http://evhan55.github.io) | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)
 
-## Run Demo
+## Run Demo (for Wacom tablets)
 
-1. Install the [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) (automatically included when you install any modern Wacom tablet)
+1. Install the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) (automatically included when you install any modern Wacom tablet)
 2. Open `index.html` in a WebKit browser
 3. Draw on canvas with a Wacom pen or check **Use Mouse** to use a mouse
 
@@ -18,9 +18,9 @@ DEMO                                    | BLOG
 
 ### Ploma
 
-A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the Wacom Web Plugin object element in your HTML.  
+A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) object element in your HTML.  
   
-Example: <code>index.html</code>  
+Example code: [<code>index.html</code>](https://github.com/evhan55/ploma/blob/master/index.html)  
   
 <table>
 <tr>
