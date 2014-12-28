@@ -6,23 +6,23 @@
 | ------------- | ------------- |
 | [Launch demo](http://evhan55.github.io)  | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  |
 
-## Getting Started
+## Run Ploma
 
 
-1. [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) (automatically included when you install any Wacom stylus)
+1. Install the [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) (automatically included when you install any Wacom stylus)
 2. Open `index.html` in a WebKit browser
-3. Draw on canvas with a Wacom pen input or check 'Use Mouse' to use a mouse
-4. *OPTIONAL*
-    * Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
-    * Toggle 'Show Cursor' to show a mouse cursor
+3. Draw on canvas with a Wacom pen or check **Use Mouse** to use a mouse
 
 ## API
+
+View `index.html` source for example of how to use Ploma on your own site  
 
 * `strokes()` contains the collected point information
 * `curStroke()`
 * `beginStroke(x, y, p)`
 * `extendStroke(x, y, p)`
 * `endStroke(x, y, p)`
+* Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
 
 ## Versions
 
