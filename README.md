@@ -8,7 +8,7 @@
 
 ## Run Demo
 
-1. Install the [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) (automatically included when you install any Wacom stylus)
+1. Install the [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) (automatically included when you install any modern Wacom tablet)
 2. Open `index.html` in a WebKit browser
 3. Draw on canvas with a Wacom pen or check **Use Mouse** to use a mouse
 
