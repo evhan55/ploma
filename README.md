@@ -18,7 +18,7 @@ DEMO                                    | BLOG
 
 ### Ploma
 
-A Ploma instance expects an `HTML <canvas> Element` for rendering strokes.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  
+A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the Wacom Web Plugin object element in your HTML.  
   
 Example: <code>index.html</code>  
   
