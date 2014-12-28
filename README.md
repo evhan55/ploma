@@ -1,5 +1,4 @@
-# Ploma
-##### High-fidelity ballpoint pen rendering for tablets with pressure-sensitive styluses  
+![](http://i.imgur.com/wiMIFLb.png)  
 
 DEMO                                    | BLOG
 --------------------------------------- | ---------------------------------------------------------
