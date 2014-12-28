@@ -1,4 +1,4 @@
-#### Ploma
+### Ploma
 ##### High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
 
 Evelyn Eastmond  
@@ -17,7 +17,7 @@ License: TODO
 | ------------- | ------------- |
 | [Launch demo](http://evhan55.github.io)  | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  |
 
-##### Getting Started
+#### Getting Started
 
 ###### Prerequisites
 
@@ -30,13 +30,13 @@ License: TODO
     * Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
     * Toggle 'Show Cursor' to show a mouse cursor
 
-##### API Notes
+#### API Notes
 
 * `filteredStrokes` contains the collected point information
 * Input filtering, bezier geometry and even stepping is taken from Dan Amelang's research
 
 ------------
-##### Version Notes
+#### Version Notes
 
 ##### v0.3
 
@@ -65,7 +65,7 @@ License: TODO
     * Needs more testing with/without plugin, across all browsers.
 
 ------------
-##### TODO
+#### TODO
 
 * Optimize
     * asm.js?
