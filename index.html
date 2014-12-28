@@ -1,23 +1,29 @@
 <html>
 <head>
+  <link href='http://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
 <style>
   body {
-    font-family: sans-serif;
+    font-family: 'Amatic SC', cursive, sans-serif;
+    font-size: 25px;
   }
   canvas#canvas {
     float: left;
     cursor: none;
     border: 1px solid gray;
   }
-  img {
-    display: none;
-  }
   a {
+    margin-left: 5px;
     padding: 10px;
-    line-height: 40px;
     cursor: pointer;
     color: white;
     text-decoration: none;
+    border-radius: 6px;
+  }
+  #save {
+    background: #0D9CC7;
+  }
+  #clear {
+    background: #FF3333;
   }
   .noselect {
     -webkit-touch-callout: none;
@@ -27,12 +33,6 @@
     -ms-user-select: none;
     user-select: none;
   }
-  #save {
-    background: #3B2D38;
-  }
-  #clear {
-    background: #F02475;
-  }
 </style>
 </head>
 
@@ -40,6 +40,7 @@
 <canvas id="canvas"></canvas>
 <div id="buttons">
   <!-- buttons -->
+  <br>
   <a id="save" class="noselect">Save</a>
   <br>
   <br>
@@ -58,7 +59,7 @@
 </object>
 </body>
 
-<script type='text/javascript' src="js/ploma.js"></script>
+<script type='text/javascript' src="ploma.js"></script>
 
 <script type="text/javascript">
   var useMouse = false;
@@ -96,7 +97,7 @@
       window.open(canvas.toDataURL());
     }
     clear.onclick = function(e) {
-      sketcherA.clear();
+      ploma.clear();
     }
     cursor.onclick = function(e) {
       if(cursor.checked) {
