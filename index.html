@@ -92,6 +92,10 @@
     //  mouse.checked = true;
     //}
 
+    // load Ploma onto canvas and clear it
+    ploma = new Ploma(canvas);
+    ploma.clear();
+
     // initialize events
     save.onclick = function(e) {
       window.open(canvas.toDataURL());
@@ -122,9 +126,6 @@
       ploma.endStroke(point.x, point.y, point.p);
     }
 
-    // load Ploma onto canvas and clear it
-    ploma = new Ploma(canvas);
-    ploma.clear();
   }
 
   function getEventPoint(e) {
