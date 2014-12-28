@@ -38,33 +38,6 @@ TODO: License
 * `filteredStrokes` contains the collected point information
 * Input filtering, bezier geometry and even stepping is taken from Dan Amelang's research
 
-##### Known Issues
-
-* Canvas edge cases not yet handled?
-* RGB of stroke is probably inaccurate, the app should probably be using black for now
-* Last mouseup stroke may be missing and not being drawn
-* Even stepping deteriorates as step size increases
-* Curves not completely accurate
-* Latency
-
-##### TODO
-
-* Optimize to decrease input latency
-    * asm.js?
-* Add inkflow anomalies
-* Finetune textures at light and heavy touches
-* Address curve shapes
-    * wider input filtering
-    * input downsampling?
-* Refactor Bezier object
-* Miscellaneous
-    * Try Catmull-Rom instead?
-    * Switch to CIELab color space?
-* Test
-* ~~Rewrite as stream that accepts pre-recorded strokes for non-realtime use~~
-* ~~Add texturing capability~~
-* ~~Refactor Point object~~
-
 ------------
 ##### Version Notes
 
@@ -92,4 +65,28 @@ TODO: License
     * 'Clear' and 'Save' functionality
 * **Misc Notes**:
     * Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
-    * Needs more testing with/without plugin, across all browsers.  
+    * Needs more testing with/without plugin, across all browsers.
+
+------------
+##### TODO
+
+* Optimize
+    * asm.js?
+    * Refactor texture access?
+* Rendering
+    * Add inkflow anomalies
+    * Finetune textures at light and heavy touches
+* Curves
+    * Last mouseup stroke may be missing and not being drawn
+    * Wider input filtering
+    * Input downsampling?
+    * Even stepping deteriorates as step size increases
+* Refactor
+    * Bezier object
+* Miscellaneous
+    * Try Catmull-Rom instead?
+    * Switch to CIELab color space?
+        * RGB of stroke is probably inaccurate, the app should probably be using black for now
+* ~~Rewrite as stream that accepts pre-recorded strokes for non-realtime use~~
+* ~~Add texturing capability~~
+* ~~Refactor Point object~~
