@@ -7,9 +7,9 @@ DEMO                                    | BLOG
 
 ## Run Demo (for Wacom tablets)
 
-1. Install the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) (automatically included when you install any modern Wacom tablet)
-2. Open `index.html` in a WebKit browser
-3. Draw on canvas with a Wacom pen or check **Use Mouse** to use a mouse
+1. **Install** the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/)<br>*(automatically included when you install any modern Wacom tablet)*
+2. **Open** `index.html` in a WebKit browser
+3. **Draw** on canvas with a Wacom pen or check **Use Mouse** to use a mouse
 
 ## API
 
