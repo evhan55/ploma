@@ -28,15 +28,11 @@ View `index.html` source for example of how to use Ploma on your own site
   <td>To set the canvas background color.</td>
 </tr>
 <tr>
-  <td><code>curStroke()</code></td>
-  <td>Returns the current stroke of points that have been stored since the last mouse down as an array of point data objects.</td>
-</tr>
-<tr>
-  <td><code>cursorOffsetX</code></td>
+  <td><code>setCursorOffsetX(n)</code></td>
   <td>To address parallax.</td>
 </tr>
 <tr>
-  <td><code>cursorOffsetY</code></td>
+  <td><code>setCursorOffsetY(n)</code></td>
   <td>To address parallax.</td>
 </tr>
 </table>
