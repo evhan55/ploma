@@ -1,13 +1,12 @@
-### Ploma
-##### High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
+# Ploma
+### High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
 
 
 |  <color="#F00">DEMO</color>         | BLOG          |
 | ------------- | ------------- |
 | [Launch demo](http://evhan55.github.io)  | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  |
 
-## Run Ploma
-
+## Run Demo
 
 1. Install the [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) (automatically included when you install any Wacom stylus)
 2. Open `index.html` in a WebKit browser
