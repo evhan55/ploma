@@ -1,5 +1,5 @@
 /*
-Ploma - High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD
+Ploma - High-fidelity ballpoint pen rendering for tablets with pressure-sensitive styluses
 v0.3
 
 Evelyn Eastmond
@@ -14,6 +14,14 @@ Viewpoints Research Institute
 TODO: License
 */
 
+
+// ------------------------------------------
+// Ploma
+//
+// Constructor for Ploma instances. Accepts
+// an HTML <canvas> Element element to render
+// strokes onto.
+//
 var Ploma = function(canvas) {
 
   //////////////////////////////////////////////
@@ -21,44 +29,9 @@ var Ploma = function(canvas) {
   //////////////////////////////////////////////
 
   // ------------------------------------------
-  // strokes
-  //
-  // Returns an array of all strokes that have
-  // been recorded, each stroke itself is an
-  // array of point data objects.
-  //
-  this.strokes = function() {
-    var strokes = [];
-    for(var i = 0; i < filteredStrokes.length; i++){
-      var stroke = [];
-      strokes.push(stroke);
-      for(var j = 0; j < filteredStrokes[i].length; j++) {
-        stroke.push(filteredStrokes[i][j].asObj());
-      }
-    }
-    return strokes;
-  };
-
-  // ------------------------------------------
-  // curStroke
-  //
-  // Returns the current stroke of points that
-  // have been stored since the last mouse down
-  // as an array of point data objects.
-  //
-  this.curStroke = function() {
-    var curStroke = [];
-    for(var i = 0; i < curFilteredStroke.length; i++) {
-      curStroke.push(curFilteredStroke[i].asObj());
-    }
-    return curStroke;
-  };
-
-  // ------------------------------------------
   // clear
   //
-  // Clears the canvas to paperColor in given
-  // width and height.
+  // Clears the canvas.
   //
   this.clear = function() {
     ctx.clearRect(0, 0, w, h);
@@ -71,7 +44,9 @@ var Ploma = function(canvas) {
   // ------------------------------------------
   // beginStroke
   //
-  // Appends a new stroke array containing point
+  // Begins a new stroke containing the given
+  // point x, y and p (pressure ranging from
+  // 0-1) values.
   //
   this.beginStroke = function(x,y,p) {
     stepOffset = stepInterval;
@@ -88,8 +63,9 @@ var Ploma = function(canvas) {
   // ------------------------------------------
   // extendStroke
   //
-  // Appends the filtered point to the last
-  // stroke array.
+  // Extends the current stroke with the given
+  // point and renders the new stroke segment
+  // to the canvas.
   //
   this.extendStroke = function(x,y,p) {
     pointCounter++;
@@ -119,7 +95,9 @@ var Ploma = function(canvas) {
   // ------------------------------------------
   // endStroke
   //
-  // Appends point to the current stroke array.
+  // Ends the current stroke with the given
+  // point and renders the final stroke segment
+  // to the canvas.
   //
   this.endStroke = function(x,y,p) {
     // Keep the last point as is for now
@@ -131,6 +109,72 @@ var Ploma = function(canvas) {
     redraw();
     lastControlPoint = null;
     isDrawing = false;
+  }
+
+  // ------------------------------------------
+  // strokes
+  //
+  // Returns an array of all strokes that have
+  // been recorded, each stroke itself is an
+  // array of point JSON objects.
+  //
+  // [
+  //   [{x, y, p}, {x, y, p}, ...],
+  //   [{x, y, p}, {x, y, p}, ...],
+  //   ...
+  // ]
+  //
+  this.strokes = function() {
+    var strokes = [];
+    for(var i = 0; i < filteredStrokes.length; i++){
+      var stroke = [];
+      strokes.push(stroke);
+      for(var j = 0; j < filteredStrokes[i].length; j++) {
+        stroke.push(filteredStrokes[i][j].asObj());
+      }
+    }
+    return strokes;
+  };
+
+  // ------------------------------------------
+  // curStroke
+  //
+  // Returns the current stroke of points that
+  // have been stored since the last mouse down
+  // as an array of point JSON objects.
+  //
+  // [
+  //   {x, y, p},
+  //   {x, y, p},
+  //   ...
+  // ]
+  //
+  this.curStroke = function() {
+    var curStroke = [];
+    for(var i = 0; i < curFilteredStroke.length; i++) {
+      curStroke.push(curFilteredStroke[i].asObj());
+    }
+    return curStroke;
+  };
+
+  // ------------------------------------------
+  // setParallaxOffsetX
+  //
+  // Sets the horizontal offset of the cursor
+  // to address parallax.
+  //
+  this.setParallaxOffsetX = function(n) {
+    this.cursorOffsetX = n;
+  }
+
+  // ------------------------------------------
+  // setParallaxOffsetY
+  //
+  // Sets the vertical offset of the cursor to
+  // address parallax.
+  //
+  this.setParallaxOffsetY = function(n) {
+    this.cursorOffsetY = n;
   }
 
   //////////////////////////////////////////////
