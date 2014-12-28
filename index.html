@@ -9,9 +9,6 @@
     cursor: none;
     border: 1px solid gray;
   }
-  canvas#texture-canvas {
-    display: none;
-  }
   img {
     display: none;
   }
@@ -41,7 +38,6 @@
 
 <body>
 <canvas id="canvas"></canvas>
-<canvas id="texture-canvas"></canvas>
 <div id="buttons">
   <!-- buttons -->
   <a id="save" class="noselect">Save</a>
@@ -56,8 +52,6 @@
   <br>
   <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
 </div>
-<!-- texture -->
-<img src="img/rubbing_to_mask 9a.jpeg" id="texture"/>
 <!-- Wacom plugin -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
   <param name="onload" value="pluginLoaded"/>
@@ -72,7 +66,6 @@
   var h = 1000;
   var cursorOffsetX = 8;
   var cursorOffsetY = 8;
-  var textureCanvas;
   var save;
   var clear;
   var plugin;
@@ -88,14 +81,7 @@
     save = document.getElementById('save');
     clear = document.getElementById('clear');
     cursor = document.getElementById('cursor');
-    texture = document.getElementById("texture");
-    textureCanvas = document.getElementById("texture-canvas");
     plugin = document.getElementById('wtPlugin');
-
-    // prepare textures
-    textureCanvas.width = texture.width;
-    textureCanvas.height = texture.height;
-    textureCanvas.getContext('2d').drawImage(texture, 0, 0, texture.width, texture.height);
 
     // If pen is not detected at startup
     // assume that we're using a mouse
@@ -136,7 +122,7 @@
     }
 
     // load Ploma onto canvas and clear it
-    ploma = new Ploma(canvas, textureCanvas);
+    ploma = new Ploma(canvas);
     ploma.clear();
   }
 
