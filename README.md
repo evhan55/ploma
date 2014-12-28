@@ -1,4 +1,5 @@
-##### Ploma - High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
+#### Ploma
+##### High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
 
 Evelyn Eastmond  
 evhan55@gmail.com  
@@ -12,13 +13,10 @@ License: TODO
 
 ------------
 
-##### LIVE DEMO
-
-[Launch demo](http://evhan55.github.io)
-
-##### DEV BLOG
-
-[plomaproject.tumblr.com](http://plomaproject.tumblr.com)  
+|  <color="#F00">DEMO</color>         | BLOG          |
+| ------------- | ------------- |
+| [Launch demo](http://evhan55.github.io)  | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  |
+  
 
 ##### Getting Started
 
