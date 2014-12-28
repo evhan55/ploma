@@ -2,9 +2,9 @@
 ### High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
 
 
-|  <color="#F00">DEMO</color>         | BLOG          |
-| ------------- | ------------- |
-| [Launch demo](http://evhan55.github.io)  | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  |
+DEMO                                    | BLOG
+--------------------------------------- | ---------------------------------------------------------
+[Launch demo](http://evhan55.github.io) | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)
 
 ## Run Demo
 
@@ -16,12 +16,17 @@
 
 View `index.html` source for example of how to use Ploma on your own site  
 
-* `strokes()` contains the collected point information
-* `curStroke()`
-* `beginStroke(x, y, p)`
-* `extendStroke(x, y, p)`
-* `endStroke(x, y, p)`
-* Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
+Call                    | Description
+----------------------- | ---
+`strokes()`             | Returns an array of all strokes that have been recorded, each stroke itself is an array of point data objects
+`curStroke()`           | Returns the current stroke of points that have been stored since the last mouse down as an array of point data objects.
+`clear()`               | Clears the canvas.
+`beginStroke(x, y, p)`  | Appends a new stroke array containing the point.
+`extendStroke(x, y, p)` | Appends the filtered point to the last stroke array.
+`endStroke(x, y, p)`    | Appends point to the current stroke array.
+`cursorOffsetX`         | To address parallax.
+`cursorOffsetY`         | To address parallax.
+`setPaperColor(rgb)`    | Sets paper color according to CSS rgb string.
 
 ## Versions
 
