@@ -1,45 +1,66 @@
-##### Ploma - High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
+# Ploma
+##### High-fidelity ballpoint pen rendering for tablets with pressure-sensitive styluses  
 
-Evelyn Eastmond  
-evhan55@gmail.com  
-Communications Design Group, SAP  
+DEMO                                    | BLOG
+--------------------------------------- | ---------------------------------------------------------
+[Launch demo](http://evhan55.github.io) | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)
+
+## Run Demo (for Wacom tablets)
+
+1. Install the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) (automatically included when you install any modern Wacom tablet)
+2. Open `index.html` in a WebKit browser
+3. Draw on canvas with a Wacom pen or check **Use Mouse** to use a mouse
+
+## API
+
   
-Dan Amelang  
-Viewpoints Research Institute  
+
+### Ploma
+
+A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) object element in your HTML.  
   
-(c) 2014  
-License: TODO  
+Example code: [<code>index.html</code>](https://github.com/evhan55/ploma/blob/master/index.html)  
+  
+<table>
+<tr>
+  <td width="30%"><code>Ploma(canvas)</code></td>
+  <td width="70%">Constructor for Ploma instances.  Accepts an <code>HTML &lt;canvas&gt; Element</code> element to render strokes onto.</td>
+</tr>
+<tr>
+  <td><code>clear()</code></td>
+  <td>Clears the canvas.</td>
+</tr>
+<tr>
+  <td><code>beginStroke(x, y, p)</code></td>
+  <td>Begins a new stroke containing the given point <code>x</code>, <code>y</code> and <code>p</code> (pressure ranging from 0-1) values.</td>
+</tr>
+<tr>
+  <td><code>extendStroke(x, y, p)</code></td>
+  <td>Extends the current stroke with the given point and renders the new stroke segment to the canvas.</td>
+</tr>
+<tr>
+  <td><code>endStroke(x, y, p)</code></td>
+  <td>Ends the current stroke with the given point and renders the final stroke segment to the canvas.</td>
+</tr>
+<tr>
+  <td><code>strokes()</code></td>
+  <td>Returns an array of all strokes that have been recorded, each stroke itself is an array of point JSON objects.<br> <code>[[{x, y, p}, {x, y, p}, ...], [{x, y, p}, {x, y, p}, ...], ...]</td>
+</tr>
+<tr>
+  <td><code>curStroke()</code></td>
+  <td>Returns the current stroke of points that have been stored since the last mouse down as an array of point JSON objects.<br><code>[{x, y, p}, {x, y, p}, ...]</code></td>
+</tr>
+<tr>
+  <td><code>setParallaxOffsetX(n)</code></td>
+  <td>Sets the horizontal offset of the cursor to address parallax.</td>
+</tr>
+<tr>
+  <td><code>setParallaxOffsetY(n)</code></td>
+  <td>Sets the vertical offset of the cursor to address parallax.</td>
+</tr>
+</table>
 
-------------
-
-##### LIVE DEMO
-
-[Launch demo](http://evhan55.github.io)
-
-##### DEV BLOG
-
-[plomaproject.tumblr.com](http://plomaproject.tumblr.com)  
-
-##### Getting Started
-
-###### Prerequisites
-
-1. [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) installed in your browser (automatically included when you install any Wacom stylus)
-
-###### Launch Ploma
-1. Open `index.html` in a WebKit browser
-2. Draw on canvas with a Wacom pen input or check 'Use Mouse' to use a mouse
-3. (OPTIONAL)
-    * Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
-    * Toggle 'Show Cursor' to show a mouse cursor
-
-##### API Notes
-
-* `filteredStrokes` contains the collected point information
-* Input filtering, bezier geometry and even stepping is taken from Dan Amelang's research
-
-------------
-##### Version Notes
+## Versions
 
 ##### v0.3
 
@@ -67,8 +88,7 @@ License: TODO
     * Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
     * Needs more testing with/without plugin, across all browsers.
 
-------------
-##### TODO
+## TODO
 
 * Optimize
     * asm.js?
