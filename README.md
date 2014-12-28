@@ -13,8 +13,6 @@ DEMO                                    | BLOG
 
 ## API
 
-  
-
 ### Ploma
 
 A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) object element in your HTML.  
@@ -59,6 +57,30 @@ Example code: [<code>index.html</code>](https://github.com/evhan55/ploma/blob/ma
   <td>Sets the vertical offset of the cursor to address parallax.</td>
 </tr>
 </table>
+
+#### Example Usage
+
+```js
+var ploma = new Ploma(canvas); // canvas points to a <canvas>
+ploma.clear(); // clear the canvas
+
+canvas.onmousedown = function(e) {
+  var point = getEventPoint(e)
+  ploma.beginStroke(point.x, point.y, point.p); // begin a stroke at the mouse down point
+}
+canvas.onmousemove = function(e) {
+  var point = getEventPoint(e)
+  ploma.extendStroke(point.x, point.y, point.p); // extend the stroke at the mouse move point
+}
+canvas.onmouseup = function(e) {
+  var point = getEventPoint(e);
+  ploma.endStroke(point.x, point.y, point.p); // end the stroke at the mouse up point
+}
+```
+
+#### Full Example
+
+Full example usage of Ploma can be found in [index.html](https://github.com/evhan55/ploma/blob/master/index.html)
 
 ## Versions
 
