@@ -1,42 +1,30 @@
 ### Ploma
 ##### High-fidelity ballpoint pen rendering for Wacom Cintiq 13HD  
 
-Evelyn Eastmond  
-evhan55@gmail.com  
-Communications Design Group, SAP  
-  
-Dan Amelang  
-Viewpoints Research Institute  
-  
-(c) 2014  
-License: TODO  
-
-------------
 
 |  <color="#F00">DEMO</color>         | BLOG          |
 | ------------- | ------------- |
 | [Launch demo](http://evhan55.github.io)  | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)  |
 
-#### Getting Started
+## Getting Started
 
-###### Prerequisites
 
-1. [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) installed in your browser (automatically included when you install any Wacom stylus)
-
-###### Launch Ploma
-1. Open `index.html` in a WebKit browser
-2. Draw on canvas with a Wacom pen input or check 'Use Mouse' to use a mouse
-3. (OPTIONAL)
+1. [Wacom browser plugin](http://us.wacom.com/en/support/drivers/) (automatically included when you install any Wacom stylus)
+2. Open `index.html` in a WebKit browser
+3. Draw on canvas with a Wacom pen input or check 'Use Mouse' to use a mouse
+4. *OPTIONAL*
     * Adjust `cursorOffsetX` and `cursorOffsetY` to address parallax
     * Toggle 'Show Cursor' to show a mouse cursor
 
-#### API Notes
+## API
 
-* `filteredStrokes` contains the collected point information
-* Input filtering, bezier geometry and even stepping is taken from Dan Amelang's research
+* `strokes()` contains the collected point information
+* `curStroke()`
+* `beginStroke(x, y, p)`
+* `extendStroke(x, y, p)`
+* `endStroke(x, y, p)`
 
-------------
-#### Version Notes
+## Versions
 
 ##### v0.3
 
@@ -64,8 +52,7 @@ License: TODO
     * Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
     * Needs more testing with/without plugin, across all browsers.
 
-------------
-#### TODO
+## TODO
 
 * Optimize
     * asm.js?
