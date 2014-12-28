@@ -14,9 +14,14 @@ DEMO                                    | BLOG
 
 ## API
 
-View `index.html` source for example of how to use Ploma on your own site  
+  
+
 ### Ploma
 
+A Ploma instance expects an `HTML <canvas> Element` for rendering strokes.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  
+  
+Example: <code>index.html</code>  
+  
 <table>
 <tr>
   <td width="30%"><code>Ploma(canvas)</code></td>
@@ -28,7 +33,7 @@ View `index.html` source for example of how to use Ploma on your own site
 </tr>
 <tr>
   <td><code>beginStroke(x, y, p)</code></td>
-  <td>Begins a new stroke containing the given point <code>x</code>, <code>y</code> and <code>p</code> (pressure) values.</td>
+  <td>Begins a new stroke containing the given point <code>x</code>, <code>y</code> and <code>p</code> (pressure ranging from 0-1) values.</td>
 </tr>
 <tr>
   <td><code>extendStroke(x, y, p)</code></td>
