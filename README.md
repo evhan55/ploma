@@ -52,11 +52,11 @@ Example: <code>index.html</code>
   <td>Returns the current stroke of points that have been stored since the last mouse down as an array of point JSON objects.<br><code>[{x, y, p}, {x, y, p}, ...]</code></td>
 </tr>
 <tr>
-  <td><code>setCursorOffsetX(n)</code></td>
+  <td><code>setParallaxOffsetX(n)</code></td>
   <td>Sets the horizontal offset of the cursor to address parallax.</td>
 </tr>
 <tr>
-  <td><code>setCursorOffsetY(n)</code></td>
+  <td><code>setParallaxOffsetY(n)</code></td>
   <td>Sets the vertical offset of the cursor to address parallax.</td>
 </tr>
 </table>
