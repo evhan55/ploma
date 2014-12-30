@@ -14,6 +14,7 @@ Viewpoints Research Institute
 TODO: License
 */
 
+"use strict"; // for strict mode
 
 // ------------------------------------------
 // Ploma
@@ -54,7 +55,12 @@ var Ploma = function(canvas) {
     curRawInputStroke = [point];
     rawInputStrokes.push(curRawInputStroke);
 
-    curFilteredStroke.length = 0; // to expose properly
+    // get the latest canvas pixels
+    imageData = ctx.getImageData(0, 0, w, h);
+
+    // to expose the array properly
+    curFilteredStroke.length = 0;
+
     curFilteredStroke.push(point);
     filteredStrokes.push(curFilteredStroke);
     isDrawing = true;
@@ -156,26 +162,6 @@ var Ploma = function(canvas) {
     }
     return curStroke;
   };
-
-  // ------------------------------------------
-  // setParallaxOffsetX
-  //
-  // Sets the horizontal offset of the cursor
-  // to address parallax.
-  //
-  this.setParallaxOffsetX = function(n) {
-    this.cursorOffsetX = n;
-  }
-
-  // ------------------------------------------
-  // setParallaxOffsetY
-  //
-  // Sets the vertical offset of the cursor to
-  // address parallax.
-  //
-  this.setParallaxOffsetY = function(n) {
-    this.cursorOffsetY = n;
-  }
 
   //////////////////////////////////////////////
   // PRIVATE
@@ -302,7 +288,7 @@ var Ploma = function(canvas) {
     }
 
     // Put image using a crude dirty rect
-    ctx.putImageData(imageData, 0, 0, minx, miny, maxx - minx + 10, maxy - miny + 10);
+    ctx.putImageData(imageData, 0, 0, minx, miny, maxx - minx + 8, maxy - miny + 8);
   }
 
   // ------------------------------------------
@@ -347,7 +333,7 @@ var Ploma = function(canvas) {
       t = t + dt;
     }
 
-    // TODO: Maybe later use a better approximation for distance along the bezier?
+    // TODO: Maybe use a better approximation for distance along the bezier?
     if (stepPoints.length == 0) // We didn't step at all along this Bezier
       stepOffset = stepOffset + p0.getDistance(p3);
     else

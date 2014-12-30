@@ -51,7 +51,7 @@
   <!-- checkboxes -->
   <input type="checkbox" id="cursor" class="noselect"/> Show Cursor
   <br>
-  <input type="checkbox" id="mouse" class="noselect"/> Use Mouse
+  <input type="checkbox" id="mouse" class="noselect"/> Use Mouse<br>
 </div>
 <!-- Wacom plugin -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
@@ -62,16 +62,23 @@
 <script type='text/javascript' src="ploma.js"></script>
 
 <script type="text/javascript">
-  var useMouse = false;
-  var w = 1300;
-  var h = 1000;
-  var cursorOffsetX = 8;
-  var cursorOffsetY = 8;
+  "use strict";
+
+  // DOM
+  var canvas;
   var save;
   var clear;
-  var plugin;
   var cursor;
+  var mouse;
+  var plugin;
+
+  // State
   var ploma;
+  var w = 1300;
+  var h = 1000;
+  var useMouse = false;
+  var cursorOffsetX = 8;
+  var cursorOffsetY = 8;
 
   window.onload = function() {
 
@@ -82,6 +89,7 @@
     save = document.getElementById('save');
     clear = document.getElementById('clear');
     cursor = document.getElementById('cursor');
+    mouse = document.getElementById('mouse');
     plugin = document.getElementById('wtPlugin');
 
     // If pen is not detected at startup
@@ -96,7 +104,7 @@
     ploma = new Ploma(canvas);
     ploma.clear();
 
-    // initialize events
+    // bind events
     save.onclick = function(e) {
       window.open(canvas.toDataURL());
     }
@@ -114,11 +122,11 @@
       useMouse = mouse.checked;
     }
     canvas.onmousedown = function(e) {
-      var point = getEventPoint(e)
+      var point = getEventPoint(e);
       ploma.beginStroke(point.x, point.y, point.p);
     }
     canvas.onmousemove = function(e) {
-      var point = getEventPoint(e)
+      var point = getEventPoint(e);
       ploma.extendStroke(point.x, point.y, point.p);
     }
     canvas.onmouseup = function(e) {
