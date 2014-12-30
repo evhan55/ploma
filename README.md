@@ -88,28 +88,6 @@ canvas.onmouseup = function(e) {
 
 Full example usage of Ploma can be found in [index.html](https://github.com/evhan55/ploma/blob/master/index.html)
 
-## Versions
-
-##### v0.3
-
-* Refactored into a standalone-plugin with Astrid's help
-
-##### v0.2
-
-* Texture capability, infinitely mirrored and tiled
-* Inline documentation added
-* Some functions renamed
-
-##### v0.1
-
-* Input santizing
-* On-the-fly cubic bezier fitting using a look-ahead point
-* Even stepping along beziers for drawing steps
-* Variable-width antialiasing
-* 'Clear' and 'Save' functionality
-* Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
-* Needs more testing with/without plugin, across all browsers.
-
 ## TODO
 
 * Optimize
