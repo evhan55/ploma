@@ -4,7 +4,7 @@ DEMO                                    | BLOG
 --------------------------------------- | ---------------------------------------------------------
 [Launch demo](http://evhan55.github.io) | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)
 
-## Run Demo (for Wacom tablets)
+## Running the demo (for Wacom tablets)
 
 1. **Install** the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/)<br>*(automatically included when you install any modern Wacom tablet)*
 2. **Open** `index.html` in a WebKit browser
@@ -12,12 +12,8 @@ DEMO                                    | BLOG
 
 ## API
 
-### Ploma
-
 A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) object element in your HTML.  
-  
-Example code: [<code>index.html</code>](https://github.com/evhan55/ploma/blob/master/index.html)  
-  
+
 <table>
 <tr>
   <td width="30%"><code>Ploma(canvas)</code></td>
@@ -48,6 +44,10 @@ Example code: [<code>index.html</code>](https://github.com/evhan55/ploma/blob/ma
   <td>Returns the current stroke of points that have been stored since the last mouse down as an array of point JSON objects.<br><code>[{x, y, p}, {x, y, p}, ...]</code></td>
 </tr>
 <tr>
+  <td><code>setPaperColor(cssRGBString)</code></td>
+  <td>Sets the canvas color to the given CSS rgb value.</td>
+</tr>
+<tr>
   <td><code>setParallaxOffsetX(n)</code></td>
   <td>Sets the horizontal offset of the cursor to address parallax.</td>
 </tr>
@@ -60,20 +60,27 @@ Example code: [<code>index.html</code>](https://github.com/evhan55/ploma/blob/ma
 #### Example Usage
 
 ```js
-var ploma = new Ploma(canvas); // canvas points to a <canvas>
-ploma.clear(); // clear the canvas
+// canvas points to a <canvas>
 
+var ploma = new Ploma(canvas);
+ploma.clear();
+
+// begin a stroke at the mouse down point
 canvas.onmousedown = function(e) {
   var point = getEventPoint(e)
-  ploma.beginStroke(point.x, point.y, point.p); // begin a stroke at the mouse down point
+  ploma.beginStroke(point.x, point.y, point.p);
 }
+
+// extend the stroke at the mouse move point
 canvas.onmousemove = function(e) {
   var point = getEventPoint(e)
-  ploma.extendStroke(point.x, point.y, point.p); // extend the stroke at the mouse move point
+  ploma.extendStroke(point.x, point.y, point.p);
 }
+
+// end the stroke at the mouse up point
 canvas.onmouseup = function(e) {
   var point = getEventPoint(e);
-  ploma.endStroke(point.x, point.y, point.p); // end the stroke at the mouse up point
+  ploma.endStroke(point.x, point.y, point.p);
 }
 ```
 
@@ -85,29 +92,23 @@ Full example usage of Ploma can be found in [index.html](https://github.com/evha
 
 ##### v0.3
 
-* **Features:**
-    * Refactored into a standalone-plugin with Astrid's help
-* **Misc Notes**:
+* Refactored into a standalone-plugin with Astrid's help
 
 ##### v0.2
 
-* **Features**:
-    * Texture capability, infinitely mirrored and tiled
-* **Misc Notes**:
-    * Inline documentation added
-    * Some functions renamed
+* Texture capability, infinitely mirrored and tiled
+* Inline documentation added
+* Some functions renamed
 
 ##### v0.1
 
-* **Features**:
-    * Input santizing
-    * On-the-fly cubic bezier fitting using a look-ahead point
-    * Even stepping along beziers for drawing steps
-    * Variable-width antialiasing
-    * 'Clear' and 'Save' functionality
-* **Misc Notes**:
-    * Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
-    * Needs more testing with/without plugin, across all browsers.
+* Input santizing
+* On-the-fly cubic bezier fitting using a look-ahead point
+* Even stepping along beziers for drawing steps
+* Variable-width antialiasing
+* 'Clear' and 'Save' functionality
+* Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
+* Needs more testing with/without plugin, across all browsers.
 
 ## TODO
 
