@@ -47,14 +47,6 @@ A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen 
   <td><code>setPaperColor(cssRGBString)</code></td>
   <td>Sets the canvas color to the given CSS rgb value.</td>
 </tr>
-<tr>
-  <td><code>setParallaxOffsetX(n)</code></td>
-  <td>Sets the horizontal offset of the cursor to address parallax.</td>
-</tr>
-<tr>
-  <td><code>setParallaxOffsetY(n)</code></td>
-  <td>Sets the vertical offset of the cursor to address parallax.</td>
-</tr>
 </table>
 
 #### Example Usage
