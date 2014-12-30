@@ -1,26 +1,19 @@
-# Ploma
-##### High-fidelity ballpoint pen rendering for tablets with pressure-sensitive styluses  
+![](http://i.imgur.com/FczwY4f.png)  
 
 DEMO                                    | BLOG
 --------------------------------------- | ---------------------------------------------------------
 [Launch demo](http://evhan55.github.io) | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)
 
-## Run Demo (for Wacom tablets)
+## Running the demo (for Wacom tablets)
 
-1. Install the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) (automatically included when you install any modern Wacom tablet)
-2. Open `index.html` in a WebKit browser
-3. Draw on canvas with a Wacom pen or check **Use Mouse** to use a mouse
+1. **Install** the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/)<br>*(automatically included when you install any modern Wacom tablet)*
+2. **Open** `index.html` in a WebKit browser
+3. **Draw** on canvas with a Wacom pen or check **Use Mouse** to use a mouse
 
 ## API
 
-  
-
-### Ploma
-
 A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) object element in your HTML.  
-  
-Example code: [<code>index.html</code>](https://github.com/evhan55/ploma/blob/master/index.html)  
-  
+
 <table>
 <tr>
   <td width="30%"><code>Ploma(canvas)</code></td>
@@ -51,42 +44,41 @@ Example code: [<code>index.html</code>](https://github.com/evhan55/ploma/blob/ma
   <td>Returns the current stroke of points that have been stored since the last mouse down as an array of point JSON objects.<br><code>[{x, y, p}, {x, y, p}, ...]</code></td>
 </tr>
 <tr>
-  <td><code>setParallaxOffsetX(n)</code></td>
-  <td>Sets the horizontal offset of the cursor to address parallax.</td>
-</tr>
-<tr>
-  <td><code>setParallaxOffsetY(n)</code></td>
-  <td>Sets the vertical offset of the cursor to address parallax.</td>
+  <td><code>setPaperColor(cssRGBString)</code></td>
+  <td>Sets the canvas color to the given CSS rgb value.</td>
 </tr>
 </table>
 
-## Versions
+#### Example Usage
 
-##### v0.3
+```js
+// canvas points to a <canvas>
 
-* **Features:**
-    * Refactored into a standalone-plugin with Astrid's help
-* **Misc Notes**:
+var ploma = new Ploma(canvas);
+ploma.clear();
 
-##### v0.2
+// begin a stroke at the mouse down point
+canvas.onmousedown = function(e) {
+  var point = getEventPoint(e)
+  ploma.beginStroke(point.x, point.y, point.p);
+}
 
-* **Features**:
-    * Texture capability, infinitely mirrored and tiled
-* **Misc Notes**:
-    * Inline documentation added
-    * Some functions renamed
+// extend the stroke at the mouse move point
+canvas.onmousemove = function(e) {
+  var point = getEventPoint(e)
+  ploma.extendStroke(point.x, point.y, point.p);
+}
 
-##### v0.1
+// end the stroke at the mouse up point
+canvas.onmouseup = function(e) {
+  var point = getEventPoint(e);
+  ploma.endStroke(point.x, point.y, point.p);
+}
+```
 
-* **Features**:
-    * Input santizing
-    * On-the-fly cubic bezier fitting using a look-ahead point
-    * Even stepping along beziers for drawing steps
-    * Variable-width antialiasing
-    * 'Clear' and 'Save' functionality
-* **Misc Notes**:
-    * Right now this mostly assumes a Wacom plugin pre-installed, since the mouse use case is not of interest.
-    * Needs more testing with/without plugin, across all browsers.
+#### Full Example
+
+Full example usage of Ploma can be found in [index.html](https://github.com/evhan55/ploma/blob/master/index.html)
 
 ## TODO
 
