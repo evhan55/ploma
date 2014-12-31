@@ -73,12 +73,13 @@
   var plugin;
 
   // State
-  var ploma;
+  var ploma = null;
   var w = 1300;
   var h = 1000;
   var useMouse = false;
   var cursorOffsetX = 8;
   var cursorOffsetY = 8;
+  var isDrawing = false;
 
   window.onload = function() {
 
@@ -124,14 +125,17 @@
     canvas.onmousedown = function(e) {
       var point = getEventPoint(e);
       ploma.beginStroke(point.x, point.y, point.p);
+      isDrawing = true;
     }
     canvas.onmousemove = function(e) {
+      if (!isDrawing) return;
       var point = getEventPoint(e);
       ploma.extendStroke(point.x, point.y, point.p);
     }
     canvas.onmouseup = function(e) {
       var point = getEventPoint(e);
       ploma.endStroke(point.x, point.y, point.p);
+      isDrawing = false;
     }
 
   }

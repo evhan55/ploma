@@ -63,7 +63,6 @@ var Ploma = function(canvas) {
 
     curFilteredStroke.push(point);
     filteredStrokes.push(curFilteredStroke);
-    isDrawing = true;
   }
 
   // ------------------------------------------
@@ -75,7 +74,6 @@ var Ploma = function(canvas) {
   //
   this.extendStroke = function(x,y,p) {
     pointCounter++;
-    if (!isDrawing) return;
 
     // Skip every other point for curves
     if (pointCounter % 2 !== 0) {
@@ -114,7 +112,6 @@ var Ploma = function(canvas) {
 
     redraw();
     lastControlPoint = null;
-    isDrawing = false;
   }
 
   // ------------------------------------------
@@ -195,7 +192,6 @@ var Ploma = function(canvas) {
   var textureOffsetY = 0;
   var stepOffset = 0;
   var stepInterval = 0.30;
-  var isDrawing = false;
 
   // ------------------------------------------
   // redraw
@@ -206,8 +202,6 @@ var Ploma = function(canvas) {
   function redraw() {
     // TODO: Handle single point and double point strokes
     // 3 points needed for a look-ahead bezier
-    if (!isDrawing) return;
-
     if(curFilteredStroke.length >= 3) {
       var len = curFilteredStroke.length;
       createAndDrawBezier([
@@ -571,7 +565,7 @@ var Ploma = function(canvas) {
 
   function getImageDataFromImage(img) {
     var canvas = document.createElement('canvas');
-    var ctx    = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d');
     canvas.width = img.width;
     canvas.height = img.height;
     ctx.drawImage(img, 0, 0);
