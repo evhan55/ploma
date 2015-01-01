@@ -14,14 +14,26 @@ DEMO                                    | BLOG
 
 A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) object element in your HTML.  
 
+### Class
+
 <table>
 <tr>
   <td width="30%"><code>Ploma(canvas)</code></td>
   <td width="70%">Constructor for Ploma instances.  Accepts an <code>HTML &lt;canvas&gt; Element</code> element to render strokes onto.</td>
 </tr>
 <tr>
-  <td><code>clear()</code></td>
-  <td>Clears the canvas.</td>
+  <td><code>getStrokeImageData(strokes)</code></td>
+  <td>Returns image data for the input stroke, against a transparent canvas, clipped to the stroke's bounds.  Input stroke is to be a an array of JSON objects of point data: <br> <code>[{x, y, p}, {x, y, p}, ...]
+  </td>
+</tr>
+</table>
+
+### Instance
+
+<table>
+<tr>
+  <td width="30%"><code>clear()</code></td>
+  <td width="70%">Clears the canvas.</td>
 </tr>
 <tr>
   <td><code>beginStroke(x, y, p)</code></td>
