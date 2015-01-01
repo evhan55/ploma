@@ -112,7 +112,7 @@ var Ploma = function(canvas) {
   }
 
   // ------------------------------------------
-  // rawInputStrokes
+  // strokes
   //
   // Returns an array of all strokes that have
   // been recorded, each stroke itself is an
@@ -124,7 +124,7 @@ var Ploma = function(canvas) {
   //   ...
   // ]
   //
-  this.rawInputStrokes = function() {
+  this.strokes = function() {
     var strokes = [];
     for(var i = 0; i < rawInputStrokes.length; i++){
       var stroke = [];
@@ -137,7 +137,7 @@ var Ploma = function(canvas) {
   };
 
   // ------------------------------------------
-  // curRawInputStroke
+  // curStroke
   //
   // Returns the current stroke of points that
   // have been stored since the last mouse down
@@ -149,7 +149,7 @@ var Ploma = function(canvas) {
   //   ...
   // ]
   //
-  this.curRawInputStroke = function() {
+  this.curStroke = function() {
     var curStroke = [];
     for(var i = 0; i < curRawInputStroke.length; i++) {
       curStroke.push(curRawInputStroke[i].asObj());
