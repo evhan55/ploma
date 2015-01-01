@@ -171,7 +171,7 @@ var Ploma = function(canvas) {
   var textureWidth = textureImage.width;
   var textureHeight = textureImage.height;
   var textureImageData = getImageDataFromImage(textureImage);
-  var paperColor = 'rgb(255, 255, 255)';
+  var paperColor = 'rgb(0, 255, 255)';
 
   // State
   var rawInputStrokes = [];
@@ -447,12 +447,25 @@ var Ploma = function(canvas) {
         var b = 45;
 
         // Byte-index pixel placement within array
-        // Alpha blending: old * (1 - a) + new * a
         var idx = (i + j * w) * 4;
-        id.data[idx + 0] = id.data[idx + 0] * (1 - a) + r * a;
-        id.data[idx + 1] = id.data[idx + 1] * (1 - a) + g * a;
-        id.data[idx + 2] = id.data[idx + 2] * (1 - a) + b * a;
-        id.data[idx + 3] = 255;
+
+        // Transparent vs. opaque background
+        if(id.data[idx + 3] === 255) {
+          // newC: newC * newA + oldC * (1 - newA)
+          // newA: 255
+          id.data[idx + 0] = r * a + id.data[idx + 0] * (1 - a);
+          id.data[idx + 1] = g * a + id.data[idx + 1] * (1 - a);
+          id.data[idx + 2] = b * a + id.data[idx + 2] * (1 - a);
+          id.data[idx + 3] = 255;
+        } else {
+          // newC: newC * newA + oldC * oldA * (1 - newA)
+          // newA: newA + oldA * (1 - newA)
+          var oldA = id.data[idx + 3]/255;
+          id.data[idx + 0] = r * a + id.data[idx + 0] * oldA * (1 - a);
+          id.data[idx + 1] = g * a + id.data[idx + 1] * oldA * (1 - a);
+          id.data[idx + 2] = b * a + id.data[idx + 2] * oldA * (1 - a);
+          id.data[idx + 3] = (a + oldA * (1 - a)) * 255;
+        }
       }
     }
   }
@@ -592,3 +605,62 @@ var Ploma = function(canvas) {
   }
 
 } // Ploma
+
+// ------------------------------------------
+// Ploma.getStrokeImageData
+//
+// Returns image data for....
+//
+Ploma.getStrokeImageData = function(stroke) {
+  // For drawing and getting image data later
+  var canvas = document.createElement('canvas');
+
+  // Precalculate necessary bounds
+  var minx = Infinity;
+  var miny = Infinity;
+  var maxx = 0;
+  var maxy = 0;
+  for(var i = 0; i < stroke.length; i++) {
+    var point = stroke[i];
+    minx = Math.min(minx, point.x);
+    miny = Math.min(miny, point.y);
+    maxx = Math.max(maxx, point.x);
+    maxy = Math.max(maxy, point.y);
+  }
+  var w = maxx - minx + 8;
+  var h = maxy - miny + 8;
+  canvas.setAttribute('width', Math.ceil(w));
+  canvas.setAttribute('height', Math.ceil(h));
+
+  // Shift points to new origin
+  for(var i = 0; i < stroke.length; i++) {
+    var point = stroke[i];
+    point.x = point.x - minx + 4;
+    point.y = point.y - miny + 4;
+  }
+
+  // Instantiate Ploma on this new canvas
+  var ploma = new Ploma(canvas);
+
+  // Draw stroke onto temp canvas
+  ploma.beginStroke(
+    stroke[0].x,
+    stroke[0].y,
+    stroke[0].p
+  );
+  for(var i = 1; i < stroke.length - 1; i++) {
+    ploma.extendStroke(
+      stroke[i].x,
+      stroke[i].y,
+      stroke[i].p
+    );
+  }
+  ploma.endStroke(
+    stroke[stroke.length - 1].x,
+    stroke[stroke.length - 1].y,
+    stroke[stroke.length - 1].p
+  );
+
+  // Return the image data
+  return canvas.getContext('2d').getImageData(0, 0, w, h);
+};
