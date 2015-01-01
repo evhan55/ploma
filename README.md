@@ -49,7 +49,7 @@ A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen 
 </tr>
 <tr>
   <td><code>strokes()</code></td>
-  <td>Returns an array of all strokes that have been recorded, each stroke itself is an array of point JSON objects.<br> <code>[[{x, y, p}, {x, y, p}, ...], [{x, y, p}, {x, y, p}, ...], ...]</td>
+  <td>Returns an array of all strokes that have been recorded, each stroke itself is an array of point JSON objects.<br> <code>[<br>[{x, y, p}, {x, y, p}, ...],<br>[{x, y, p}, {x, y, p}, ...],<br>...<br>]</td>
 </tr>
 <tr>
   <td><code>curStroke()</code></td>
