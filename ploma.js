@@ -53,19 +53,17 @@ var Ploma = function(canvas) {
     var point = new Point(x,y,p);
     pointCounter++;
 
-    stepOffset = stepInterval;
     curRawStroke = [point];
-    curRawSampledStroke = [point];
     rawStrokes.push(curRawStroke);
+    curFilteredStroke = [point]
+    filteredStrokes.push(curFilteredStroke);
+    curRawSampledStroke = [point];
 
     // Get the latest canvas pixels
     imageData = ctx.getImageData(0, 0, w, h);
 
-    // To expose the array properly
-    curFilteredStroke.length = 0;
-
-    curFilteredStroke.push(point);
-    filteredStrokes.push(curFilteredStroke);
+    // Reset step offset for new stroke
+    stepOffset = stepInterval;
   }
 
   // ------------------------------------------
