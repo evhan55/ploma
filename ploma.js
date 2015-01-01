@@ -421,7 +421,7 @@ var Ploma = function(canvas) {
         var dist = point.getDistance(new Point(i, j));
 
         // Antialiasing
-        var a = 0.1/(dist - width) - 0.06;
+        var a = 0.1 / (dist - width) - 0.06;
 
         // Spike
         if(dist < width) {
@@ -460,11 +460,12 @@ var Ploma = function(canvas) {
         } else {
           // newC: newC * newA + oldC * oldA * (1 - newA)
           // newA: newA + oldA * (1 - newA)
-          var oldA = id.data[idx + 3]/255;
-          id.data[idx + 0] = r * a + id.data[idx + 0] * oldA * (1 - a);
-          id.data[idx + 1] = g * a + id.data[idx + 1] * oldA * (1 - a);
-          id.data[idx + 2] = b * a + id.data[idx + 2] * oldA * (1 - a);
-          id.data[idx + 3] = (a + oldA * (1 - a)) * 255;
+          var oldA = id.data[idx + 3] / 255;
+          var newA = (a + oldA * (1 - a));
+          id.data[idx + 0] = (r * a + id.data[idx + 0] * oldA * (1 - a)) / newA;
+          id.data[idx + 1] = (g * a + id.data[idx + 1] * oldA * (1 - a)) / newA;
+          id.data[idx + 2] = (b * a + id.data[idx + 2] * oldA * (1 - a)) / newA;
+          id.data[idx + 3] = newA * 255;
         }
       }
     }
