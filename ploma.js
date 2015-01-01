@@ -51,10 +51,12 @@ var Ploma = function(canvas) {
   //
   this.beginStroke = function(x,y,p) {
     var point = new Point(x,y,p);
+    pointCounter++;
 
     stepOffset = stepInterval;
-    curRawInputStroke = [point];
-    rawInputStrokes.push(curRawInputStroke);
+    curRawStroke = [point];
+    curRawSampledStroke = [point];
+    rawStrokes.push(curRawStroke);
 
     // Get the latest canvas pixels
     imageData = ctx.getImageData(0, 0, w, h);
@@ -74,22 +76,38 @@ var Ploma = function(canvas) {
   // to the canvas.
   //
   this.extendStroke = function(x,y,p) {
+    pointCounter++;
+
     var point = new Point(x,y,p);
 
-    // Ignore duplicates in the same stroke
-    if(curRawInputStroke.last().equals(point)) {
-      return;
+    // Push raw point
+    if(curRawStroke.last().equals(point)) {
+      return; // ignore duplicates within a stroke
     }
-    // Push current point
-    curRawInputStroke.push(point);
+    curRawStroke.push(point);
 
-    // Filter inputs
-    var fpoint = getCurFilteredPoint();
-    if(fpoint) {
-      curFilteredStroke.push(fpoint);
+    // Push and filter sampled point, redraw
+    if (pointCounter % sample !== 0) {
+      if(curRawSampledStroke.last().equals(point)) {
+        return; // ignore duplicates within a stroke
+      }
+      curRawSampledStroke.push(point);
+
+      // Filter next to last input point
+      var len = curRawSampledStroke.length;
+      if(len >= 3) {
+        var fpoint = calculateFilteredPoint(
+          curRawSampledStroke[len - 3],
+          curRawSampledStroke[len - 2],
+          curRawSampledStroke[len - 1]
+        );
+        if(fpoint) {
+          curFilteredStroke.push(fpoint);
+        }
+      }
+      redraw();
     }
 
-    redraw();
   }
 
   // ------------------------------------------
@@ -104,7 +122,8 @@ var Ploma = function(canvas) {
 
     // Keep the last point as is for now
     // TODO: Try to address the "tapering on mouseup" issue
-    curRawInputStroke.push(point);
+    curRawStroke.push(point);
+    curRawSampledStroke.push(point);
     curFilteredStroke.push(point);
 
     redraw();
@@ -126,11 +145,11 @@ var Ploma = function(canvas) {
   //
   this.strokes = function() {
     var strokes = [];
-    for(var i = 0; i < rawInputStrokes.length; i++){
+    for(var i = 0; i < rawStrokes.length; i++){
       var stroke = [];
       strokes.push(stroke);
-      for(var j = 0; j < rawInputStrokes[i].length; j++) {
-        stroke.push(rawInputStrokes[i][j].asObj());
+      for(var j = 0; j < rawStrokes[i].length; j++) {
+        stroke.push(rawStrokes[i][j].asObj());
       }
     }
     return strokes;
@@ -147,8 +166,8 @@ var Ploma = function(canvas) {
   //
   this.curStroke = function() {
     var curStroke = [];
-    for(var i = 0; i < curRawInputStroke.length; i++) {
-      curStroke.push(curRawInputStroke[i].asObj());
+    for(var i = 0; i < curRawStroke.length; i++) {
+      curStroke.push(curRawStroke[i].asObj());
     }
     return curStroke;
   };
@@ -170,8 +189,9 @@ var Ploma = function(canvas) {
   var paperColor = 'rgb(0, 255, 255)';
 
   // State
-  var rawInputStrokes = [];
-  var curRawInputStroke = [];
+  var rawStrokes = [];
+  var curRawStroke = [];
+  var curRawSampledStroke = [];
   var filteredStrokes = [];
   var curFilteredStroke = [];
   var minx = null;
@@ -184,6 +204,8 @@ var Ploma = function(canvas) {
   var textureOffsetY = 0;
   var stepOffset = 0;
   var stepInterval = 0.30;
+  var pointCounter = 0;
+  var sample = 2;
 
   // ------------------------------------------
   // redraw
@@ -203,36 +225,6 @@ var Ploma = function(canvas) {
       ]);
     }
   };
-
-  // ------------------------------------------
-  // getCurFilteredPoint
-  //
-  // Returns a filtered point from the current
-  // raw input stroke if there are enough
-  // points there to filter.
-  //
-  function getCurFilteredPoint() {
-    // Sample every other point for curve shape
-    var sampledCurRawInputStroke = [];
-    /*for(var i = 0; i < curRawInputStroke.length; i++) {
-      if((i % 2) === 0 || 
-        (i === 0) ||
-        (i === (curRawInputStroke.len - 1))) {
-        sampledCurRawInputStroke.push(curRawInputStroke[i]);
-      }
-    }*/
-    sampledCurRawInputStroke = curRawInputStroke;
-
-    var len = sampledCurRawInputStroke.length;
-    if(len >= 3) {
-      var fpoint = calculateFilteredPoint(
-        sampledCurRawInputStroke[len - 3],
-        sampledCurRawInputStroke[len - 2],
-        sampledCurRawInputStroke[len - 1]
-      );
-    }
-    return fpoint
-  }
 
   // ------------------------------------------
   // createAndDrawBezier
@@ -349,10 +341,12 @@ var Ploma = function(canvas) {
   // point p2 between points p1 and p3.
   //
   function calculateFilteredPoint(p1, p2, p3) {
-    var w = filterWeight / 100;
     if (p1 == null || p2 == null || p3 == null)
       return null; // Not enough points yet to filter
+
+    var w = filterWeight / 100;
     var m = p1.getMidPt(p3);
+
     return new Point(
       w * p2.x + (1 - w) * m.x,
       w * p2.y + (1 - w) * m.y,
