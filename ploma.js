@@ -610,7 +610,13 @@ var Ploma = function(canvas) {
 // ------------------------------------------
 // Ploma.getStrokeImageData
 //
-// Returns image data for....
+// Returns image data for the input stroke,
+// against a transparent canvas, clipped to
+// the stroke's bounds.  Input stroke is to
+// be a an array of JSON objects of point
+// data:
+//
+// [{x, y, p}, {x, y, p}, ...]
 //
 Ploma.getStrokeImageData = function(stroke) {
   // For drawing and getting image data later
