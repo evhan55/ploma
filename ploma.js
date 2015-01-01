@@ -143,11 +143,7 @@ var Ploma = function(canvas) {
   // have been stored since the last mouse down
   // as an array of point JSON objects.
   //
-  // [
-  //   {x, y, p},
-  //   {x, y, p},
-  //   ...
-  // ]
+  // [{x, y, p}, {x, y, p}, ...]
   //
   this.curStroke = function() {
     var curStroke = [];
