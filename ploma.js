@@ -78,20 +78,26 @@ var Ploma = function(canvas) {
 
     var point = new Point(x,y,p);
 
-    // Push raw point
+    //
+    // Raw
+    //
     if(curRawStroke.last().equals(point)) {
-      return; // ignore duplicates within a stroke
+      return; // ignore dupes
     }
     curRawStroke.push(point);
 
-    // Push and filter sampled point, redraw
+    //
+    // Sampled and filtered
+    //
     if (pointCounter % sample !== 0) {
+
+      // Push sampled point
       if(curRawSampledStroke.last().equals(point)) {
-        return; // ignore duplicates within a stroke
+        return; // ignore dupes
       }
       curRawSampledStroke.push(point);
 
-      // Filter next to last input point
+      // Filter next-to-last input point
       var len = curRawSampledStroke.length;
       if(len >= 3) {
         var fpoint = calculateFilteredPoint(
@@ -100,9 +106,12 @@ var Ploma = function(canvas) {
           curRawSampledStroke[len - 1]
         );
         if(fpoint) {
+          // Push sampled, filtered, point
           curFilteredStroke.push(fpoint);
         }
       }
+
+      // Redraw sampled and filtered
       redraw();
     }
 
