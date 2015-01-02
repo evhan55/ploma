@@ -61,6 +61,7 @@ var Ploma = function(canvas) {
 
     // Get the latest canvas pixels
     imageData = ctx.getImageData(0, 0, w, h);
+    //console.log('getting image data');
 
     // Reset step offset for new stroke
     stepOffset = stepInterval;
@@ -290,7 +291,7 @@ var Ploma = function(canvas) {
     }
 
     // Put image using a crude dirty rect
-    ctx.putImageData(imageData, 0, 0, minx, miny, maxx - minx + 8, maxy - miny + 8);
+    ctx.putImageData(imageData, 0, 0, minx, miny, maxx - minx + 10, maxy - miny + 10);
   }
 
   // ------------------------------------------
@@ -393,7 +394,7 @@ var Ploma = function(canvas) {
       width = map(p, 0.95, 0.99, 0.9, 0.95);
     }
     if(p > 1) { // Possible output from bezier
-      width = 1.2;
+      width = 1;
     }
 
     return width;
@@ -421,7 +422,7 @@ var Ploma = function(canvas) {
         var dist = point.getDistance(new Point(i, j));
 
         // Antialiasing
-        var a = 0.1 / (dist - width) - 0.06;
+        var a = (0.1 / (dist - width)) - 0.06;
 
         // Spike
         if(dist < width) {
@@ -494,11 +495,6 @@ var Ploma = function(canvas) {
     var g = textureImageData[idx + 1];
     var b = textureImageData[idx + 2];
     var l = (r + g + b) / 3; // crude average luminance
-
-    // Lighter texture for grain at light touches
-    //if(p < 0.2) {
-    //  l += 50; 
-    //}
 
     // Step texture offset randomly [-1, 1]
     var textureStep = getTextureStep();
