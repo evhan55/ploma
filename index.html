@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <link href='http://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
@@ -65,6 +66,7 @@
   "use strict";
 
   // DOM
+  var body;
   var canvas;
   var save;
   var clear;
@@ -84,6 +86,7 @@
   window.onload = function() {
 
     // load DOM elements
+    body = document.getElementsByTagName('body')[0];
     canvas = document.getElementById('canvas');
     canvas.setAttribute('width', w);
     canvas.setAttribute('height', h);
@@ -142,8 +145,8 @@
 
   function getEventPoint(e) {
     return {
-      x: e.clientX - cursorOffsetX + document.getElementsByTagName('body')[0].scrollLeft,
-      y: e.clientY - cursorOffsetY + document.getElementsByTagName('body')[0].scrollTop,
+      x: e.clientX - cursorOffsetX + body.scrollLeft,
+      y: e.clientY - cursorOffsetY + body.scrollTop,
       p: (useMouse ? 1: plugin.penAPI.pressure)
     }
   }
