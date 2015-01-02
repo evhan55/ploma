@@ -213,6 +213,9 @@ var Ploma = function(canvas) {
   var stepInterval = 0.30;
   var pointCounter = 0;
   var sample = 2;
+  var penR = 20;
+  var penG = 20;
+  var penB = 45;
 
   // ------------------------------------------
   // redraw
@@ -434,14 +437,16 @@ var Ploma = function(canvas) {
            a = 0.3;
         }
 
-        // Get texture for alpha
-        var l = getNextTexturePixel(point.p);
-        a = a * l;
+        // Get texture sample
+        var l = getNextTexturePixel();
 
-        // Color
-        var r = 20;
-        var g = 20;
-        var b = 45;
+        // Lighten for light touches
+        if(point.p < 0.2) {
+          l += 0.7;
+        }
+
+        // Shade alpha by texture
+        a = a * l;
 
         // Byte-index pixel placement within array
         var idx = (i + j * w) * 4;
@@ -450,18 +455,18 @@ var Ploma = function(canvas) {
         if(id.data[idx + 3] === 255) {
           // newC: newC * newA + oldC * (1 - newA)
           // newA: 255
-          id.data[idx + 0] = r * a + id.data[idx + 0] * (1 - a);
-          id.data[idx + 1] = g * a + id.data[idx + 1] * (1 - a);
-          id.data[idx + 2] = b * a + id.data[idx + 2] * (1 - a);
+          id.data[idx + 0] = penR * a + id.data[idx + 0] * (1 - a);
+          id.data[idx + 1] = penG * a + id.data[idx + 1] * (1 - a);
+          id.data[idx + 2] = penB * a + id.data[idx + 2] * (1 - a);
           id.data[idx + 3] = 255;
         } else {
           // newC: newC * newA + oldC * oldA * (1 - newA)
           // newA: newA + oldA * (1 - newA)
           var oldA = id.data[idx + 3] / 255;
           var newA = (a + oldA * (1 - a));
-          id.data[idx + 0] = (r * a + id.data[idx + 0] * oldA * (1 - a)) / newA;
-          id.data[idx + 1] = (g * a + id.data[idx + 1] * oldA * (1 - a)) / newA;
-          id.data[idx + 2] = (b * a + id.data[idx + 2] * oldA * (1 - a)) / newA;
+          id.data[idx + 0] = (penR * a + id.data[idx + 0] * oldA * (1 - a)) / newA;
+          id.data[idx + 1] = (penG * a + id.data[idx + 1] * oldA * (1 - a)) / newA;
+          id.data[idx + 2] = (penB * a + id.data[idx + 2] * oldA * (1 - a)) / newA;
           id.data[idx + 3] = newA * 255;
         }
       }
@@ -475,7 +480,7 @@ var Ploma = function(canvas) {
   // by meandering around an infinitely
   // mirrored and tiled texture.
   // 
-  function getNextTexturePixel(p) {
+  function getNextTexturePixel() {
 
     // Get normalized pixel within texture
     var T_s = textureOffsetX / (textureWidth - 1);
@@ -491,9 +496,9 @@ var Ploma = function(canvas) {
     var l = (r + g + b) / 3; // crude average luminance
 
     // Lighter texture for grain at light touches
-    if(p < 0.2) {
-      l += 50; 
-    }
+    //if(p < 0.2) {
+    //  l += 50; 
+    //}
 
     // Step texture offset randomly [-1, 1]
     var textureStep = getTextureStep();
