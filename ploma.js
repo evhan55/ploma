@@ -193,7 +193,7 @@ var Ploma = function(canvas) {
   var textureWidth = textureImage.width;
   var textureHeight = textureImage.height;
   var textureImageData = getImageDataFromImage(textureImage);
-  var paperColor = 'rgb(0, 255, 255)';
+  var paperColor = 'rgb(255, 255, 255)';
 
   // State
   var rawStrokes = [];
