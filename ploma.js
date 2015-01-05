@@ -193,7 +193,10 @@ var Ploma = function(canvas) {
   var textureImage = getImageFromBase64(textureBase64());
   var textureWidth = textureImage.width;
   var textureHeight = textureImage.height;
+  var textureWidth_1 = textureWidth - 1;
+  var textureHeight_1 = textureHeight - 1;
   var textureImageData = getImageDataFromImage(textureImage);
+  var textureImageDataGrays = readGrays(textureImageData);
   var paperColor = 'rgb(255, 255, 255)';
 
   // State
@@ -217,6 +220,20 @@ var Ploma = function(canvas) {
   var penR = 20;
   var penG = 20;
   var penB = 45;
+
+  // ------------------------------------------
+  // readGrays
+  //
+  // Process image data into array of grays in
+  // range [0,1].
+  //
+  function readGrays(imageData) {
+    var grays = [];
+    for(var i = 0; i < imageData.length; i+=4) {
+      grays.push(1 - imageData[i]/255);
+    }
+    return grays;
+  }
 
   // ------------------------------------------
   // redraw
@@ -409,6 +426,12 @@ var Ploma = function(canvas) {
   function drawStep(id, point) {
     var width = calculateWidth(point.p);
 
+    // TODO: OPTIMIZATIONS
+    // - Update bounding rect outside of loop using math
+    // - Look at antialiasing function to see if it can be auto-capped or auto-lightened or auto-clamped
+    // - Pre-choose which type of background it is against?
+    // - In getNextTexturePixel, try to pre-randomize the walk
+
     for(var i = Math.round(point.x) - 2; i < Math.round(point.x) + 3; i++) {
       for(var j = Math.round(point.y) - 2; j < Math.round(point.y) + 3; j++) {
 
@@ -440,6 +463,7 @@ var Ploma = function(canvas) {
 
         // Get texture sample
         var l = getNextTexturePixel();
+        //var l = Module.getNextTexturePixel();
 
         // Lighten for light touches
         if(point.p < 0.2) {
@@ -461,7 +485,7 @@ var Ploma = function(canvas) {
           id.data[idx + 2] = penB * a + id.data[idx + 2] * (1 - a);
           id.data[idx + 3] = 255;
         } else {
-          // newC: newC * newA + oldC * oldA * (1 - newA)
+          // newC: newC * newA + (oldC * oldA * (1 - newA)) / newA
           // newA: newA + oldA * (1 - newA)
           var oldA = id.data[idx + 3] / 255;
           var newA = (a + oldA * (1 - a));
@@ -484,24 +508,20 @@ var Ploma = function(canvas) {
   function getNextTexturePixel() {
 
     // Get normalized pixel within texture
-    var T_s = textureOffsetX / (textureWidth - 1);
-    var T_t = textureOffsetY / (textureHeight - 1);
+    var T_s = textureOffsetX / textureWidth_1;
+    var T_t = textureOffsetY / textureHeight_1;
     var s = Math.abs(Math.abs(T_s - 1) % 2 - 1);
     var t = Math.abs(Math.abs(T_t - 1) % 2 - 1);
-    var x = Math.floor(s * (textureWidth - 1));
-    var y = Math.floor(t * (textureHeight - 1));
-    var idx = (x + y * textureWidth) * 4;
-    var r = textureImageData[idx + 0];
-    var g = textureImageData[idx + 1];
-    var b = textureImageData[idx + 2];
-    var l = (r + g + b) / 3; // crude average luminance
+    var x = Math.floor(s * textureWidth_1);
+    var y = Math.floor(t * textureHeight_1);
+    var l = textureImageDataGrays[x + y * textureWidth];
 
     // Step texture offset randomly [-1, 1]
     var textureStep = getTextureStep();
     textureOffsetX += textureStep.x;
     textureOffsetY += textureStep.y;
 
-    return (1 - l/255);
+    return l;
   }
 
   // ------------------------------------------
