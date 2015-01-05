@@ -636,7 +636,13 @@ var Ploma = function(canvas) {
 //
 // [{x, y, p}, {x, y, p}, ...]
 //
-Ploma.getStrokeImageData = function(stroke) {
+Ploma.getStrokeImageData = function(inputStroke) {
+  // Make a local copy
+  var stroke = [];
+  for(var i = 0; i < inputStroke.length; i++) {
+    stroke.push(inputStroke[i]);
+  }
+
   // For drawing and getting image data later
   var canvas = document.createElement('canvas');
 
