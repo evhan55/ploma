@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
   <link href='http://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
 <style>
   body {
@@ -38,7 +40,7 @@
 </head>
 
 <body>
-<canvas id="canvas"></canvas>
+<canvas id="canvas" class="noselect"></canvas>
 <div id="buttons">
   <!-- buttons -->
   <br>
@@ -109,8 +111,6 @@
         canvas.style.cursor = 'none';
       }
     }
-
-    //console.log(plugin.penAPI.pressure);
 
     // bind input events
     if(window.PointerEvent) {
