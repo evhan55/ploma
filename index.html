@@ -95,7 +95,7 @@
     ploma = new Ploma(canvas);
     ploma.clear();
 
-    // bind events
+    // bind button events
     save.onclick = function(e) {
       window.open(canvas.toDataURL());
     }
@@ -109,30 +109,90 @@
         canvas.style.cursor = 'none';
       }
     }
-    canvas.onmousedown = function(e) {
-      var point = getEventPoint(e);
-      ploma.beginStroke(point.x, point.y, point.p);
-      isDrawing = true;
-    }
-    canvas.onmousemove = function(e) {
-      if (!isDrawing) return;
-      var point = getEventPoint(e);
-      ploma.extendStroke(point.x, point.y, point.p);
-    }
-    canvas.onmouseup = function(e) {
-      var point = getEventPoint(e);
-      ploma.endStroke(point.x, point.y, point.p);
-      isDrawing = false;
+
+    //console.log(plugin.penAPI.pressure);
+
+    // bind input events
+    if(window.PointerEvent) {
+      ///////////////////////////////////
+      // POINTER EVENT
+      ///////////////////////////////////
+      var getPointerEventPoint = function(e) {
+        return {
+          x: e.clientX - cursorOffsetX + body.scrollLeft,
+          y: e.clientY - cursorOffsetY + body.scrollTop,
+          p: e.pressure
+        };
+      }
+      canvas.onpointerdown = function(e) {
+        var point = getPointerEventPoint(e);
+        ploma.beginStroke(point.x, point.y, point.p);
+        isDrawing = true;
+      }
+      canvas.onpointermove = function(e) {
+        if (!isDrawing) return;
+        var point = getPointerEventPoint(e);
+        ploma.extendStroke(point.x, point.y, point.p);
+      }
+      canvas.onpointerup = function(e) {
+        var point = getPointerEventPoint(e);
+        ploma.endStroke(point.x, point.y, point.p);
+        isDrawing = false;
+      }
+    } else if (plugin) {
+      ///////////////////////////////////
+      // PLUGIN
+      ///////////////////////////////////
+      var getPluginEventPoint = function(e) {
+        return {
+          x: e.clientX - cursorOffsetX + body.scrollLeft,
+          y: e.clientY - cursorOffsetY + body.scrollTop,
+          p: plugin.penAPI.pressure
+        };
+      }
+      canvas.onmousedown = function(e) {
+        var point = getPluginEventPoint(e);
+        ploma.beginStroke(point.x, point.y, point.p);
+        isDrawing = true;
+      }
+      canvas.onmousemove = function(e) {
+        if (!isDrawing) return;
+        var point = getPluginEventPoint(e);
+        ploma.extendStroke(point.x, point.y, point.p);
+      }
+      canvas.onmouseup = function(e) {
+        var point = getPluginEventPoint(e);
+        ploma.endStroke(point.x, point.y, point.p);
+        isDrawing = false;
+      }
+    } else {
+      ///////////////////////////////////
+      // MOUSE
+      ///////////////////////////////////
+      var getMouseEventPoint = function(e) {
+        return {
+          x: e.clientX - cursorOffsetX + body.scrollLeft,
+          y: e.clientY - cursorOffsetY + body.scrollTop,
+          p: 1
+        };
+      }
+      canvas.onmousedown = function(e) {
+        var point = getMouseEventPoint(e);
+        ploma.beginStroke(point.x, point.y, point.p);
+        isDrawing = true;
+      }
+      canvas.onmousemove = function(e) {
+        if (!isDrawing) return;
+        var point = getMouseEventPoint(e);
+        ploma.extendStroke(point.x, point.y, point.p);
+      }
+      canvas.onmouseup = function(e) {
+        var point = getMouseEventPoint(e);
+        ploma.endStroke(point.x, point.y, point.p);
+        isDrawing = false;
+      }
     }
 
-  }
-
-  function getEventPoint(e) {
-    return {
-      x: e.clientX - cursorOffsetX + body.scrollLeft,
-      y: e.clientY - cursorOffsetY + body.scrollTop,
-      p: plugin.penAPI.pressure
-    }
   }
 
 </script>
