@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <link href='http://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
+<style>
+  body {
+    font-family: 'Amatic SC', cursive, sans-serif;
+    font-size: 25px;
+  }
+  canvas#canvas {
+    float: left;
+    cursor: none;
+    border: 1px solid gray;
+  }
+  a {
+    margin-left: 5px;
+    padding: 10px;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+  }
+  #save {
+    background: #0D9CC7;
+  }
+  #clear {
+    background: #FF3333;
+  }
+  .noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+</style>
+</head>
+
+<body>
+<canvas id="canvas" class="noselect"></canvas>
+<div id="buttons">
+  <!-- buttons -->
+  <br>
+  <a id="save" class="noselect">Save</a>
+  <br>
+  <br>
+  <a id="clear" class="noselect">Clear</a>
+  <br>
+  <br>
+  <br>
+  <!-- checkboxes -->
+  <input type="checkbox" id="cursor" class="noselect"/> Show Cursor
+  <br>
+  <input type="checkbox" id="mouse" class="noselect"/> Use Mouse<br>
+</div>
+<!-- Wacom plugin -->
+<object id="wtPlugin" type="application/x-wacomtabletplugin">
+  <param name="onload" value="pluginLoaded"/>
+</object>
+</body>
+
+<!--<script type='text/javascript' src="pointerevents.js"></script>-->
+<script type='text/javascript' src="ploma.js"></script>
+<!--<script type='text/javascript' src="a.out.js"></script>-->
+
+<script type="text/javascript">
+  "use strict";
+
+  // DOM
+  var body;
+  var canvas;
+  var save;
+  var clear;
+  var cursor;
+  var mouse;
+  var plugin;
+  var penAPI;
+  var bodyScrollTop;
+
+  // State
+  var ploma = null;
+  var w = 1300;
+  var h = 1000;
+  var useMouse = false;
+  var parallaxOffsetX = 12;
+  var parallaxOffsetY = 12;
+  var mouseOffsetX = -1 * parallaxOffsetX;
+  var mouseOffsetY = -1 * parallaxOffsetY;
+  var isDrawing = false;
+
+  window.onload = function() {
+    // Testing asm.js/emcc/embind
+    //console.log("Testing that module loads: " + Module.getNextTexturePixel());
+
+    // load DOM elements
+    body = document.getElementsByTagName('body')[0];
+    canvas = document.getElementById('canvas');
+    canvas.setAttribute('width', w);
+    canvas.setAttribute('height', h);
+    save = document.getElementById('save');
+    clear = document.getElementById('clear');
+    cursor = document.getElementById('cursor');
+    mouse = document.getElementById('mouse');
+    plugin = document.getElementById('wtPlugin');
+    penAPI = plugin.penAPI;
+
+    // If pen is not detected at startup
+    // assume that we're using a mouse
+    // TODO: check and test thoroughly
+    //if (!plugin.penAPI || !plugin.penAPI.pressure) {
+    //  useMouse = true;
+    //  mouse.checked = true;
+    //}
+
+    // load Ploma onto canvas and clear it
+    ploma = new Ploma(canvas);
+    ploma.clear();
+    var extendStroke = ploma.extendStroke;
+
+    // bind events
+    window.onscroll = function (event) {
+      mouseOffsetX = body.scrollLeft - parallaxOffsetX;
+      mouseOffsetY = body.scrollTop - parallaxOffsetY;
+    }
+    save.onclick = function(e) {
+      window.open(canvas.toDataURL());
+    }
+    clear.onclick = function(e) {
+      ploma.clear();
+    }
+    cursor.onclick = function(e) {
+      if(cursor.checked) {
+        canvas.style.cursor = 'crosshair';
+      } else {
+        canvas.style.cursor = 'none';
+      }
+    }
+    mouse.onclick = function(e) {
+      useMouse = mouse.checked;
+    }
+    canvas.onmousedown = function(e) {
+      var point = getEventPoint(e);
+      //console.log('calling beginStroke');
+      ploma.beginStroke(point[0], point[1], point[2]);
+      isDrawing = true;
+    }
+    //canvas.onpointerdown = function(e) {
+    //  var point = getEventPoint(e);
+    //  ploma.beginStroke(point[0], point[1], point[2]);
+    //  isDrawing = true;
+    //}
+    canvas.onmousemove = function(e) {
+      if (!isDrawing) return;
+      //var point = getEventPoint(e);
+      //extendStroke(point[0], point[1], point[2]);
+      extendStroke(
+        e.clientX + mouseOffsetX,
+        e.clientY + mouseOffsetY,
+        penAPI.pressure
+      );
+    }
+    //canvas.onpointermove = function(e) {
+    //  if (!isDrawing) return;
+    //  var point = getEventPoint(e);
+    //  //console.log('calling extendStroke');
+    //  //console.log('pressure: ' + point[2]);
+    //  extendStroke(point[0], point[1], point[2]);
+    //}
+    canvas.onmouseup = function(e) {
+      var point = getEventPoint(e);
+      //console.log('calling endStroke');
+      ploma.endStroke(point[0], point[1], point[2]);
+      isDrawing = false;
+    }
+    //canvas.onpointerup = function(e) {
+    //  var point = getEventPoint(e);
+    //  //console.log('calling endStroke');
+    //  ploma.endStroke(point[0], point[1], point[2]);
+    //  isDrawing = false;
+    //}
+
+  }
+
+  function getEventPoint(e) {
+    //console.log(e);
+    //console.log(e.pressure);
+    return [
+      e.clientX + mouseOffsetX,
+      e.clientY + mouseOffsetY,
+      penAPI.pressure //e.pressure //penAPI.pressure // Add this back in after everything else has been optimized
+    ]
+  }
+
+</script>
+
+</html>
