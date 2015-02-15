@@ -51,8 +51,6 @@
   <br>
   <!-- checkboxes -->
   <input type="checkbox" id="cursor" class="noselect"/> Show Cursor
-  <br>
-  <input type="checkbox" id="mouse" class="noselect"/> Use Mouse<br>
 </div>
 <!-- Wacom plugin -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
@@ -71,14 +69,12 @@
   var save;
   var clear;
   var cursor;
-  var mouse;
   var plugin;
 
   // State
   var ploma = null;
   var w = 1300;
   var h = 1000;
-  var useMouse = false;
   var cursorOffsetX = 8;
   var cursorOffsetY = 8;
   var isDrawing = false;
@@ -93,16 +89,7 @@
     save = document.getElementById('save');
     clear = document.getElementById('clear');
     cursor = document.getElementById('cursor');
-    mouse = document.getElementById('mouse');
     plugin = document.getElementById('wtPlugin');
-
-    // If pen is not detected at startup
-    // assume that we're using a mouse
-    // TODO: check and test thoroughly
-    //if (!plugin.penAPI || !plugin.penAPI.pressure) {
-    //  useMouse = true;
-    //  mouse.checked = true;
-    //}
 
     // load Ploma onto canvas and clear it
     ploma = new Ploma(canvas);
@@ -121,9 +108,6 @@
       } else {
         canvas.style.cursor = 'none';
       }
-    }
-    mouse.onclick = function(e) {
-      useMouse = mouse.checked;
     }
     canvas.onmousedown = function(e) {
       var point = getEventPoint(e);
@@ -147,7 +131,7 @@
     return {
       x: e.clientX - cursorOffsetX + body.scrollLeft,
       y: e.clientY - cursorOffsetY + body.scrollTop,
-      p: (useMouse ? 1: plugin.penAPI.pressure)
+      p: plugin.penAPI.pressure
     }
   }
 
