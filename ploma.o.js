@@ -206,6 +206,7 @@ var Ploma = function(canvas) {
   var textureSampleStep = 0;
   var lastControlPoint = null;
   var filterWeight = 0.5;
+  var filterWeightInverse = 1 - filterWeight;
   var stepOffset = 0.0;
   var stepInterval = 0.30;
   var penR = 20;
@@ -213,9 +214,6 @@ var Ploma = function(canvas) {
   var penB = 45;
   //var pointCounter = 0;
   //var sample = 2;
-  //var redrawIntervalID = null;
-  //var lastExtendStroke = 0;
-  //var redrawInterval = 40;
 
   // Generate Texture Samples
   var textureImage = getImageFromBase64(textureBase64());
@@ -231,7 +229,7 @@ var Ploma = function(canvas) {
   function redraw() {
     // TODO:
     // - Handle single point and double point strokes
-    
+
     // 3 points needed for a look-ahead bezier
     if(curFilteredStroke.length >= 3) {
       var len = curFilteredStroke.length;
@@ -370,8 +368,7 @@ var Ploma = function(canvas) {
       t = t + dt;
     }
 
-    // TODO:
-    // - Maybe use a better approximation for distance along the bezier?
+    // TODO: Maybe use a better approximation for distance along the bezier?
     if (stepPoints.length == 0) // We didn't step at all along this Bezier
       stepOffset = stepOffset + p0.getDistance(p3);
     else
@@ -390,13 +387,12 @@ var Ploma = function(canvas) {
     if (p1 == null || p2 == null || p3 == null)
       return null; // Not enough points yet to filter
 
-    var w = filterWeight;
     var m = p1.getMidPt(p3);
 
     return new Point(
-      w * p2.x + (1 - w) * m.x,
-      w * p2.y + (1 - w) * m.y,
-      w * p2.p + (1 - w) * m.p
+      filterWeight * p2.x + filterWeightInverse * m.x,
+      filterWeight * p2.y + filterWeightInverse * m.y,
+      filterWeight * p2.p + filterWeightInverse * m.p
     );
   }
 
@@ -406,9 +402,6 @@ var Ploma = function(canvas) {
   // Calculates a non-linear width offset in
   // the range [-2, 1] based on pressure.
   //
-  // TODO:
-  // - Optimize somehow?
-  // - Turn into table
   function calculateWidth(p) {
     var width;
     //console.log(p);
@@ -444,15 +437,6 @@ var Ploma = function(canvas) {
   // Draws a 5x5 pixel grid at a step point
   // with proper antialiasing and texture.
   //
-  // TODO:
-  // - var drawStep = findDrawStepFunction(...);
-  // - type all the vars in the loop
-  // - try to make things as primitive as possible
-  // - loop unrolling for inner loop
-  // - No objects
-  // - No methods <<<<< INLINE where possible
-  // - How to type variables (in JS) ??
-  // - Make sure all inner loop vars are typed
   function drawStep(id, point) {
 
     /////////////////////
@@ -478,7 +462,7 @@ var Ploma = function(canvas) {
     if(textureSampleStep >= textureSamples.length) {
       textureSampleStep = 0;
     }
-    l = textureSamples[textureSampleStep];
+    l = (textureSamples[textureSampleStep])/255;
     textureSampleStep ++;
 
     /////////////////////
@@ -508,17 +492,10 @@ var Ploma = function(canvas) {
       for(var j = centerY - 2; j < centerY + 3; j++) {
 
         // Distance
-        // TODO:
-        // - Change to math
-        // - Add change in x to change in y (manhattan distance)
-        // - Adjust with approximation of square root of 2 (Constant) (normalize/multiply ??)
-        // - If the distance is close enough...should be fine
-        //var dist = point.getDistanceXY(i, j);
-        //var dist = Math.abs(point.x - i) + Math.abs(point.y - j);
+        //var dist = Math.abs(dx) + Math.abs(dy);
         dx = p_x - i;
         dy = p_y - j;
         dist = Math.sqrt(dx * dx + dy * dy);
-        //var dist = dx + dy;
 
         // Antialiasing
         a = (0.1 / (dist - width)) - 0.06;
@@ -533,20 +510,16 @@ var Ploma = function(canvas) {
         if (a >= 0.3) a = 0.3;
 
         // Shade alpha by texture
-        a = a * (l/255);
+        a = a * l;
 
         // Byte-index pixel placement within array
         idx = (i + j * w) * 4;
 
-        // newC: (newC * newA + oldC * oldA * (1 - newA)) / newA
-        // newA: newA + oldA * (1 - newA)
-        // TODO:
-        //  optimize this based on transparency/context into different paths
+        // Assumes opaque background for blending
         invA = 1 - a;
         idx_0 = idx + 0;
         idx_1 = idx + 1;
         idx_2 = idx + 2;
-        idx_3 = idx + 3;
         oldR = id[idx_0];
         oldG = id[idx_1];
         oldB = id[idx_2];
@@ -556,7 +529,6 @@ var Ploma = function(canvas) {
         id[idx_0] = newR;
         id[idx_1] = newG;
         id[idx_2] = newB;
-        //id[idx_3] = 255;
 
       }
     }
@@ -595,12 +567,6 @@ var Ploma = function(canvas) {
     // TODO: use Manhattan distance?
     var dx = this.x - pt.x;
     var dy = this.y - pt.y;
-    return Math.sqrt(dx * dx + dy * dy);
-  }
-
-  Point.prototype.getDistanceXY = function(x, y) {
-    var dx = this.x - x;
-    var dy = this.y - y;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
