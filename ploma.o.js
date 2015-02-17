@@ -1,6 +1,6 @@
 /*
 Ploma - High-fidelity ballpoint pen rendering for tablets with pressure-sensitive styluses
-v0.3
+v0.4
 
 Evelyn Eastmond
 Dan Amelang
@@ -64,9 +64,6 @@ var Ploma = function(canvas) {
 
     // Reset step offset for new stroke
     stepOffset = stepInterval;
-
-    // Start the redraw timeout?
-    //redrawIntervalID = window.setInterval(updateStroke, redrawInterval);
   }
 
   // ------------------------------------------
@@ -84,8 +81,6 @@ var Ploma = function(canvas) {
     //
     // Raw
     //
-    // TODO:
-    //  Do I need this check?
     //if(curRawStroke.last().equals(point)) {
       //return; // ignore dupes TODO: ??
     //}
@@ -97,8 +92,6 @@ var Ploma = function(canvas) {
     //if (pointCounter % sample !== 0) {
 
       // Push sampled point
-      // TODO:
-      //  Do I need this check?
       //if(curRawSampledStroke.last().equals(point)) {
         //return; // ignore dupes TODO: ??
       //}
@@ -122,8 +115,6 @@ var Ploma = function(canvas) {
       redraw();
     //}
 
-    //lastExtendStroke = Date.now();
-
   }
 
   // ------------------------------------------
@@ -134,34 +125,16 @@ var Ploma = function(canvas) {
   // to the canvas.
   //
   this.endStroke = function(x, y, p) {
-    //console.log('END THE STROKE');
-    //this.extendStroke(x, y, p);
-    //curFilteredStroke.push(new Point(x, y, p));
-    //redraw();
-
-    //console.log(curRawStroke.length + ' = ' + curFilteredStroke.length);
-    //console.log('curFilteredStroke.length = ' + curFilteredStroke.length);
-    //this.extendStroke(x, y, p);
-    //this.extendStroke(x, y, p);
-    //var point = new Point(x,y,p);
+    var point = new Point(x,y,p);
 
     // Keep the last point as is for now
     // TODO: Try to address the "tapering on mouseup" issue
-    //curRawStroke.push(curRawStroke[curRawStroke.length - 1]);
-    //curRawSampledStroke.push(curRawSampledStroke[curRawSampledStroke.length - 1]);
-    //curFilteredStroke.push(curFilteredStroke[curFilteredStroke.length - 1]);
-    //redraw();
-
-    //curRawStroke.push(point);
-    //curRawStroke.push(point);
+    curRawStroke.push(point);
     //curRawSampledStroke.push(point);
-    //curRawSampledStroke.push(point);
-    //curFilteredStroke.push(point);
-    //curFilteredStroke.push(point);
-    //redraw();
+    curFilteredStroke.push(point);
 
+    redraw();
     lastControlPoint = null;
-    //window.clearInterval(redrawIntervalID);
   }
 
   // ------------------------------------------
@@ -250,59 +223,6 @@ var Ploma = function(canvas) {
   getSamplesFromImage(textureImage, textureSamples);
 
   // ------------------------------------------
-  // updateStroke
-  //
-  // Bring the current stroke up to date with
-  // the point if not already.
-  //
-  function updateStroke() {
-    //console.log('updateStroke?: ');
-    //console.log(this);
-    // if it's been 60 ms since the last extendStroke/redraw
-    // and the filtered points haven't yet been caught up
-      //console.log('curRawStroke.length ' + curRawStroke.length);
-      //console.log('curFilteredStroke.length ' + curFilteredStroke.length);
-    if((Date.now() - lastExtendStroke > redrawInterval) && (curFilteredStroke.length < curRawStroke.length)){
-      console.log('YES----------------------------------------');
-      //curRawStroke.push(curRawStroke[curRawStroke.length - 1]);
-      //curRawSampledStroke.push(curRawSampledStroke[curRawSampledStroke.length - 1]);
-      //curFilteredStroke.push(curFilteredStroke[curFilteredStroke.length - 1]);
-      //redraw();
-      //console.log('curRawStroke.length ' + curRawStroke.length);
-      //console.log('curFilteredStroke.length ' + curFilteredStroke.length);
-
-      curFilteredStroke.push(curRawStroke[curRawStroke.length-1]);
-      redraw();
-
-      curFilteredStroke.push(curFilteredStroke[curFilteredStroke.length-1]);
-      redraw();
-
-      // NOW WHEN THE FILTERED STROKE HAS 'CAUGHT UP',  IT IS ACTUALLY
-      // TWO POINTS LONGER THAN THE CURRAWSTROKE, WHICH IS BAD AND MESSES UP
-      // THE MODEL FOR THE REST OF THE TIME
-      // SOOO.....
-
-      // remove the two now?
-      // how do we catch up the model while still looking ahead one point for the filtering and two ahead for the filtering/bezier?
-
-      // raw                     *    *    *    *    *    * 
-      // filtered               [*]  [*]  [*]  [*]  [*]
-      // drawn                   *----*----*----*
-      //
-      //
-
-      //window.clearInterval(redrawIntervalID);
-      //curRawStroke.push(eventPoint);
-      //curRawStroke.push(eventPoint);
-      //curRawSampledStroke.push(eventPoint);
-      //curRawSampledStroke.push(eventPoint);
-      //curFilteredStroke.push(eventPoint);
-      //curFilteredStroke.push(eventPoint);
-      //redraw();
-    }
-  }
-
-  // ------------------------------------------
   // redraw
   //
   // Calls the curve drawing function if there
@@ -311,6 +231,7 @@ var Ploma = function(canvas) {
   function redraw() {
     // TODO:
     // - Handle single point and double point strokes
+    
     // 3 points needed for a look-ahead bezier
     if(curFilteredStroke.length >= 3) {
       var len = curFilteredStroke.length;
@@ -837,14 +758,3 @@ Ploma.getStrokeImageData = function(inputStroke) {
   // Return the image data
   return canvas.getContext('2d').getImageData(0, 0, w, h);
 };
-
-
-/*
-var oldA = id[idx + 3] / 255;
-var invA = 1 - a;
-var newA = a + oldA * invA;
-id[idx + 0] = (penR * a + id[idx + 0] * oldA * invA) / newA;
-id[idx + 1] = (penG * a + id[idx + 1] * oldA * invA) / newA;
-id[idx + 2] = (penB * a + id[idx + 2] * oldA * invA) / newA;
-id[idx + 3] = newA * 255;
-*/

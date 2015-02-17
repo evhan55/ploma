@@ -3,13 +3,10 @@ Ploma - High-fidelity ballpoint pen rendering for tablets with pressure-sensitiv
 v0.3
 
 Evelyn Eastmond
-evhan55@gmail.com
-Communications Design Group, SAP
-
 Dan Amelang
 Viewpoints Research Institute
 
-(c) 2014
+(c) 2014-2015
 
 TODO: License
 */
@@ -49,7 +46,7 @@ var Ploma = function(canvas) {
   // point x, y and p (pressure ranging from
   // 0-1) values.
   //
-  this.beginStroke = function(x,y,p) {
+  this.beginStroke = function(x, y, p) {
     var point = new Point(x,y,p);
     pointCounter++;
 
@@ -59,9 +56,9 @@ var Ploma = function(canvas) {
     filteredStrokes.push(curFilteredStroke);
     curRawSampledStroke = [point];
 
-    // Get the latest canvas pixels
+    // Get the latest canvas pixels in case they've changed
+    // since the last stroke
     imageData = ctx.getImageData(0, 0, w, h);
-    //console.log('getting image data');
 
     // Reset step offset for new stroke
     stepOffset = stepInterval;
@@ -74,7 +71,7 @@ var Ploma = function(canvas) {
   // point and renders the new stroke segment
   // to the canvas.
   //
-  this.extendStroke = function(x,y,p) {
+  this.extendStroke = function(x, y, p) {
     pointCounter++;
 
     var point = new Point(x,y,p);
@@ -125,7 +122,7 @@ var Ploma = function(canvas) {
   // point and renders the final stroke segment
   // to the canvas.
   //
-  this.endStroke = function(x,y,p) {
+  this.endStroke = function(x, y, p) {
     var point = new Point(x,y,p);
 
     // Keep the last point as is for now
@@ -242,7 +239,9 @@ var Ploma = function(canvas) {
   // are enough points for a bezier.
   //
   function redraw() {
-    // TODO: Handle single point and double point strokes
+    // TODO:
+    // - Handle single point and double point strokes
+    
     // 3 points needed for a look-ahead bezier
     if(curFilteredStroke.length >= 3) {
       var len = curFilteredStroke.length;
