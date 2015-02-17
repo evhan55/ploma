@@ -443,20 +443,10 @@ var Ploma = function(canvas) {
     // PRE-LOOP
     /////////////////////
 
-    // typing
     var width = 0.0;
-    var p_x = 0.0;
-    var p_y = 0.0;
-    var centerX = 0.0;
-    var centerY = 0.0;
     var l = 0.0;
 
-    // initialization
-    width = calculateWidth(point.p);    
-    p_x = point.x;
-    p_y = point.y;
-    centerX = Math.round(p_x);
-    centerY = Math.round(p_y);
+    width = calculateWidth(point.p);
 
     // Pre-find texture sample
     if(textureSampleStep >= textureSamples.length) {
@@ -469,8 +459,16 @@ var Ploma = function(canvas) {
     // LOOP
     /////////////////////
 
+    var p_x = 0.0;
+    var p_y = 0.0;
+    var centerX = 0.0;
+    var centerY = 0.0;
     var i = 0;
     var j = 0;
+    var left = 0;
+    var right = 0;
+    var top = 0;
+    var bottom = 0; 
     var dx = 0.0;
     var dy = 0.0;
     var dist = 0.0;
@@ -488,8 +486,17 @@ var Ploma = function(canvas) {
     var newG = 0.0;
     var newB = 0.0;
 
-    for(i = centerX - 2; i < centerX + 3; i++) {
-      for(var j = centerY - 2; j < centerY + 3; j++) {
+    p_x = point.x;
+    p_y = point.y;
+    centerX = Math.round(p_x);
+    centerY = Math.round(p_y);
+    left = centerX - 2;
+    right = centerX + 3;
+    top = centerY - 2;
+    bottom = centerY + 3;
+
+    for(i = left; i < right; i++) {
+      for(j = top; j < bottom; j++) {
 
         // Distance
         //var dist = Math.abs(dx) + Math.abs(dy);
