@@ -162,7 +162,8 @@
         ploma.beginStroke(
           e.clientX + mouseOffsetX,
           e.clientY + mouseOffsetY,
-          penAPI.pressure
+          //penAPI.isInProximity ? penAPI.pressure : 1
+          1
         );
         isDrawing = true;
       }
@@ -171,14 +172,16 @@
         ploma.extendStroke(
           e.clientX + mouseOffsetX,
           e.clientY + mouseOffsetY,
-          penAPI.pressure
+          //penAPI.isInProximity ? penAPI.pressure : 1
+          1
         );
       }
       canvas.onmouseup = function(e) {
         ploma.endStroke(
           e.clientX + mouseOffsetX,
           e.clientY + mouseOffsetY,
-          penAPI.pressure
+          //penAPI.isInProximity ? penAPI.pressure : 1
+          1
         );
         isDrawing = false;
       }

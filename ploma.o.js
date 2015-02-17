@@ -95,7 +95,7 @@ var Ploma = function(canvas) {
       //if(curRawSampledStroke.last().equals(point)) {
         //return; // ignore dupes TODO: ??
       //}
-      curRawStroke.push(point);
+      //curRawSampledStroke.push(point);
 
       // Filter next-to-last input point
       var len = curRawStroke.length;
@@ -231,13 +231,13 @@ var Ploma = function(canvas) {
     // - Handle single point and double point strokes
 
     // 3 points needed for a look-ahead bezier
-    if(curFilteredStroke.length >= 3) {
-      var len = curFilteredStroke.length;
-      createAndDrawBezier([
+    var len = curFilteredStroke.length;
+    if(len >= 3) {
+      createAndDrawBezier(
         curFilteredStroke[len - 3],
         curFilteredStroke[len - 2],
         curFilteredStroke[len - 1]
-      ]);
+      );
     }
   };
 
@@ -247,20 +247,20 @@ var Ploma = function(canvas) {
   // Draw a look-ahead cubic bezier based on 3
   // input points.
   //
-  function createAndDrawBezier(pts) {
+  function createAndDrawBezier(pt0, pt1, pt2) {
     // Endpoints and control points
-    var p0 = pts[0];
+    var p0 = pt0;
     var p0_x = p0.x;
     var p0_y = p0.y;
     var p0_p = p0.p;
 
-    var p3 = pts[1];
+    var p3 = pt1;
     var p3_x = p3.x;
     var p3_y = p3.y;
     var p3_p = p3.p;
 
-    var p1;
-    var p2;
+    var p1 = 0.0;
+    var p2 = 0.0;
 
     // Calculate p1
     if(!lastControlPoint) {
@@ -274,11 +274,11 @@ var Ploma = function(canvas) {
     }
 
     // Calculate p2
-    if (pts[2]) {
+    if (pt2) {
       p2 = new Point(
-        p3_x - (((p3_x - p0_x) + (pts[2].x - p3_x)) / 6),
-        p3_y - (((p3_y - p0_y) + (pts[2].y - p3_y)) / 6),
-        p3_p - (((p3_p - p0_p) + (pts[2].p - p3_p)) / 6)
+        p3_x - (((p3_x - p0_x) + (pt2.x - p3_x)) / 6),
+        p3_y - (((p3_y - p0_y) + (pt2.y - p3_y)) / 6),
+        p3_p - (((p3_p - p0_p) + (pt2.p - p3_p)) / 6)
         //p3_x - (((p3_x - p0_x) + (pts[2].x - p3_x)) * 0.166),
         //p3_y - (((p3_y - p0_y) + (pts[2].y - p3_y)) * 0.166),
         //p3_p - (((p3_p - p0_p) + (pts[2].p - p3_p)) * 0.166)
@@ -516,7 +516,7 @@ var Ploma = function(canvas) {
         if (a < 0) a = 0;
         if (a >= 0.3) a = 0.3;
 
-        // Shade alpha by texture
+        // Shade clamped alpha by texture
         a = a * l;
 
         // Byte-index pixel placement within array
