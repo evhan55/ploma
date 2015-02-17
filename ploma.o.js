@@ -185,13 +185,16 @@ var Ploma = function(canvas) {
 
   // DOM
   var canvas = canvas;
-  var w = canvas.getAttribute('width');
-  var h = canvas.getAttribute('height');
+  var w = 0;
+  var h = 0;
   var ctx = canvas.getContext('2d');
-  var imageData = ctx.getImageData(0, 0, w, h);
+  var imageData = null;
   var imageDataData = new Uint8ClampedArray(w*h);
-  imageDataData = ctx.getImageData(0, 0, w, h).data;
   var paperColor = 'rgb(255, 255, 255)';
+  w = canvas.getAttribute('width');
+  h = canvas.getAttribute('height');
+  imageData = ctx.getImageData(0, 0, w, h);
+  imageDataData = imageData.data;
 
   // State
   var rawStrokes = [];
@@ -217,7 +220,8 @@ var Ploma = function(canvas) {
 
   // Generate Texture Samples
   var textureImage = getImageFromBase64(textureBase64());
-  var textureSamples = new Uint8ClampedArray(1e4);
+  //var textureSamples = new Uint8ClampedArray(1e4);
+  var textureSamples = new Float32Array(1e4);
   getSamplesFromImage(textureImage, textureSamples);
 
   // ------------------------------------------
@@ -403,7 +407,7 @@ var Ploma = function(canvas) {
   // the range [-2, 1] based on pressure.
   //
   function calculateWidth(p) {
-    var width;
+    var width = 0.0;
     //console.log(p);
 
     if(p < 0) { // Possible output from bezier
@@ -452,7 +456,7 @@ var Ploma = function(canvas) {
     if(textureSampleStep >= textureSamples.length) {
       textureSampleStep = 0;
     }
-    l = (textureSamples[textureSampleStep])/255;
+    l = textureSamples[textureSampleStep];
     textureSampleStep ++;
 
     /////////////////////
@@ -473,12 +477,10 @@ var Ploma = function(canvas) {
     var dy = 0.0;
     var dist = 0.0;
     var a = 0.0;
-    var idx = 0;
     var invA = 0.0;
     var idx_0 = 0;
     var idx_1 = 0;
     var idx_2 = 0;
-    var idx_3 = 0;
     var oldR = 0.0;
     var oldG = 0.0;
     var oldB = 0.0;
@@ -499,34 +501,31 @@ var Ploma = function(canvas) {
       for(j = top; j < bottom; j++) {
 
         // Distance
-        //var dist = Math.abs(dx) + Math.abs(dy);
         dx = p_x - i;
         dy = p_y - j;
-        dist = Math.sqrt(dx * dx + dy * dy);
+        //dist = Math.sqrt(dx * dx + dy * dy);
+        dist = Math.abs(dx) + Math.abs(dy);
 
         // Antialiasing
         a = (0.1 / (dist - width)) - 0.06;
+        //a = 0.04 / (dist - width);
 
         // Spike
         if(dist < width) {
-          a = 0.3;
+          a = l;
         }
         
         // Clamp alpha
         if (a < 0) a = 0;
-        if (a >= 0.3) a = 0.3;
-
-        // Shade clamped alpha by texture
-        a = a * l;
+        if (a >= l) a = l;
 
         // Byte-index pixel placement within array
-        idx = (i + j * w) * 4;
+        idx_0 = (i + j * w) * 4;
 
         // Assumes opaque background for blending
         invA = 1 - a;
-        idx_0 = idx + 0;
-        idx_1 = idx + 1;
-        idx_2 = idx + 2;
+        idx_1 = idx_0 + 1;
+        idx_2 = idx_0 + 2;
         oldR = id[idx_0];
         oldG = id[idx_1];
         oldB = id[idx_2];
@@ -648,7 +647,8 @@ var Ploma = function(canvas) {
       var x = Math.floor(s * (img.width - 1));
       var y = Math.floor(t * (img.height - 1));
       var l = imageDataGrays[x + y * img.width];
-      samples[i] = (l*255)|0;
+      //samples[i] = (l*255)|0;
+      samples[i] = l * 0.3;
       //samples[i] = 230;
       
       // Step texture offset randomly [-1, 1]
