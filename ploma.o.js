@@ -105,10 +105,10 @@ var Ploma = function(canvas) {
           curRawStroke[len - 2],
           curRawStroke[len - 1]
         );
-        if(fpoint) {
+        //if(fpoint) {
           // Push sampled, filtered, point
           curFilteredStroke.push(fpoint);
-        }
+        //}
       }
 
       // Redraw sampled and filtered
@@ -187,12 +187,14 @@ var Ploma = function(canvas) {
   var canvas = canvas;
   var w = 0;
   var h = 0;
+  var w_4 = 0;
   var ctx = canvas.getContext('2d');
   var imageData = null;
   var imageDataData = new Uint8ClampedArray(w*h);
   var paperColor = 'rgb(255, 255, 255)';
   w = canvas.getAttribute('width');
   h = canvas.getAttribute('height');
+  w_4 = w * 4;
   imageData = ctx.getImageData(0, 0, w, h);
   imageDataData = imageData.data;
 
@@ -207,6 +209,7 @@ var Ploma = function(canvas) {
   var miny = 0.0;
   var maxy = 0.0;
   var textureSampleStep = 0;
+  var textureSamplesLength = 1e4;
   var lastControlPoint = null;
   var filterWeight = 0.5;
   var filterWeightInverse = 1 - filterWeight;
@@ -221,7 +224,7 @@ var Ploma = function(canvas) {
   // Generate Texture Samples
   var textureImage = getImageFromBase64(textureBase64());
   //var textureSamples = new Uint8ClampedArray(1e4);
-  var textureSamples = new Float32Array(1e4);
+  var textureSamples = new Float32Array(textureSamplesLength);
   getSamplesFromImage(textureImage, textureSamples);
 
   // ------------------------------------------
@@ -254,17 +257,17 @@ var Ploma = function(canvas) {
   function createAndDrawBezier(pt0, pt1, pt2) {
     // Endpoints and control points
     var p0 = pt0;
+    var p1 = 0.0;
+    var p2 = 0.0;
+    var p3 = pt1;
+
+    // Value access
     var p0_x = p0.x;
     var p0_y = p0.y;
     var p0_p = p0.p;
-
-    var p3 = pt1;
     var p3_x = p3.x;
     var p3_y = p3.y;
     var p3_p = p3.p;
-
-    var p1 = 0.0;
-    var p2 = 0.0;
 
     // Calculate p1
     if(!lastControlPoint) {
@@ -280,12 +283,12 @@ var Ploma = function(canvas) {
     // Calculate p2
     if (pt2) {
       p2 = new Point(
-        p3_x - (((p3_x - p0_x) + (pt2.x - p3_x)) / 6),
-        p3_y - (((p3_y - p0_y) + (pt2.y - p3_y)) / 6),
-        p3_p - (((p3_p - p0_p) + (pt2.p - p3_p)) / 6)
-        //p3_x - (((p3_x - p0_x) + (pts[2].x - p3_x)) * 0.166),
-        //p3_y - (((p3_y - p0_y) + (pts[2].y - p3_y)) * 0.166),
-        //p3_p - (((p3_p - p0_p) + (pts[2].p - p3_p)) * 0.166)
+        //p3_x - (((p3_x - p0_x) + (pt2.x - p3_x)) / 6),
+        //p3_y - (((p3_y - p0_y) + (pt2.y - p3_y)) / 6),
+        //p3_p - (((p3_p - p0_p) + (pt2.p - p3_p)) / 6)
+        p3_x - (((p3_x - p0_x) + (pt2.x - p3_x)) * 0.1666),
+        p3_y - (((p3_y - p0_y) + (pt2.y - p3_y)) * 0.1666),
+        p3_p - (((p3_p - p0_p) + (pt2.p - p3_p)) * 0.1666)
       );
     } else {
       p2 = new Point(
@@ -298,21 +301,19 @@ var Ploma = function(canvas) {
     // Set last control point
     lastControlPoint = p2;
 
-    // Step along curve
+    // Step along curve and draw step
     var stepPoints = calculateStepPoints(p0, p1, p2, p3);
     for(var i = 0; i < stepPoints.length; i++) {
       drawStep(imageDataData, stepPoints[i]);
     }
 
-    // Access point objects now
+    // Calculate redraw bounds
+    // TODO:
+    // - Math.min = x <= y ? x : y; INLINE
     var p1_x = p1.x;
     var p1_y = p1.y;
     var p2_x = p2.x;
     var p2_y = p2.y;
-
-    // Calculate redraw bounds
-    // TODO:
-    // - Math.min = x <=y ? x : y; INLINE
     minx = Math.min(p0_x, p1_x, p2_x, p3_x);
     miny = Math.min(p0_y, p1_y, p2_y, p3_y);
     maxx = Math.max(p0_x, p1_x, p2_x, p3_x);
@@ -340,24 +341,29 @@ var Ploma = function(canvas) {
     var stepPoints = [];
     var i = stepInterval;
 
+    // Value access
+    var p0_x = p0.x;
+    var p0_y = p0.y;
+    var p0_p = p0.p;
+
     // Algebraic conveniences, not geometric
-    var A_x = p3.x - 3 * p2.x + 3 * p1.x - p0.x;
-    var A_y = p3.y - 3 * p2.y + 3 * p1.y - p0.y;
-    var A_p = p3.p - 3 * p2.p + 3 * p1.p - p0.p;
-    var B_x = 3 * p2.x - 6 * p1.x + 3 * p0.x;
-    var B_y = 3 * p2.y - 6 * p1.y + 3 * p0.y;
-    var B_p = 3 * p2.p - 6 * p1.p + 3 * p0.p;
-    var C_x = 3 * p1.x - 3 * p0.x;
-    var C_y = 3 * p1.y - 3 * p0.y;
-    var C_p = 3 * p1.p - 3 * p0.p;
+    var A_x = p3.x - 3 * p2.x + 3 * p1.x - p0_x;
+    var A_y = p3.y - 3 * p2.y + 3 * p1.y - p0_y;
+    var A_p = p3.p - 3 * p2.p + 3 * p1.p - p0_p;
+    var B_x = 3 * p2.x - 6 * p1.x + 3 * p0_x;
+    var B_y = 3 * p2.y - 6 * p1.y + 3 * p0_y;
+    var B_p = 3 * p2.p - 6 * p1.p + 3 * p0_p;
+    var C_x = 3 * p1.x - 3 * p0_x;
+    var C_y = 3 * p1.y - 3 * p0_y;
+    var C_p = 3 * p1.p - 3 * p0_p;
 
     var t = (i - stepOffset) / Math.sqrt(C_x * C_x + C_y * C_y);
 
     while (t <= 1.0) {
       // Point
-      var step_x = t * (t * (t * A_x + B_x) + C_x) + p0.x;
-      var step_y = t * (t * (t * A_y + B_y) + C_y) + p0.y;
-      var step_p = t * (t * (t * A_p + B_p) + C_p) + p0.p;
+      var step_x = t * (t * (t * A_x + B_x) + C_x) + p0_x;
+      var step_y = t * (t * (t * A_y + B_y) + C_y) + p0_y;
+      var step_p = t * (t * (t * A_p + B_p) + C_p) + p0_p;
       stepPoints.push(new Point(
         step_x,
         step_y,
@@ -388,8 +394,8 @@ var Ploma = function(canvas) {
   // point p2 between points p1 and p3.
   //
   function calculateFilteredPoint(p1, p2, p3) {
-    if (p1 == null || p2 == null || p3 == null)
-      return null; // Not enough points yet to filter
+    //if (p1 == null || p2 == null || p3 == null)
+    //  return null; // Not enough points yet to filter
 
     var m = p1.getMidPt(p3);
 
@@ -453,11 +459,8 @@ var Ploma = function(canvas) {
     width = calculateWidth(point.p);
 
     // Pre-find texture sample
-    if(textureSampleStep >= textureSamples.length) {
-      textureSampleStep = 0;
-    }
     l = textureSamples[textureSampleStep];
-    textureSampleStep ++;
+    textureSampleStep = (textureSampleStep > textureSamplesLength) ? 0 : (textureSampleStep + 1);
 
     /////////////////////
     // LOOP
@@ -481,6 +484,7 @@ var Ploma = function(canvas) {
     var idx_0 = 0;
     var idx_1 = 0;
     var idx_2 = 0;
+    var idx_0_i = 0;
     var oldR = 0.0;
     var oldG = 0.0;
     var oldB = 0.0;
@@ -498,13 +502,22 @@ var Ploma = function(canvas) {
     bottom = centerY + 3;
 
     for(i = left; i < right; i++) {
+
+      // Distance
+      dx = p_x - i;
+
+      // Byte-index
+      idx_0_i = i * 4;
+
       for(j = top; j < bottom; j++) {
 
         // Distance
-        dx = p_x - i;
         dy = p_y - j;
         //dist = Math.sqrt(dx * dx + dy * dy);
         dist = Math.abs(dx) + Math.abs(dy);
+
+        // Byte-index
+        idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
         a = (0.1 / (dist - width)) - 0.06;
@@ -518,9 +531,6 @@ var Ploma = function(canvas) {
         // Clamp alpha
         if (a < 0) a = 0;
         if (a >= l) a = l;
-
-        // Byte-index pixel placement within array
-        idx_0 = (i + j * w) * 4;
 
         // Assumes opaque background for blending
         invA = 1 - a;
@@ -638,7 +648,7 @@ var Ploma = function(canvas) {
     }
 
     // Read samples from mirrored-and-tiled grays
-    for (var i = 0; i < 1e4; i++) {
+    for (var i = 0; i < textureSamplesLength; i++) {
       // Get normalized pixel within texture
       var T_s = textureOffsetX / (img.width - 1);
       var T_t = textureOffsetY / (img.height - 1);
