@@ -190,7 +190,7 @@ var Ploma = function(canvas) {
   var w_4 = 0;
   var ctx = canvas.getContext('2d');
   var imageData = null;
-  var imageDataData = new Uint8ClampedArray(w*h);
+  var imageDataData = new Uint8ClampedArray(w * h);
   var paperColor = 'rgb(255, 255, 255)';
   w = canvas.getAttribute('width');
   h = canvas.getAttribute('height');
@@ -501,27 +501,33 @@ var Ploma = function(canvas) {
     top = centerY - 2;
     bottom = centerY + 3;
 
+    //////////////
+    // Horizontal
+    //////////////
     for(i = left; i < right; i++) {
 
       // Distance
-      dx = p_x - i;
+      dx = Math.abs(p_x - i);
 
       // Byte-index
       idx_0_i = i * 4;
 
+      ////////////
+      // Vertical
+      ////////////
       for(j = top; j < bottom; j++) {
 
         // Distance
-        dy = p_y - j;
+        dy = Math.abs(p_y - j);
         //dist = Math.sqrt(dx * dx + dy * dy);
-        dist = Math.abs(dx) + Math.abs(dy);
+        dist = dx + dy;
 
         // Byte-index
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
         a = (0.1 / (dist - width)) - 0.06;
-        //a = 0.04 / (dist - width);
+        //a = (0.1 / dist - width);
 
         // Spike
         if(dist < width) {
