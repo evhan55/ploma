@@ -147,7 +147,7 @@
         return {
           x: e.clientX - cursorOffsetX + body.scrollLeft,
           y: e.clientY - cursorOffsetY + body.scrollTop,
-          p: plugin.penAPI.pressure
+          p: plugin.penAPI.isInProximity ? plugin.penAPI.pressure : 1
         };
       }
       canvas.onmousedown = function(e) {
