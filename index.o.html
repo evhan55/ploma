@@ -163,7 +163,8 @@
           e.clientX + mouseOffsetX,
           e.clientY + mouseOffsetY,
           //penAPI.isInProximity ? penAPI.pressure : 1
-          1
+          penAPI.pressure
+          //1
         );
         isDrawing = true;
       }
@@ -173,7 +174,8 @@
           e.clientX + mouseOffsetX,
           e.clientY + mouseOffsetY,
           //penAPI.isInProximity ? penAPI.pressure : 1
-          1
+          penAPI.pressure
+          //1
         );
       }
       canvas.onmouseup = function(e) {
@@ -181,7 +183,8 @@
           e.clientX + mouseOffsetX,
           e.clientY + mouseOffsetY,
           //penAPI.isInProximity ? penAPI.pressure : 1
-          1
+          penAPI.pressure
+          //1
         );
         isDrawing = false;
       }

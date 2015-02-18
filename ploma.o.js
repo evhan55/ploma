@@ -460,7 +460,7 @@ var Ploma = function(canvas) {
 
     // Pre-find texture sample
     l = textureSamples[textureSampleStep];
-    textureSampleStep = (textureSampleStep > textureSamplesLength) ? 0 : (textureSampleStep + 1);
+    textureSampleStep = (textureSampleStep === textureSamplesLength - 1) ? 0 : (textureSampleStep + 1);
 
     /////////////////////
     // LOOP
@@ -527,7 +527,6 @@ var Ploma = function(canvas) {
 
         // Antialiasing
         a = (0.1 / (dist - width)) - 0.06;
-        //a = (0.1 / dist - width);
 
         // Spike
         if(dist < width) {
