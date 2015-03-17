@@ -223,7 +223,6 @@ var Ploma = function(canvas) {
 
   // Generate Texture Samples
   var textureImage = getImageFromBase64(textureBase64());
-  //var textureSamples = new Uint8ClampedArray(1e4);
   var textureSamples = new Float32Array(textureSamplesLength);
   getSamplesFromImage(textureImage, textureSamples);
 
