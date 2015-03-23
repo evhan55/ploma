@@ -21,11 +21,11 @@ A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen 
   <td width="30%"><code>Ploma(canvas)</code></td>
   <td width="70%">Constructor for Ploma instances.  Accepts an <code>HTML &lt;canvas&gt; Element</code> element to render strokes onto.</td>
 </tr>
-<tr>
+<!-- <tr>
   <td><code>getStrokeImageData(strokes)</code></td>
   <td>Returns image data for the input stroke, against a transparent canvas, clipped to the stroke's bounds.  Input stroke is to be a an array of JSON objects of point data: <br> <code>[{x, y, p}, {x, y, p}, ...]
   </td>
-</tr>
+</tr> -->
 </table>
 
 ### Instance
