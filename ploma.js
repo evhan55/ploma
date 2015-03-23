@@ -32,12 +32,27 @@ var Ploma = function(canvas) {
   // Clears the canvas.
   //
   this.clear = function() {
+    // Clear canvas
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = paperColor;
     ctx.globalAlpha = 1;
     ctx.fillRect(0, 0, w, h);
     imageData = ctx.getImageData(0, 0, w, h);
     imageDataData = imageData.data;
+
+    // Reset data
+    rawStrokes = [];
+    curRawStroke = [];
+    curRawSampledStroke = [];
+    filteredStrokes = [];
+    curFilteredStroke = [];
+    minx = 0.0;
+    maxx = 0.0;
+    miny = 0.0;
+    maxy = 0.0;
+    lastControlPoint = null;
+    stepOffset = 0.0;
+    pointCounter = 0;
   };
 
   // ------------------------------------------
