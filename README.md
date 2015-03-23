@@ -55,10 +55,6 @@ A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen 
   <td><code>curStroke()</code></td>
   <td>Returns the current stroke of points that have been stored since the last mouse down as an array of point JSON objects.<br><code>[{x, y, p}, {x, y, p}, ...]</code></td>
 </tr>
-<tr>
-  <td><code>setPaperColor(cssRGBString)</code></td>
-  <td>Sets the canvas color to the given CSS rgb value.</td>
-</tr>
 </table>
 
 #### Example Usage
