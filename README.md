@@ -21,11 +21,11 @@ A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen 
   <td width="30%"><code>Ploma(canvas)</code></td>
   <td width="70%">Constructor for Ploma instances.  Accepts an <code>HTML &lt;canvas&gt; Element</code> element to render strokes onto.</td>
 </tr>
-<tr>
+<!-- <tr>
   <td><code>getStrokeImageData(strokes)</code></td>
   <td>Returns image data for the input stroke, against a transparent canvas, clipped to the stroke's bounds.  Input stroke is to be a an array of JSON objects of point data: <br> <code>[{x, y, p}, {x, y, p}, ...]
   </td>
-</tr>
+</tr> -->
 </table>
 
 ### Instance
@@ -55,34 +55,32 @@ A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen 
   <td><code>curStroke()</code></td>
   <td>Returns the current stroke of points that have been stored since the last mouse down as an array of point JSON objects.<br><code>[{x, y, p}, {x, y, p}, ...]</code></td>
 </tr>
-<tr>
-  <td><code>setPaperColor(cssRGBString)</code></td>
-  <td>Sets the canvas color to the given CSS rgb value.</td>
-</tr>
 </table>
 
 #### Example Usage
 
 ```js
-// canvas points to a <canvas>
-
+// canvas is any <canvas> element
 var ploma = new Ploma(canvas);
 ploma.clear();
 
 // begin a stroke at the mouse down point
 canvas.onmousedown = function(e) {
+  isDrawing = true;
   var point = getEventPoint(e)
   ploma.beginStroke(point.x, point.y, point.p);
 }
 
 // extend the stroke at the mouse move point
 canvas.onmousemove = function(e) {
+  if (!isDrawing) return;
   var point = getEventPoint(e)
   ploma.extendStroke(point.x, point.y, point.p);
 }
 
 // end the stroke at the mouse up point
 canvas.onmouseup = function(e) {
+  isDrawing = false;
   var point = getEventPoint(e);
   ploma.endStroke(point.x, point.y, point.p);
 }
