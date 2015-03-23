@@ -66,18 +66,21 @@ ploma.clear();
 
 // begin a stroke at the mouse down point
 canvas.onmousedown = function(e) {
+  isDrawing = true;
   var point = getEventPoint(e)
   ploma.beginStroke(point.x, point.y, point.p);
 }
 
 // extend the stroke at the mouse move point
 canvas.onmousemove = function(e) {
+  if (!isDrawing) return;
   var point = getEventPoint(e)
   ploma.extendStroke(point.x, point.y, point.p);
 }
 
 // end the stroke at the mouse up point
 canvas.onmouseup = function(e) {
+  isDrawing = false;
   var point = getEventPoint(e);
   ploma.endStroke(point.x, point.y, point.p);
 }
