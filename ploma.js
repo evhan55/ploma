@@ -446,10 +446,10 @@ var Ploma = function(canvas) {
     //console.log(p);
 
     if(p < 0) { // Possible output from bezier
-      width = 0;
+      width = -1;
     }
     if(p < 0.4) {
-      width = map(p, 0, 0.4, 0, 0.2);
+      width = map(p, 0, 0.4, -1, 0.2);
     } 
     if((p >= 0.4) && (p < 0.45)) {
       width = map(p, 0.4, 0.45, 0.2, 0.25);
