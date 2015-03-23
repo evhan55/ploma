@@ -60,8 +60,7 @@ A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen 
 #### Example Usage
 
 ```js
-// canvas points to a <canvas>
-
+// canvas is any <canvas> element
 var ploma = new Ploma(canvas);
 ploma.clear();
 
