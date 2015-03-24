@@ -570,7 +570,7 @@ var Ploma = function(canvas) {
 
         // ORIGINAL: 4gxYSUNDX
         // Lighten for heavy touches
-        if ( a === 1 && point.p > 0.6) {
+        if ( a === 1 && p_p > 0.6) {
            a = 0.3;
         }
 
@@ -586,16 +586,19 @@ var Ploma = function(canvas) {
 
         // ORIGINAL: 4gxYSUNDX
         // Lighten for light touches
-        if(point.p < 0.2) {
-          l += 0.7;
-        }
+        //if(point.p < 0.2) {
+        //  l += 0.7;
+        //}
+        //if(point.p < 0.3) {
+        //  l = 0.2;
+        //}
 
         // GRAIN
         // Lighten for light touches
-        //if(p_p < 0.3 && l < 0.5) {
-        //  l = 0;
-        //  a *= 0.5;
-        //}
+        if(p_p < 0.3 && l < 0.5) {
+          l = 0;
+          a *= 0.5;
+        }
 
         // Shade alpha by texture
         a = a * l;
