@@ -595,7 +595,7 @@ var Ploma = function(canvas) {
 
         // GRAIN
         // Lighten for light touches
-        if(p_p < 0.3 && l < 0.5) {
+        if(p_p < 0.6 && l < 0.5) {
           l = 0;
           a *= 0.5;
         }

@@ -8,11 +8,11 @@
   body {
     font-family: 'Amatic SC', cursive, sans-serif;
     font-size: 25px;
+    margin: 0px;
   }
   canvas#canvas {
     float: left;
     cursor: crosshair;
-    border: 1px solid gray;
   }
   a {
     margin-left: 5px;
@@ -43,7 +43,7 @@
 <canvas id="canvas" class="noselect"></canvas>
 <div id="buttons">
   <!-- buttons -->
-  <br>
+  <!--<br>
   <a id="save" class="noselect">Save</a>
   <br>
   <br>
@@ -51,8 +51,7 @@
   <br>
   <br>
   <br>
-  <!-- checkboxes -->
-  <input type="checkbox" id="cursor" class="noselect" checked/> Show Cursor
+  <input type="checkbox" id="cursor" class="noselect" checked/> Show Cursor -->
 </div>
 <!-- Wacom plugin -->
 <object id="wtPlugin" type="application/x-wacomtabletplugin">
@@ -78,8 +77,8 @@
   // State
   var mode = 2;
   var ploma = null;
-  var w = 1300;
-  var h = 1000;
+  var w;// = 1300;
+  var h;// = 1000;
   var parallaxOffsetX = 10;
   var parallaxOffsetY = 10;
   var bodyScrollTop = 0;
@@ -122,6 +121,10 @@
   /////////////
   window.onload = function() {
 
+    // Get window width and height
+    w = window.innerWidth;
+    h = window.innerHeight;
+
     // load DOM elements
     body = document.getElementsByTagName('body')[0];
     canvas = document.getElementById('canvas');
@@ -142,7 +145,7 @@
     extendStroke = ploma.extendStroke;
 
     // bind button events
-    save.onclick = function(e) {
+    /*save.onclick = function(e) {
       window.open(canvas.toDataURL());
     }
     clear.onclick = function(e) {
@@ -150,7 +153,7 @@
     }
     cursor.onclick = function(e) {
       toggleCursor();
-    }
+    }*/
 
     // bind keyboard events
     window.onkeydown = function(e) {
@@ -227,7 +230,7 @@
         ploma.beginStroke(
           e.clientX + mouseOffsetX,
           e.clientY + mouseOffsetY,
-          penAPI ? penAPI.pressure : 1
+          penAPI.pressure ? penAPI.pressure : 1
         );
       }
       canvas.onmousemove = function(e) {
@@ -239,7 +242,7 @@
         ploma.extendStroke(
           e.clientX + mouseOffsetX,
           e.clientY + mouseOffsetY,
-          penAPI ? penAPI.pressure : 1
+          penAPI.pressure ? penAPI.pressure : 1
         );
       }
       canvas.onmouseup = function(e) {
@@ -248,7 +251,7 @@
         ploma.endStroke(
           e.clientX + mouseOffsetX,
           e.clientY + mouseOffsetY,
-          penAPI ? penAPI.pressure : 1
+          penAPI.pressure ? penAPI.pressure : 1
         );
       }
     //} 
