@@ -208,6 +208,21 @@ var Ploma = function(canvas) {
     sample = n;
   }
 
+  // ------------------------------------------
+  // resize
+  //
+  // Resize the Ploma instance to a new width
+  // and height.
+  //
+  this.resize = function(a, b) {
+    canvas.setAttribute('width', a);
+    canvas.setAttribute('height', b);
+    w = canvas.getAttribute('width');
+    h = canvas.getAttribute('height');
+    w_4 = w*4;
+    this.clear();
+  }
+
   //////////////////////////////////////////////
   // PRIVATE
   //////////////////////////////////////////////
@@ -570,7 +585,10 @@ var Ploma = function(canvas) {
 
         // ORIGINAL: 4gxYSUNDX
         // Lighten for heavy touches
-        if ( a === 1 && p_p > 0.6) {
+        //if ( a === 1 && p_p > 0.6) {
+        //   a = 0.3;
+        //}
+        if ( a === 1 && p_p > 0.5) {
            a = 0.3;
         }
 
@@ -595,9 +613,9 @@ var Ploma = function(canvas) {
 
         // GRAIN
         // Lighten for light touches
-        if(p_p < 0.6 && l < 0.5) {
-          l = 0;
-          a *= 0.5;
+        if(p_p < 0.3 && l < 0.6) {
+          l -= 0.2;
+          //a *= 0.2;
         }
 
         // Shade alpha by texture

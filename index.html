@@ -3,30 +3,50 @@
 <head>
   <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
   <meta content="utf-8" http-equiv="encoding">
-  <link href='http://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
 <style>
   body {
-    font-family: 'Amatic SC', cursive, sans-serif;
-    font-size: 25px;
     margin: 0px;
+    width: 100%;
+    height: 100%;
   }
   canvas#canvas {
-    float: left;
     cursor: crosshair;
+    position: absolute;
+    top: 0px;
+    left: 0px;
   }
-  a {
-    margin-left: 5px;
-    padding: 10px;
-    cursor: pointer;
+  object {
+    width: 0px; /* hide */
+    height: 0px; /* hide */
+  }
+  .button {
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    top: 10px;
+    font-family: sans-serif;
+    font-size: 24px;
+    background: rgba(50, 50, 50, 0.9);
     color: white;
-    text-decoration: none;
-    border-radius: 6px;
+    cursor: pointer;
+    border-radius: 2px;
+    line-height: 50px;
+    text-align: center;
   }
-  #save {
-    background: #0D9CC7;
+  .button img {
+    margin-top: 13px;
+  }
+  #mode {
+    left: 10px;
   }
   #clear {
-    background: #FF3333;
+    left: 80px;
+  }
+  #save {
+    left: 150px;
+  }
+  #cursor {
+    left: 220px;
   }
   .noselect {
     -webkit-touch-callout: none;
@@ -40,23 +60,17 @@
 </head>
 
 <body>
-<canvas id="canvas" class="noselect"></canvas>
-<div id="buttons">
-  <!-- buttons -->
-  <!--<br>
-  <a id="save" class="noselect">Save</a>
-  <br>
-  <br>
-  <a id="clear" class="noselect">Clear</a>
-  <br>
-  <br>
-  <br>
-  <input type="checkbox" id="cursor" class="noselect" checked/> Show Cursor -->
-</div>
-<!-- Wacom plugin -->
-<object id="wtPlugin" type="application/x-wacomtabletplugin">
-  <param name="onload" value="pluginLoaded"/>
-</object>
+  <!-- Canvas -->
+  <canvas id="canvas" class="noselect"></canvas>
+  <!-- Buttons -->
+  <div id="mode" class="button noselect">Mode</div>
+  <div id="clear" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/paper-24.png"/></div>
+  <div id="save" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/save-24.png"/></div>
+  <div id="cursor" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/plus-6-24.png"/></div>
+  <!-- Wacom plugin -->
+  <object id="wtPlugin" type="application/x-wacomtabletplugin">
+    <param name="onload" value="pluginLoaded"/>
+  </object>
 </body>
 
 <script type='text/javascript' src="ploma.js"></script>
@@ -65,8 +79,8 @@
   "use strict";
 
   // DOM
-  var body;
   var canvas;
+  var mode;
   var save;
   var clear;
   var cursor;
@@ -75,15 +89,10 @@
   var extendStroke;
 
   // State
-  var mode = 2;
+  var sampling = 2;
   var ploma = null;
   var w;// = 1300;
   var h;// = 1000;
-  var parallaxOffsetX = 10;
-  var parallaxOffsetY = 10;
-  var bodyScrollTop = 0;
-  var mouseOffsetX = -1 * parallaxOffsetX;
-  var mouseOffsetY = -1 * parallaxOffsetY;
   var isDrawing = false;
 
   // Red Pixel
@@ -99,41 +108,21 @@
   r[15] = 255;
 
   /////////////
-  // CALLBACKS
-  /////////////
-  function pluginLoaded() {
-    // TODO: DOES NOT WORK ON FIREFOX
-    console.log('pluginLoaded: ' + plugin);
-    penAPI = plugin.penAPI;
-  }
-
-  function toggleCursor() {
-    // TODO: UPDATE CHECKBOX OR IMAGE ON BUTTON
-    if(canvas.style.cursor === 'none') {
-      canvas.style.cursor = 'crosshair';
-    } else {
-      canvas.style.cursor = 'none';
-    }
-  }
-
-  /////////////
   // ONLOAD
   /////////////
   window.onload = function() {
 
-    // Get window width and height
-    w = window.innerWidth;
-    h = window.innerHeight;
-
     // load DOM elements
-    body = document.getElementsByTagName('body')[0];
     canvas = document.getElementById('canvas');
-    canvas.setAttribute('width', w);
-    canvas.setAttribute('height', h);
+    canvas.setAttribute('width', window.innerWidth);
+    canvas.setAttribute('height', window.innerHeight);
+    mode = document.getElementById('mode');
     save = document.getElementById('save');
     clear = document.getElementById('clear');
     cursor = document.getElementById('cursor');
     plugin = document.getElementById('wtPlugin');
+    penAPI = plugin.penAPI;
+    mode.innerHTML = sampling;
 
     // populate red pixel
     rid = canvas.getContext('2d').createImageData(2, 2);
@@ -144,51 +133,34 @@
     ploma.clear();
     extendStroke = ploma.extendStroke;
 
-    // bind button events
-    /*save.onclick = function(e) {
+    ////////////
+    // BUTTONS
+    ////////////
+    mode.onclick = function(e) {
+      sampling = (sampling === 2) ? 0 : sampling + 1;
+      ploma.setSample(sampling);
+      mode.innerHTML = sampling; 
+    }
+    save.onclick = function(e) {
       window.open(canvas.toDataURL());
     }
     clear.onclick = function(e) {
       ploma.clear();
     }
     cursor.onclick = function(e) {
-      toggleCursor();
-    }*/
-
-    // bind keyboard events
-    window.onkeydown = function(e) {
-      switch(e.keyCode) {
-        // '0'
-        case 48:
-          mode = 0;
-          ploma.clear();
-          break;
-        // '1'
-        case 49:
-          mode = 1;
-          ploma.clear();
-          ploma.setSample(1);
-          break;
-        // '2'
-        case 50:
-          mode = 2;
-          ploma.clear();
-          ploma.setSample(2);
-          break;
-        // 'r'
-        case 82:
-          toggleCursor();
-          break;
-        // 'c'
-        case 67:
-          ploma.clear();
+      // TODO: UPDATE CHECKBOX OR IMAGE ON BUTTON
+      if(canvas.style.cursor === 'none') {
+        canvas.style.cursor = 'crosshair';
+      } else {
+        canvas.style.cursor = 'none';
       }
     }
 
-    // bind scroll
-    window.onscroll = function (event) {
-      mouseOffsetX = body.scrollLeft - parallaxOffsetX;
-      mouseOffsetY = body.scrollTop - parallaxOffsetY;
+    ////////////
+    // RESIZE
+    ////////////
+    window.onresize = function(e) {
+      ploma.resize(window.innerWidth, window.innerHeight);
     }
 
     // bind device input events
@@ -198,8 +170,8 @@
       ///////////////////////////////////
       canvas.onpointerdown = function(e) {
         ploma.beginStroke(
-          e.clientX + mouseOffsetX,
-          e.clientY + mouseOffsetY,
+          e.clientX,
+          e.clientY,
           e.pressure
         );
         isDrawing = true;
@@ -207,15 +179,15 @@
       canvas.onpointermove = function(e) {
         if (!isDrawing) return;
         ploma.extendStroke(
-          e.clientX + mouseOffsetX,
-          e.clientY + mouseOffsetY,
+          e.clientX,
+          e.clientY,
           e.pressure
         );
       }
       canvas.onpointerup = function(e) {
         ploma.endStroke(
-          e.clientX + mouseOffsetX,
-          e.clientY + mouseOffsetY,
+          e.clientX,
+          e.clientY,
           e.pressure
         );
         isDrawing = false;
@@ -226,31 +198,39 @@
       ///////////////////////////////////
       canvas.onmousedown = function(e) {
         isDrawing = true;
-        if (mode === 0) return;
+        if (sampling === 0) return;
         ploma.beginStroke(
-          e.clientX + mouseOffsetX,
-          e.clientY + mouseOffsetY,
+          e.clientX,
+          e.clientY,
           penAPI.pressure ? penAPI.pressure : 1
         );
       }
       canvas.onmousemove = function(e) {
         if (!isDrawing) return;
-        if (mode === 0) {
-          canvas.getContext('2d').putImageData(rid, e.clientX + mouseOffsetX, e.clientY + mouseOffsetY, 0, 0, 2, 2);
+        if (sampling === 0) {
+          canvas.getContext('2d').putImageData(
+            rid,
+            e.clientX,
+            e.clientY,
+            0,
+            0,
+            2,
+            2
+          );
           return;
         }
         ploma.extendStroke(
-          e.clientX + mouseOffsetX,
-          e.clientY + mouseOffsetY,
+          e.clientX,
+          e.clientY,
           penAPI.pressure ? penAPI.pressure : 1
         );
       }
       canvas.onmouseup = function(e) {
         isDrawing = false;
-        if (mode === 0) return;
+        if (sampling === 0) return;
         ploma.endStroke(
-          e.clientX + mouseOffsetX,
-          e.clientY + mouseOffsetY,
+          e.clientX,
+          e.clientY,
           penAPI.pressure ? penAPI.pressure : 1
         );
       }
