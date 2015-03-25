@@ -498,7 +498,6 @@ var Ploma = function(canvas) {
     /////////////////////
 
     var width = 0.0;
-    var l = 0.0;
 
     width = calculateWidth(point.p);
 
@@ -524,6 +523,7 @@ var Ploma = function(canvas) {
     var dx = 0.0;
     var dy = 0.0;
     var dist = 0.0;
+    var t = 0.0;
     var a = 0.0;
     var invA = 0.0;
     var idx_0 = 0;
@@ -583,43 +583,22 @@ var Ploma = function(canvas) {
         if (a < 0) a = 0;
         if (a >= 1) a = 1;
 
-        // ORIGINAL: 4gxYSUNDX
-        // Lighten for heavy touches
-        //if ( a === 1 && p_p > 0.6) {
-        //   a = 0.3;
-        //}
-        if ( a === 1 && p_p > 0.5) {
+        // Lighten inkflow for medium-to-heavy touches
+        if (p_p > 0.2 && a === 1) {
            a = 0.3;
         }
 
-        // GRAIN
-        // Lighten for heavy touches
-        //if (a === 1 && p_p > 0.6) {
-        //   a = 0.9;
-        //}
-
         // Get texture sample
-        l = textureSamples[textureSampleStep];
+        t = textureSamples[textureSampleStep];
         textureSampleStep = (textureSampleStep === textureSamplesLength - 1) ? 0 : (textureSampleStep + 1);
 
-        // ORIGINAL: 4gxYSUNDX
-        // Lighten for light touches
-        //if(point.p < 0.2) {
-        //  l += 0.7;
-        //}
-        //if(point.p < 0.3) {
-        //  l = 0.2;
-        //}
-
-        // GRAIN
-        // Lighten for light touches
-        if(p_p < 0.3 && l < 0.6) {
-          l -= 0.2;
-          //a *= 0.2;
+        // Lighten texture sample for medium-to-light touches
+        if(p_p < 0.3 && t < 0.6) {
+          t -= 0.2;
         }
 
         // Shade alpha by texture
-        a = a * l;
+        a = a * t;
 
         // Assumes opaque background for blending
         invA = 1 - a;
@@ -738,6 +717,7 @@ var Ploma = function(canvas) {
 
     // Read grays from image
     for(var i = 0; i < imageData.length; i+=4) {
+      //imageDataGrays.push(1 - imageData[i]/255);
       imageDataGrays.push(1 - imageData[i]/255);
     }
 
@@ -750,10 +730,10 @@ var Ploma = function(canvas) {
       var t = Math.abs(Math.abs(T_t - 1) % 2 - 1);
       var x = Math.floor(s * (img.width - 1));
       var y = Math.floor(t * (img.height - 1));
-      var l = imageDataGrays[x + y * img.width];
+      var d = imageDataGrays[x + y * img.width];
       //samples[i] = (l*255)|0;
       //samples[i] = l * 0.3;
-      samples[i] = l;
+      samples[i] = d;
       //samples[i] = 230;
       
       // Step texture offset randomly [-1, 1]
