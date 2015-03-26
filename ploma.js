@@ -235,7 +235,7 @@ var Ploma = function(canvas) {
   var ctx = canvas.getContext('2d');
   var imageData = null;
   var imageDataData = new Uint8ClampedArray(w * h);
-  var paperColor = 'rgb(255, 255, 255)';
+  var paperColor = 'rgb(250, 245, 230)';
   w = canvas.getAttribute('width');
   h = canvas.getAttribute('height');
   w_4 = w * 4;
@@ -260,9 +260,9 @@ var Ploma = function(canvas) {
   var filterWeightInverse = 1 - filterWeight;
   var stepOffset = 0.0;
   var stepInterval = 0.30;
-  var penR = 20;
-  var penG = 20;
-  var penB = 45;
+  var penR = 20;//20;
+  var penG = 20;//20;
+  var penB = 45;//45;
   var pointCounter = 0;
   var sample = 2;
 
@@ -461,25 +461,25 @@ var Ploma = function(canvas) {
     //console.log(p);
 
     if(p < 0) { // Possible output from bezier
-      width = -1;
+      width = -1.00;
     }
     if(p < 0.4) {
-      width = map(p, 0, 0.4, -1, 0.2);
+      width = map(p, 0, 0.4, -1.00, 0.20);
     } 
     if((p >= 0.4) && (p < 0.45)) {
-      width = map(p, 0.4, 0.45, 0.2, 0.25);
+      width = map(p, 0.4, 0.45, 0.20, 0.25);
     }
     if((p >= 0.45) && (p < 0.8)) {
-      width = map(p, 0.45, 0.8, 0.25, 0.50);
+      width = map(p, 0.45, 0.8, 0.25, 0.70);
     }
     if((p >= 0.8) && (p < 0.95)) {
-      width = map(p, 0.8, 0.95, 0.7, 0.9);
+      width = map(p, 0.8, 0.95, 0.70, 0.90);
     }
     if((p >= 0.95) && (p <= 1)) {
-      width = map(p, 0.95, 1, 0.9, 1);
+      width = map(p, 0.95, 1, 0.90, 1.20);
     }
     if(p > 1) { // Possible output from bezier
-      width = 1;
+      width = 1.20;
     }
 
     return width;
@@ -542,10 +542,10 @@ var Ploma = function(canvas) {
     p_p = point.p;
     centerX = Math.round(p_x);
     centerY = Math.round(p_y);
-    left = centerX - 2;
-    right = centerX + 3;
-    top = centerY - 2;
-    bottom = centerY + 3;
+    left = centerX - 3;
+    right = centerX + 4;
+    top = centerY - 3;
+    bottom = centerY + 4;
 
     //////////////
     // Horizontal
@@ -572,7 +572,8 @@ var Ploma = function(canvas) {
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
-        a = (0.1 / (dist - width)) - 0.06;
+        //a = (0.1 / (dist - width)) - 0.06;
+        a = (0.1 / (dist - width)) - 0.065;
 
         // Spike
         if(dist < width) {
@@ -585,8 +586,9 @@ var Ploma = function(canvas) {
 
         // Lighten inkflow for medium-to-heavy touches
         if (p_p > 0.2 && a === 1) {
-           a = 0.3;
+           a = 0.35;
         }
+        //a *= 0.3;
 
         // Get texture sample
         t = textureSamples[textureSampleStep];
@@ -595,6 +597,7 @@ var Ploma = function(canvas) {
         // Lighten texture sample for medium-to-light touches
         if(p_p < 0.3 && t < 0.6) {
           t -= 0.2;
+          //t = Math.max(0, t);
         }
 
         // Shade alpha by texture
