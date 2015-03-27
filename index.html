@@ -78,6 +78,9 @@
 <script type="text/javascript">
   "use strict";
 
+  // TEST
+  var elapsed;
+
   // DOM
   var canvas;
   var mode;
@@ -207,7 +210,9 @@
       }
       canvas.onmousemove = function(e) {
         if (!isDrawing) return;
+        //elapsed = Date.now();
         if (sampling === 0) {
+          //console.log(Date.now() - elapsed);
           canvas.getContext('2d').putImageData(
             rid,
             e.clientX,
