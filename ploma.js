@@ -551,6 +551,20 @@ var Ploma = function(canvas) {
     bottom = centerY + 3;
 
     var textureSamples = p_p < 0.3 ? grainTextureSamples : inkTextureSamples;
+    //penR = p_p < 0.45 ? 20 : 20;
+    //penG = p_p < 0.45 ? 50 : 20;
+    penB = p_p < 0.45 ? map(p_p, 0, 0.45, 190, 55) : 55;
+    penR = map(p_p, 0, 1, 20, 20);
+    penG = map(p_p, 0, 1, 40, 20);
+    //penB = map(p_p, 0, 1, 105, 55);
+
+    // Randomize pressure for splots?
+    //var dark = false;
+    //if(Math.floor(Math.random()*1500) === 2) {
+    //  p_p = 1;
+    //  width = 1;
+    //  dark = true;
+    //}
 
     //////////////
     // Horizontal
@@ -578,7 +592,8 @@ var Ploma = function(canvas) {
 
         // Antialiasing
         //a = (0.1 / (dist - width)) - 0.06;
-        a = (0.1 / (dist - width)) - 0.065;
+        //a = (0.1 / (dist - width)) - 0.065;
+        a = (0.1 / (dist - width)) - 0.07;
 
         // Spike
         if(dist < width) {
@@ -604,8 +619,8 @@ var Ploma = function(canvas) {
 
         // Lighten texture sample for medium-to-light touches
         //t *= p_p;
-        if(p_p < 0.3) {
-          t -= map(p_p, 0.4, 0, 0.3, 0.4);
+        if(p_p < 0.4) {
+          t -= map(p_p, 0.4, 0, 0.25, 0.35);
           t = Math.max(0, t);
         }
 
@@ -742,6 +757,7 @@ var Ploma = function(canvas) {
       var y = Math.floor(t * (img.height - 1));
       var d = imageDataGrays[x + y * img.width];
       samples[i] = d;
+      //samples[i] = 100 + Math.random()*155;
       
       // Step texture offset randomly [-1, 1]
       textureOffsetX += (Math.random() * 2 | 0) === 1 ? -1 : 1;
