@@ -532,13 +532,16 @@ var Ploma = function(canvas) {
     var idx_0 = 0;
     var idx_1 = 0;
     var idx_2 = 0;
+    var idx_3 = 0;
     var idx_0_i = 0;
     var oldR = 0.0;
     var oldG = 0.0;
     var oldB = 0.0;
+    var oldA = 0.0;
     var newR = 0.0;
     var newG = 0.0;
     var newB = 0.0;
+    var newA = 0.0;
 
     p_x = point.x;
     p_y = point.y;
@@ -627,16 +630,31 @@ var Ploma = function(canvas) {
         // Shade alpha by texture
         a = a * t;
 
-        // Assumes opaque background for blending
+        // Blending vars
         invA = 1 - a;
         idx_1 = idx_0 + 1;
         idx_2 = idx_0 + 2;
+        idx_3 = idx_0 + 3;
         oldR = id[idx_0];
         oldG = id[idx_1];
         oldB = id[idx_2];
-        newR = penR * a + oldR * invA;
-        newG = penG * a + oldG * invA;
-        newB = penB * a + oldB * invA;
+        oldA = id[idx_3] / 255;
+
+        // Transparent vs. opaque background
+        if(oldA === 1) {
+          newR = penR * a + oldR * invA;
+          newG = penG * a + oldG * invA;
+          newB = penB * a + oldB * invA;
+        } else {
+          newA = a + oldA * invA;
+          newR = (penR * a + oldR * oldA * invA) / newA;
+          newG = (penG * a + oldG * oldA * invA) / newA;
+          newB = (penB * a + oldB * oldA * invA) / newA;
+          newA = newA * 255;
+          id[idx_3] = newA;
+        }
+
+        // Set new RGB
         id[idx_0] = newR;
         id[idx_1] = newG;
         id[idx_2] = newB;
