@@ -259,7 +259,7 @@ var Ploma = function(canvas) {
   var filterWeight = 0.5;
   var filterWeightInverse = 1 - filterWeight;
   var stepOffset = 0.0;
-  var stepInterval = 0.30;
+  var stepInterval = 0.3;
   //var stepInterval = 10;
   var penR = 20;//20;
   var penG = 20;//20;
@@ -471,10 +471,10 @@ var Ploma = function(canvas) {
       width = -1;
     }
     if(p < 0.4) {
-      width = map(p, 0, 0.4, -1, 0.35);
+      width = map(p, 0, 0.4, -1, 0.25);
     } 
     if((p >= 0.4) && (p < 0.45)) {
-      width = map(p, 0.4, 0.45, 0.35, 0.45);
+      width = map(p, 0.4, 0.45, 0.25, 0.45);
     }
     if((p >= 0.45) && (p < 0.8)) {
       width = map(p, 0.45, 0.8, 0.45, 0.70);
@@ -554,20 +554,9 @@ var Ploma = function(canvas) {
     bottom = centerY + 3;
 
     var textureSamples = p_p < 0.3 ? grainTextureSamples : inkTextureSamples;
-    //penR = p_p < 0.45 ? 20 : 20;
-    //penG = p_p < 0.45 ? 50 : 20;
     penB = p_p < 0.45 ? map(p_p, 0, 0.45, 190, 55) : 55;
     penR = map(p_p, 0, 1, 20, 20);
     penG = map(p_p, 0, 1, 40, 20);
-    //penB = map(p_p, 0, 1, 105, 55);
-
-    // Randomize pressure for splots?
-    //var dark = false;
-    //if(Math.floor(Math.random()*1500) === 2) {
-    //  p_p = 1;
-    //  width = 1;
-    //  dark = true;
-    //}
 
     //////////////
     // Horizontal
@@ -588,14 +577,12 @@ var Ploma = function(canvas) {
         // Distance
         dy = p_y - j;
         dist = Math.sqrt(dx * dx + dy * dy);
-        //dist = dx + dy;
 
         // Byte-index
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
-        //a = (0.1 / (dist - width)) - 0.06;
-        //a = (0.1 / (dist - width)) - 0.065;
+        var test = map(p_p, 0, 1, 0.07, 0.065);
         a = (0.1 / (dist - width)) - 0.07;
 
         // Spike
@@ -607,23 +594,19 @@ var Ploma = function(canvas) {
         if (a < 0) a = 0;
         if (a >= 1) a = 1;
 
-        // Lighten inkflow for medium-to-heavy touches
-        //if (p_p > 0.3 && a === 1) {
-        //   a = 0.35;
-        //} 
+        // Lighten inkflow for heavy ink
         if (a === 1) {
+           //a = map(p_p, 0, 1, 0.5, 0.2);
            a = 0.35;
         }
-        //a *= 0.3;
 
         // Get texture sample
         t = textureSamples[textureSampleStep];
         textureSampleStep = (textureSampleStep === textureSamplesLength - 1) ? 0 : (textureSampleStep + 1);
 
         // Lighten texture sample for medium-to-light touches
-        //t *= p_p;
-        if(p_p < 0.4) {
-          t -= map(p_p, 0.4, 0, 0.25, 0.35);
+        if(p_p < 0.5) {
+          t -= map(p_p, 0.5, 0, 0.15, 0.35);
           t = Math.max(0, t);
         }
 
@@ -651,6 +634,7 @@ var Ploma = function(canvas) {
           newG = (penG * a + oldG * oldA * invA) / newA;
           newB = (penB * a + oldB * oldA * invA) / newA;
           newA = newA * 255;
+          // Set new A
           id[idx_3] = newA;
         }
 

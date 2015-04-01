@@ -205,7 +205,7 @@
         ploma.beginStroke(
           e.clientX,
           e.clientY,
-          penAPI.pressure ? penAPI.pressure : 1
+          penAPI.pressure ? penAPI.pressure : 0.05
         );
       }
       canvas.onmousemove = function(e) {
@@ -227,7 +227,7 @@
         ploma.extendStroke(
           e.clientX,
           e.clientY,
-          penAPI.pressure ? penAPI.pressure : 1
+          penAPI.pressure ? penAPI.pressure : 0.05
         );
       }
       canvas.onmouseup = function(e) {
@@ -236,7 +236,7 @@
         ploma.endStroke(
           e.clientX,
           e.clientY,
-          penAPI.pressure ? penAPI.pressure : 1
+          penAPI.pressure ? penAPI.pressure : 0.05
         );
       }
     //} 
