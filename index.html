@@ -48,6 +48,9 @@
   #cursor {
     left: 220px;
   }
+  #texture {
+    left: 290px;
+  }
   .noselect {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -67,6 +70,7 @@
   <div id="clear" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/paper-24.png"/></div>
   <div id="save" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/save-24.png"/></div>
   <div id="cursor" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/plus-6-24.png"/></div>
+  <div id="texture" class="button noselect">T</div>
   <!-- Wacom plugin -->
   <object id="wtPlugin" type="application/x-wacomtabletplugin">
     <param name="onload" value="pluginLoaded"/>
@@ -87,6 +91,7 @@
   var save;
   var clear;
   var cursor;
+  var texture;
   var plugin;
   var penAPI;
   var extendStroke;
@@ -123,6 +128,7 @@
     save = document.getElementById('save');
     clear = document.getElementById('clear');
     cursor = document.getElementById('cursor');
+    texture = document.getElementById('texture');
     plugin = document.getElementById('wtPlugin');
     penAPI = plugin.penAPI;
     mode.innerHTML = sampling;
@@ -157,6 +163,9 @@
       } else {
         canvas.style.cursor = 'none';
       }
+    }
+    texture.onclick = function(e) {
+      ploma.toggleTexture();
     }
 
     ////////////
@@ -205,7 +214,7 @@
         ploma.beginStroke(
           e.clientX,
           e.clientY,
-          penAPI.pressure ? penAPI.pressure : 0.05
+          penAPI.pressure ? penAPI.pressure : 0.5
         );
       }
       canvas.onmousemove = function(e) {
@@ -227,7 +236,7 @@
         ploma.extendStroke(
           e.clientX,
           e.clientY,
-          penAPI.pressure ? penAPI.pressure : 0.05
+          penAPI.pressure ? penAPI.pressure : 0.5
         );
       }
       canvas.onmouseup = function(e) {
@@ -236,7 +245,7 @@
         ploma.endStroke(
           e.clientX,
           e.clientY,
-          penAPI.pressure ? penAPI.pressure : 0.05
+          penAPI.pressure ? penAPI.pressure : 0.5
         );
       }
     //} 

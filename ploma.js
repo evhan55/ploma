@@ -223,6 +223,48 @@ var Ploma = function(canvas) {
     this.clear();
   }
 
+  // ------------------------------------------
+  // toggleTexture
+  //
+  // Set texture on or off, and redraw all the
+  // strokes.
+  //
+  this.toggleTexture = function() {
+    // Deep copy the raw strokes
+    /*var originalStrokes = this.strokes();
+    var capturedRawStrokes = [];
+    for(var i = 0; i < originalStrokes.length; i++) {
+      capturedRawStrokes.push(originalStrokes[i]);
+    }*/
+
+    // Clear and set rendering to false
+    //this.clear();
+    applyRendering = !applyRendering;
+
+    // Redraw all the strokes
+    /*for(var i = 0; i < capturedRawStrokes.length; i++) {
+      var stroke = capturedRawStrokes[i];
+      this.beginStroke(
+        stroke[0].x,
+        stroke[0].y,
+        stroke[0].p
+      );
+      for(var j = 1; j < stroke.length-1; j++) {
+        this.extendStroke(
+          stroke[j].x,
+          stroke[j].y,
+          stroke[j].p
+        );
+      }
+      this.endStroke(
+        stroke[stroke.length-1].x,
+        stroke[stroke.length-1].y,
+        stroke[stroke.length-1].p
+      );
+    }*/
+
+  }
+
   //////////////////////////////////////////////
   // PRIVATE
   //////////////////////////////////////////////
@@ -266,6 +308,7 @@ var Ploma = function(canvas) {
   var penB = 55;//45;
   var pointCounter = 0;
   var sample = 2;
+  var applyRendering = true;
 
   // Generate Texture Samples
   var inkTextureImage = getImageFromBase64(inkTextureBase64(), "jpeg")
@@ -554,9 +597,13 @@ var Ploma = function(canvas) {
     bottom = centerY + 3;
 
     var textureSamples = p_p < 0.3 ? grainTextureSamples : inkTextureSamples;
-    penB = p_p < 0.45 ? map(p_p, 0, 0.45, 190, 55) : 55;
-    penR = map(p_p, 0, 1, 20, 20);
-    penG = map(p_p, 0, 1, 40, 20);
+    if(applyRendering) {
+      penB = p_p < 0.45 ? map(p_p, 0, 0.45, 190, 55) : 55;
+      penR = map(p_p, 0, 1, 20, 20);
+      penG = map(p_p, 0, 1, 40, 20);
+    } else {
+      penR = penG = penB = 0;
+    }
 
     //////////////
     // Horizontal
@@ -611,7 +658,7 @@ var Ploma = function(canvas) {
         }
 
         // Shade alpha by texture
-        a = a * t;
+        a = applyRendering ? a * t : a;
 
         // Blending vars
         invA = 1 - a;
