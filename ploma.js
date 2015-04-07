@@ -520,10 +520,10 @@ var Ploma = function(canvas) {
       width = map(p, 0.4, 0.45, 0.25, 0.45);
     }
     if((p >= 0.45) && (p < 0.8)) {
-      width = map(p, 0.45, 0.8, 0.45, 0.70);
+      width = map(p, 0.45, 0.8, 0.45, 0.80);
     }
     if((p >= 0.8) && (p < 0.95)) {
-      width = map(p, 0.8, 0.95, 0.70, 0.90);
+      width = map(p, 0.8, 0.95, 0.80, 0.90);
     }
     if((p >= 0.95) && (p <= 1)) {
       width = map(p, 0.95, 1, 0.90, 1.20);
@@ -596,11 +596,17 @@ var Ploma = function(canvas) {
     top = centerY - 2;
     bottom = centerY + 3;
 
-    var textureSamples = p_p < 0.3 ? grainTextureSamples : inkTextureSamples;
+    var textureSamples = p_p < 0.25 ? grainTextureSamples : inkTextureSamples;
     if(applyRendering) {
       penB = p_p < 0.45 ? map(p_p, 0, 0.45, 190, 55) : 55;
       penR = map(p_p, 0, 1, 20, 20);
       penG = map(p_p, 0, 1, 40, 20);
+      //penB = p_p < 0.45 ? map(p_p, 0, 0.45, 200, 65) : 65;
+      //penR = map(p_p, 0, 1, 30, 30);
+      //penG = map(p_p, 0, 1, 50, 30);
+      //penB = p_p < 0.45 ? map(p_p, 0, 0.45, 210, 55) : 55;
+      //penR = p_p < 0.45 ? map(p_p, 0, 0.45, 40, 20) : 20;
+      //penG = p_p < 0.45 ? map(p_p, 0, 0.45, 40, 20) : 20;
     } else {
       penR = penG = penB = 0;
     }
@@ -629,8 +635,9 @@ var Ploma = function(canvas) {
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
-        var test = map(p_p, 0, 1, 0.07, 0.065);
-        a = (0.1 / (dist - width)) - 0.07;
+        //var test = map(p_p, 0, 1, 0.07, 0.065);
+        //a = (0.1 / (dist - width)) - 0.07;
+        a = (0.1 / (dist - width)) - 0.06;
 
         // Spike
         if(dist < width) {
@@ -644,7 +651,8 @@ var Ploma = function(canvas) {
         // Lighten inkflow for heavy ink
         if (a === 1) {
            //a = map(p_p, 0, 1, 0.5, 0.2);
-           a = 0.35;
+           //a = 0.35;
+           a = map(p_p, 0, 1, 0.30, 0.28);
         }
 
         // Get texture sample
