@@ -304,9 +304,9 @@ var Ploma = function(canvas) {
   var filterWeightInverse = 1 - filterWeight;
   var stepOffset = 0.0;
   var stepInterval = 0.3;
-  var penR = 20;
-  var penG = 20;
-  var penB = 55;
+  var penR = 28;
+  var penG = 08;
+  var penB = 45;
   var pointCounter = 0;
   var sample = 2;
   var applyRendering = true;
@@ -547,9 +547,7 @@ var Ploma = function(canvas) {
     /////////////////////
 
     var width = 0.0;
-
     width = calculateWidth(point.p);
-    //width = -1.3;
 
     /////////////////////
     // LOOP
@@ -595,44 +593,9 @@ var Ploma = function(canvas) {
     right = centerX + 4;
     top = centerY - 3;
     bottom = centerY + 4;
+
+    // Step around inside the texture before the loop
     textureSampleStep = (textureSampleStep === textureSampleLocations.length - 1) ? 0 : (textureSampleStep + 1);
-
-    
-
-    //var textureSamples = inkTextureSamples;
-    /*if(p_p < 0.65) {
-      if(p_p < 0.45) {
-        textureSamples = grainTextureSamples;
-      } else {
-        textureSamples = grainTextureSamples;
-      }
-    } else {
-      textureSamples = inkTextureSamples;
-    }*/
-        //t = textureSamples[textureSampleStep];
-        //textureSampleStep = (textureSampleStep === textureSamplesLength - 1) ? 0 : (textureSampleStep + 1);
-        //t = Math.max(0.2, t);
-    
-    //if(applyRendering) {
-      // COLORS WE WANT
-      //penR = 34;
-      //penG = p_p < 0.65 ? map(p_p, 0, 0.65, 70, 10) : 10;
-      //penB = p_p < 0.65 ? map(p_p, 0, 0.65, 125, 47) : 47;
-
-
-      penR = 28;
-      penG = 08;
-      penB = 45;
-
-      //penB = p_p < 0.45 ? map(p_p, 0, 0.45, 200, 65) : 65;
-      //penR = map(p_p, 0, 1, 30, 30);
-      //penG = map(p_p, 0, 1, 50, 30);
-      //penB = p_p < 0.45 ? map(p_p, 0, 0.45, 210, 55) : 55;
-      //penR = p_p < 0.45 ? map(p_p, 0, 0.45, 40, 20) : 20;
-      //penG = p_p < 0.45 ? map(p_p, 0, 0.45, 40, 20) : 20;
-    //} else {
-    //  penR = penG = penB = 0;
-    //}
 
     //////////////
     // Horizontal
@@ -658,35 +621,7 @@ var Ploma = function(canvas) {
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
-        var test = map(p_p, 0, 1, 0.07, 0.065);
-        //a = (0.1 / (dist - width)) - 0.07;
-        a = (0.3 / (dist - width)) - 0.085;
-        a *= 5;
-        //a *= 1.75; // light flow
-        //a *= 4; // heavy flow
-        //a *= map(p_p, 0, 1, 0.4, 3.5);
-        //if(skipping ) {
-        //skipValue = inkTextureImageDataGrays[0];
-        var textureX = textureSampleLocations[textureSampleStep].x + (i - centerX);
-        var textureY = textureSampleLocations[textureSampleStep].y + (j - centerY);
-        // Get normalized pixel within texture
-        var T_s = textureX / (inkTextureImage.width - 1);
-        var T_t = textureY / (inkTextureImage.height - 1);
-        var s = Math.abs(Math.abs(T_s - 1) % 2 - 1);
-        var t = Math.abs(Math.abs(T_t - 1) % 2 - 1);
-        var x = Math.floor(s * (inkTextureImage.width - 1));
-        var y = Math.floor(t * (inkTextureImage.height - 1));
-        /*console.log('i: ' + (i - centerX));
-        console.log('textureX: ' + textureX);
-        console.log('j: ' + (j - centerY));
-        console.log('textureY: ' + textureY);*/
-        var skipValue = inkTextureImageDataGrays[x + y * inkTextureImage.width];
-        //skipValue = inkTextureImageDataGrays[textureSampleLocations];
-        
-        //console.log(skipValue);
-
-          a*= skipValue;
-        //}
+        a = 5 * ((0.3 / (dist - width)) - 0.085);
 
         // Spike
         if(dist < width) {
@@ -697,74 +632,26 @@ var Ploma = function(canvas) {
         if (a < 0) a = 0;
         if (a >= 1) a = 1;
 
-        // Lighten inkflow for heavy ink
-        //if (a === 1) {
-           //a = map(p_p, 0, 1, 0.5, 0.2);
-           //a = 0.35;
-           //a = map(p_p, 0, 1, 0.28, 0.28);
-        //}
-        //a *= 0.92;
+        // Get new texture sample offset at center
+        var textureX = textureSampleLocations[textureSampleStep].x + (i - centerX);
+        var textureY = textureSampleLocations[textureSampleStep].y + (j - centerY);
+        // Get normalized pixel within texture
+        var T_s = textureX / (inkTextureImage.width - 1);
+        var T_t = textureY / (inkTextureImage.height - 1);
+        var s = Math.abs(Math.abs(T_s - 1) % 2 - 1);
+        var t = Math.abs(Math.abs(T_t - 1) % 2 - 1);
+        var x = Math.floor(s * (inkTextureImage.width - 1));
+        var y = Math.floor(t * (inkTextureImage.height - 1));
+        var textureValue = inkTextureImageDataGrays[x + y * inkTextureImage.width];
 
-        // Get texture sample
+        // Apply texture
+        a *= textureValue;
 
-        /*if (p_p < 0.65) {
-          if(t < map(p_p, 0, 0.65, 0.9, 0.8)) {
-            t = 0;
-          } else {
-            //t = 0.2;
-            t *= map(p_p, 0, 0.65, 0, 0.10);
-          }
-        } else {
-          if(t < map(p_p, 0.65, 1, 0.1, 0.2)) {
-            t *= 0.7;
-          } else {
-            if(a === 1) {
-              t *= map(p_p, 0.6, 1, 0.28, 0.37);
-            }
-          }
-        }*/
-        //t *= map(p_p, 0, 1, 0, 1);
-        // Lighten texture sample for medium-to-light touches
-        //if(p_p < 0.5 && t < 0.85) {
-        //  t = 0;
-        //}
-        //if(p_p < 0.75) {
-          //if(p_p < 0.5 && t < 0.85) {
-          //  t = 0;
-          //}
-          //if(t < 0.65) {
-          //  t = 0;
-          //} else {
-            //t *= map(p_p, 0, 0.65, 0, 0.8);
-            //t *= 0.8;
-          //}
-          
-        //} //else {
-          //t *= map(p_p, 0.65, 1, 0.5, 1);
-        //}
-        //t = 0;
-
-        // Shade alpha by texture
-        //console.log(t);
-       // if(a === 1) {
-          //console.log('hello');
-          var t = map(p_p, 0, 1, 0.8, 0.9);
-          //var t = 1;
-          var prob = 1-(p_p*p_p*p_p*p_p); // 1 - x^4
-          //var val = p_p < 0.6 ? 0 : 0.1;
-          t = Math.floor(Math.random()*prob*2) === 1 ? 0 : t;
-          //if(p_p < 0.5) {
-            //t = Math.floor(Math.random()*2) === 0 ? 0 : 0.8;
-            //t = 0;
-          //} else {
-            //if(Math.floor(Math.random()*map(p_p, 0.5, 1, 3, 5)) === 0) {
-              //t = map(p_p, 0, 1, 0, 0);
-            //}
-          //}
-          //t = 1;
-          
-          a = applyRendering ? a * t : a;
-        //}
+        // Grain
+        var t = map(p_p, 0, 1, 0.8, 0.9);
+        var prob = 1-(p_p*p_p*p_p*p_p); // 1 - x^4
+        t = Math.floor(Math.random()*prob*2) === 1 ? 0 : t;
+        a = applyRendering ? a * t : a;
 
         // Blending vars
         invA = 1 - a;
