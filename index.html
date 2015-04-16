@@ -10,7 +10,7 @@
     height: 100%;
   }
   canvas#canvas {
-    cursor: crosshair;
+    cursor: none;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -70,7 +70,7 @@
   <div id="clear" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/paper-24.png"/></div>
   <div id="save" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/save-24.png"/></div>
   <div id="cursor" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/plus-6-24.png"/></div>
-  <div id="texture" class="button noselect">T</div>
+  <div id="texture" class="button noselect">Texturing</div>
   <!-- Wacom plugin -->
   <object id="wtPlugin" type="application/x-wacomtabletplugin">
     <param name="onload" value="pluginLoaded"/>
@@ -132,6 +132,7 @@
     plugin = document.getElementById('wtPlugin');
     penAPI = plugin.penAPI;
     mode.innerHTML = sampling;
+    texture.innerHTML = "T";
 
     // populate red pixel
     rid = canvas.getContext('2d').createImageData(2, 2);
@@ -166,6 +167,11 @@
     }
     texture.onclick = function(e) {
       ploma.toggleTexture();
+      if (texture.innerHTML === "T") {
+        texture.innerHTML = "N";
+      } else {
+        texture.innerHTML = "T";
+      }
     }
 
     ////////////
