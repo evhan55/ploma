@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+<style>
+  body {
+    margin: 0px;
+    width: 100%;
+    height: 100%;
+  }
+  canvas#canvas {
+    cursor: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+  }
+  object {
+    width: 0px; /* hide */
+    height: 0px; /* hide */
+  }
+  .button {
+    height: 50px;
+    width: 50px;
+    position: absolute;
+    top: 10px;
+    font-family: sans-serif;
+    font-size: 24px;
+    background: rgba(50, 50, 50, 0.9);
+    color: white;
+    cursor: pointer;
+    border-radius: 2px;
+    line-height: 50px;
+    text-align: center;
+  }
+  .button img {
+    margin-top: 13px;
+  }
+  #mode {
+    left: 10px;
+  }
+  #clear {
+    left: 80px;
+  }
+  #save {
+    left: 150px;
+  }
+  #cursor {
+    left: 220px;
+  }
+  #texture {
+    left: 290px;
+  }
+  .noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+</style>
+</head>
+
+<body>
+  <!-- Canvas -->
+  <canvas id="canvas" class="noselect"></canvas>
+  <!-- Buttons -->
+  <div id="mode" class="button noselect">Mode</div>
+  <div id="clear" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/paper-24.png"/></div>
+  <div id="save" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/save-24.png"/></div>
+  <div id="cursor" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/plus-6-24.png"/></div>
+  <div id="texture" class="button noselect">Texturing</div>
+  <!-- Wacom plugin -->
+  <object id="wtPlugin" type="application/x-wacomtabletplugin">
+    <param name="onload" value="pluginLoaded"/>
+  </object>
+</body>
+
+<script type='text/javascript' src="ploma.r.js"></script>
+
+<script type="text/javascript">
+  "use strict";
+
+  // TEST
+  var elapsed;
+
+  // DOM
+  var canvas;
+  var mode;
+  var save;
+  var clear;
+  var cursor;
+  var texture;
+  var plugin;
+  var penAPI;
+  var extendStroke;
+
+  // State
+  var sampling = 2;
+  var ploma = null;
+  var w;// = 1300;
+  var h;// = 1000;
+  var isDrawing = false;
+
+  // Red Pixel
+  var r = new Uint8ClampedArray(16);
+  var rid;
+  r[0] = 255;
+  r[3] = 255;
+  r[4] = 255;
+  r[7] = 255;
+  r[8] = 255;
+  r[11] = 255;
+  r[12] = 255;
+  r[15] = 255;
+
+  /////////////
+  // ONLOAD
+  /////////////
+  window.onload = function() {
+
+    // load DOM elements
+    canvas = document.getElementById('canvas');
+    canvas.setAttribute('width', window.innerWidth);
+    canvas.setAttribute('height', window.innerHeight);
+    mode = document.getElementById('mode');
+    save = document.getElementById('save');
+    clear = document.getElementById('clear');
+    cursor = document.getElementById('cursor');
+    texture = document.getElementById('texture');
+    plugin = document.getElementById('wtPlugin');
+    penAPI = plugin.penAPI;
+    mode.innerHTML = sampling;
+    texture.innerHTML = "T";
+
+    // populate red pixel
+    rid = canvas.getContext('2d').createImageData(2, 2);
+    rid.data.set(r);
+
+    // load Ploma onto canvas and clear it
+    ploma = new Ploma(canvas);
+    ploma.clear();
+    extendStroke = ploma.extendStroke;
+
+    ////////////
+    // BUTTONS
+    ////////////
+    mode.onclick = function(e) {
+      sampling = (sampling === 2) ? 0 : sampling + 1;
+      ploma.setSample(sampling);
+      mode.innerHTML = sampling; 
+    }
+    save.onclick = function(e) {
+      window.open(canvas.toDataURL());
+    }
+    clear.onclick = function(e) {
+      ploma.clear();
+    }
+    cursor.onclick = function(e) {
+      // TODO: UPDATE CHECKBOX OR IMAGE ON BUTTON
+      if(canvas.style.cursor === 'none') {
+        canvas.style.cursor = 'crosshair';
+      } else {
+        canvas.style.cursor = 'none';
+      }
+    }
+    texture.onclick = function(e) {
+      ploma.toggleTexture();
+      if (texture.innerHTML === "T") {
+        texture.innerHTML = "N";
+      } else {
+        texture.innerHTML = "T";
+      }
+    }
+
+    ////////////
+    // RESIZE
+    ////////////
+    window.onresize = function(e) {
+      ploma.resize(window.innerWidth, window.innerHeight);
+    }
+
+    // bind device input events
+    /*if(window.PointerEvent) {
+      ///////////////////////////////////
+      // POINTER EVENT
+      ///////////////////////////////////
+      canvas.onpointerdown = function(e) {
+        ploma.beginStroke(
+          e.clientX,
+          e.clientY,
+          e.pressure
+        );
+        isDrawing = true;
+      }
+      canvas.onpointermove = function(e) {
+        if (!isDrawing) return;
+        ploma.extendStroke(
+          e.clientX,
+          e.clientY,
+          e.pressure
+        );
+      }
+      canvas.onpointerup = function(e) {
+        ploma.endStroke(
+          e.clientX,
+          e.clientY,
+          e.pressure
+        );
+        isDrawing = false;
+      }
+    } else {*/
+      ///////////////////////////////////
+      // MOUSE EVENT
+      ///////////////////////////////////
+      canvas.onmousedown = function(e) {
+        isDrawing = true;
+        if (sampling === 0) return;
+        ploma.beginStroke(
+          e.clientX,
+          e.clientY,
+          penAPI.pressure ? penAPI.pressure : 0.5
+        );
+      }
+      canvas.onmousemove = function(e) {
+        if (!isDrawing) return;
+        //elapsed = Date.now();
+        if (sampling === 0) {
+          //console.log(Date.now() - elapsed);
+          canvas.getContext('2d').putImageData(
+            rid,
+            e.clientX,
+            e.clientY,
+            0,
+            0,
+            2,
+            2
+          );
+          return;
+        }
+        ploma.extendStroke(
+          e.clientX,
+          e.clientY,
+          penAPI.pressure ? penAPI.pressure : 0.5
+        );
+      }
+      canvas.onmouseup = function(e) {
+        isDrawing = false;
+        if (sampling === 0) return;
+        ploma.endStroke(
+          e.clientX,
+          e.clientY,
+          penAPI.pressure ? penAPI.pressure : 0.5
+        );
+      }
+    //} 
+  }
+
+</script>
+
+</html>

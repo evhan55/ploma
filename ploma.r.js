@@ -304,9 +304,9 @@ var Ploma = function(canvas) {
   var filterWeightInverse = 1 - filterWeight;
   var stepOffset = 0.0;
   var stepInterval = 0.3;
-  var penR = 25;
+  var penR = 22;
   var penG = 08;
-  var penB = 45;
+  var penB = 42;
   var pointCounter = 0;
   var sample = 2;
   var applyRendering = true;
@@ -513,22 +513,22 @@ var Ploma = function(canvas) {
       width = -50.00;
     }
     if(p < 0.2) {
-      width = map(p, 0, 0.2, -50.00, -3.60);
+      width = map(p, 0, 0.2, -50.00, -3.00);
     } 
     if((p >= 0.2) && (p < 0.45)) {
-      width = map(p, 0.2, 0.45, -3.60, -2.50);
+      width = map(p, 0.2, 0.45, -3.00, -1.80);
     }
     if((p >= 0.45) && (p < 0.8)) {
-      width = map(p, 0.45, 0.8, -2.50, -1.70);
+      width = map(p, 0.45, 0.8, -1.80, -0.80);
     }
     if((p >= 0.8) && (p < 0.95)) {
-      width = map(p, 0.8, 0.95, -1.70, -1.55);
+      width = map(p, 0.8, 0.95, -0.80, -0.65);
     }
     if((p >= 0.95) && (p <= 1)) {
-      width = map(p, 0.95, 1, -1.55, -1.30);
+      width = map(p, 0.95, 1, -0.65, -0.40);
     }
     if(p > 1) { // Possible output from bezier
-      width = -1.30;
+      width = -0.40;
     }
 
     return width;
@@ -621,7 +621,7 @@ var Ploma = function(canvas) {
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
-        a = 5 * ((0.3 / (dist - width)) - 0.085);
+        a = applyRendering ? 5 * ((0.3 / (dist - width)) - 0.11) : (0.1 / (dist - p_p)) - 0.07;
 
         // Spike
         if(dist < width) {
@@ -648,7 +648,7 @@ var Ploma = function(canvas) {
         a *= applyRendering ? textureValue : 1;
 
         // Grain
-        var g = map(p_p, 0, 1, 0.8, 0.95);
+        var g = map(p_p, 0, 1, 0.7, 0.45);
         var prob = 1-(p_p*p_p*p_p*p_p*p_p); // 1 - x^4
         g = Math.floor(Math.random()*prob*2) === 1 ? 0 : g;
         a *= applyRendering ? g : 1;
