@@ -277,7 +277,7 @@ var Ploma = function(canvas) {
   var ctx = canvas.getContext('2d');
   var imageData = null;
   var imageDataData = new Uint8ClampedArray(w * h);
-  var paperColor = 'rgb(240, 235, 219)';
+  var paperColor = 'rgb(241, 238, 220)';
   //var paperColor = 'rgb(250, 240, 230)';
   //var paperColor = 'rgb(245, 230, 218)';
   w = canvas.getAttribute('width');
@@ -305,7 +305,7 @@ var Ploma = function(canvas) {
   var stepOffset = 0.0;
   var stepInterval = 0.3;
   var penR = 22;
-  var penG = 08;
+  var penG = 8;
   var penB = 42;
   var pointCounter = 0;
   var sample = 2;
@@ -621,7 +621,7 @@ var Ploma = function(canvas) {
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
-        a = applyRendering ? 5 * ((0.3 / (dist - width)) - 0.11) : (0.1 / (dist - p_p)) - 0.07;
+        a = applyRendering ? 5 * ((0.3 / (dist - width)) - 0.15) : (0.1 / (dist - p_p)) - 0.07;
 
         // Spike
         if(dist < width) {
@@ -645,13 +645,14 @@ var Ploma = function(canvas) {
         var textureValue = inkTextureImageDataGrays[x + y * inkTextureImage.width];
 
         // Apply texture
+        textureValue *= 0.4;
         a *= applyRendering ? textureValue : 1;
 
         // Grain
-        var g = map(p_p, 0, 1, 0.7, 0.45);
-        var prob = 1-(p_p*p_p*p_p*p_p*p_p); // 1 - x^4
-        g = Math.floor(Math.random()*prob*2) === 1 ? 0 : g;
-        a *= applyRendering ? g : 1;
+        //var g = map(p_p, 0, 1, 0.7, 0.3);
+        //var prob = 1-(p_p*p_p*p_p*p_p*p_p); // 1 - x^4
+        //g = Math.floor(Math.random()*prob*2) === 1 ? 0 : g;
+        //a *= applyRendering ? g : 1;
 
         // Blending vars
         invA = 1 - a;

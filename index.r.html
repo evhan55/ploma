@@ -67,9 +67,9 @@
   <canvas id="canvas" class="noselect"></canvas>
   <!-- Buttons -->
   <div id="mode" class="button noselect">Mode</div>
-  <div id="clear" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/paper-24.png"/></div>
-  <div id="save" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/save-24.png"/></div>
-  <div id="cursor" class="button noselect"><img src="http://www.iconsdb.com/icons/download/white/plus-6-24.png"/></div>
+  <div id="clear" class="button noselect"><!--<img src="http://www.iconsdb.com/icons/download/white/paper-24.png"/>--></div>
+  <div id="save" class="button noselect"><!--<img src="http://www.iconsdb.com/icons/download/white/save-24.png"/>--></div>
+  <div id="cursor" class="button noselect"><!--<img src="http://www.iconsdb.com/icons/download/white/plus-6-24.png"/>--></div>
   <div id="texture" class="button noselect">Texturing</div>
   <!-- Wacom plugin -->
   <object id="wtPlugin" type="application/x-wacomtabletplugin">
@@ -77,7 +77,20 @@
   </object>
 </body>
 
+<script type="text/javascript"/>
+  window.onload = function() {
+    console.log('hello');
+  }
+</script>
+
 <script type='text/javascript' src="ploma.r.js"></script>
+
+<script type="text/javascript"/>
+  window.onload = function() {
+    console.log('bye');
+  }
+</script>
+
 
 <script type="text/javascript">
   "use strict";
@@ -119,6 +132,8 @@
   // ONLOAD
   /////////////
   window.onload = function() {
+
+    console.log('hello?');
 
     // load DOM elements
     canvas = document.getElementById('canvas');
