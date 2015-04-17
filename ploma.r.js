@@ -516,19 +516,19 @@ var Ploma = function(canvas) {
       width = map(p, 0, 0.2, -50.00, -3.00);
     } 
     if((p >= 0.2) && (p < 0.45)) {
-      width = map(p, 0.2, 0.45, -3.00, -1.80);
+      width = map(p, 0.2, 0.45, -3.00, -1.00);
     }
     if((p >= 0.45) && (p < 0.8)) {
-      width = map(p, 0.45, 0.8, -1.80, -0.30);
+      width = map(p, 0.45, 0.8, -1.00, -0.10);
     }
     if((p >= 0.8) && (p < 0.95)) {
-      width = map(p, 0.8, 0.95, -0.20, 0.15);
+      width = map(p, 0.8, 0.95, -0.10, 0.20);
     }
     if((p >= 0.95) && (p <= 1)) {
-      width = map(p, 0.95, 1, 0.15, 0.32);
+      width = map(p, 0.95, 1, 0.20, 0.55);
     }
     if(p > 1) { // Possible output from bezier
-      width = 0.32;
+      width = 0.55;
     }
 
     return width;
@@ -646,7 +646,7 @@ var Ploma = function(canvas) {
         var textureValue = inkTextureImageDataGrays[x + y * inkTextureImage.width];
 
         // Apply texture
-        textureValue *= 0.3;
+        textureValue *= map(p_p*p_p, 0, 1, 0.32, 0.28);
         a *= applyRendering ? textureValue : 1;
 
         // Grain
