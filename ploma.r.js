@@ -277,7 +277,7 @@ var Ploma = function(canvas) {
   var ctx = canvas.getContext('2d');
   var imageData = null;
   var imageDataData = new Uint8ClampedArray(w * h);
-  var paperColor = 'rgb(241, 238, 220)';
+  var paperColor = 'rgb(240, 238, 220)';
   //var paperColor = 'rgb(250, 240, 230)';
   //var paperColor = 'rgb(245, 230, 218)';
   w = canvas.getAttribute('width');
@@ -519,16 +519,16 @@ var Ploma = function(canvas) {
       width = map(p, 0.2, 0.45, -3.00, -1.80);
     }
     if((p >= 0.45) && (p < 0.8)) {
-      width = map(p, 0.45, 0.8, -1.80, -0.80);
+      width = map(p, 0.45, 0.8, -1.80, -0.30);
     }
     if((p >= 0.8) && (p < 0.95)) {
-      width = map(p, 0.8, 0.95, -0.80, -0.65);
+      width = map(p, 0.8, 0.95, -0.20, 0.15);
     }
     if((p >= 0.95) && (p <= 1)) {
-      width = map(p, 0.95, 1, -0.65, -0.40);
+      width = map(p, 0.95, 1, 0.15, 0.32);
     }
     if(p > 1) { // Possible output from bezier
-      width = -0.40;
+      width = 0.32;
     }
 
     return width;
@@ -621,7 +621,8 @@ var Ploma = function(canvas) {
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
-        a = applyRendering ? 5 * ((0.3 / (dist - width)) - 0.15) : (0.1 / (dist - p_p)) - 0.07;
+        var test = 0.11 + 0.045*(p_p*p_p);
+        a = applyRendering ? 3.75 * ((0.3 / (dist - width)) - test) : (0.1 / (dist - p_p)) - 0.07;
 
         // Spike
         if(dist < width) {
@@ -645,7 +646,7 @@ var Ploma = function(canvas) {
         var textureValue = inkTextureImageDataGrays[x + y * inkTextureImage.width];
 
         // Apply texture
-        textureValue *= 0.4;
+        textureValue *= 0.3;
         a *= applyRendering ? textureValue : 1;
 
         // Grain
