@@ -519,16 +519,16 @@ var Ploma = function(canvas) {
       width = map(p, 0.2, 0.45, -3.00, -1.00);
     }
     if((p >= 0.45) && (p < 0.8)) {
-      width = map(p, 0.45, 0.8, -1.00, -0.10);
+      width = map(p, 0.45, 0.8, -1.00, 0.00);
     }
     if((p >= 0.8) && (p < 0.95)) {
-      width = map(p, 0.8, 0.95, -0.10, 0.20);
+      width = map(p, 0.8, 0.95,  0.00, 0.45);
     }
     if((p >= 0.95) && (p <= 1)) {
-      width = map(p, 0.95, 1, 0.20, 0.55);
+      width = map(p, 0.95, 1, 0.45, 0.60);
     }
     if(p > 1) { // Possible output from bezier
-      width = 0.55;
+      width = 0.60;
     }
 
     return width;
@@ -548,6 +548,7 @@ var Ploma = function(canvas) {
 
     var width = 0.0;
     width = calculateWidth(point.p);
+    width = -0.1;
 
     /////////////////////
     // LOOP
@@ -621,8 +622,8 @@ var Ploma = function(canvas) {
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
-        var test = 0.11 + 0.045*(p_p*p_p);
-        a = applyRendering ? 3.75 * ((0.3 / (dist - width)) - test) : (0.1 / (dist - p_p)) - 0.07;
+        //var test = 0.11 + 0.045*(p_p*p_p);
+        a = applyRendering ? (0.34 / (dist - 0.40)) - 0.18 : (0.1 / (dist - p_p)) - 0.07;
 
         // Spike
         if(dist < width) {
@@ -646,8 +647,10 @@ var Ploma = function(canvas) {
         var textureValue = inkTextureImageDataGrays[x + y * inkTextureImage.width];
 
         // Apply texture
-        textureValue *= map(p_p*p_p, 0, 1, 0.32, 0.28);
-        a *= applyRendering ? textureValue : 1;
+        textureValue *= 0.43;
+        //if(a === 1) {
+          a *= applyRendering ? textureValue : 1;
+        //}
 
         // Grain
         //var g = map(p_p, 0, 1, 0.7, 0.3);
