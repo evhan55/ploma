@@ -22,6 +22,69 @@ TODO: License
 //
 var Ploma = function(canvas) {
 
+  // TESTING
+  this.setA_SHADE = function(n) {
+    A_SHADE = n;
+    this.rerender();
+  }
+
+  this.setSTEP_VALUE = function(n) {
+    STEP_VALUE = n;
+    stepInterval = n;
+    this.rerender();
+  }
+
+  this.setSLOPE_VALUE = function(n) {
+    SLOPE_VALUE = n;
+    this.rerender();
+  }
+
+  this.setSHIFT_VALUE = function(n) {
+    SHIFT_VALUE = n;
+    this.rerender();
+  }
+
+  this.setWIDTH_TO_USE = function(n) {
+    WIDTH_TO_USE = n;
+    this.rerender();
+  }
+
+  this.rerender = function(){
+    // Deep copy the raw strokes
+    var originalStrokes = this.strokes();
+    var capturedRawStrokes = [];
+    for(var i = 0; i < originalStrokes.length; i++) {
+      capturedRawStrokes.push(originalStrokes[i]);
+    }
+
+    // Clear and set rendering to false
+    this.clear();
+    //applyRendering = !applyRendering;
+
+    // Redraw all the strokes
+    for(var i = 0; i < capturedRawStrokes.length; i++) {
+      var stroke = capturedRawStrokes[i];
+      this.beginStroke(
+        stroke[0].x,
+        stroke[0].y,
+        stroke[0].p
+      );
+      for(var j = 1; j < stroke.length-1; j++) {
+        this.extendStroke(
+          stroke[j].x,
+          stroke[j].y,
+          stroke[j].p
+        );
+      }
+      this.endStroke(
+        stroke[stroke.length-1].x,
+        stroke[stroke.length-1].y,
+        stroke[stroke.length-1].p
+      );
+    }
+  }
+  // END TESTING
+
   //////////////////////////////////////////////
   // PUBLIC
   //////////////////////////////////////////////
@@ -287,6 +350,14 @@ var Ploma = function(canvas) {
   imageData = ctx.getImageData(0, 0, w, h);
   imageDataData = imageData.data;
 
+  // TESTING
+  var STEP_VALUE = 2;
+  var SLOPE_VALUE = 0.56;
+  var SHIFT_VALUE = 0.26;
+  var A_SHADE = 0.85;
+  var WIDTH_TO_USE = 0.57;
+  // END TESTING
+
   // State
   var rawStrokes = [];
   var curRawStroke = [];
@@ -303,7 +374,7 @@ var Ploma = function(canvas) {
   var filterWeight = 0.5;
   var filterWeightInverse = 1 - filterWeight;
   var stepOffset = 0.0;
-  var stepInterval = 1.6;
+  var stepInterval = STEP_VALUE;
   var penR = 17;
   var penG = 3;
   var penB = 37;
@@ -548,7 +619,7 @@ var Ploma = function(canvas) {
 
     var width = 0.0;
     width = calculateWidth(point.p);
-    width = 0.8;
+    width = WIDTH_TO_USE;
 
     /////////////////////
     // LOOP
@@ -624,11 +695,20 @@ var Ploma = function(canvas) {
         // Antialiasing
         //var test = 0.11 + 0.045*(p_p*p_p);
         //a = applyRendering ? (0.55 / (dist - width)) - 0.39 : (0.40 / (dist - width)) - 0.3;
-        a = applyRendering ? (0.55 / (dist - width)) - 0.39 : (0.39 / (dist - width)) - 0.24;
+        a = applyRendering ? (0.55 / (dist - width)) - 0.39 : (SLOPE_VALUE / (dist - width)) - SHIFT_VALUE;
+        //a = 1 - (dist/2);
+        //a = width*dist*dist+1;
+        //a = -0.05*(dist+3)*(dist+3)+1.2
+        //a = 0.05*(dist-5)*(dist-5)-0.4
+        //a = 0.05*(dist-5.2)*(dist-5.2)-0.45
+        a = SLOPE_VALUE*(dist-5.4)*(dist-5.2)-SHIFT_VALUE
 
         // Spike
-        if(dist < width) {
-          a = 1;
+        //if(dist < width) {
+        //  a = 1;
+        //}
+        if(dist > 2.17) {
+          a = 0;
         }
         
         // Clamp alpha
@@ -649,10 +729,10 @@ var Ploma = function(canvas) {
 
         // Apply texture
         //textureValue *= 0.8;
-        if(a > 0.9) {
-          a *= applyRendering ? 0.9 : 0.9;
+        if(a > A_SHADE) {
+          a *= applyRendering ? 0.9 : A_SHADE;
         }
-        a *= textureValue;
+        //a *= textureValue;
 
         // Grain
         //var g = map(p_p, 0, 1, 0.7, 0.3);

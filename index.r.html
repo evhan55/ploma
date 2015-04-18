@@ -36,6 +36,23 @@
   .button img {
     margin-top: 13px;
   }
+  .sliders {
+    width: 800px;
+    padding: 5px;
+    position: absolute;
+    top: 600px;
+    left: 400px;
+    border: 1px #CCC solid;
+    cursor: none;
+    line-height: 45px;
+  }
+  .sliders input {
+    width: 600px;
+    cursor: none;
+  }
+  .sliders label {
+    cursor: none;
+  }
   #mode {
     left: 10px;
   }
@@ -71,25 +88,36 @@
   <div id="save" class="button noselect"><!--<img src="http://www.iconsdb.com/icons/download/white/save-24.png"/>--></div>
   <div id="cursor" class="button noselect"><!--<img src="http://www.iconsdb.com/icons/download/white/plus-6-24.png"/>--></div>
   <div id="texture" class="button noselect">Texturing</div>
+  <div id="sliders" class="sliders">
+    A_SHADE
+    <input onclick="updateA_SHADE()" id="a_shade" type="range" min="0" max="1" step="0.001" value="0.639"/>
+    <label id="a_shade_label">--</label>
+    <br>
+    STEP_VALUE
+    <input onclick="updateSTEP_VALUE()" id="step_value" type="range" min="0.1" max="4" step="0.001" value="1.713"/>
+    <label id="step_value_label">--</label>
+    <br>
+    WIDTH_TO_USE
+    <input onclick="updateWIDTH_TO_USE()" id="width_to_use" type="range" min="-7" max="2" step="0.001" value="-1.927"/>
+    <label id="width_to_use_label">--</label>
+    <br>
+    SLOPE_VALUE
+    <input onclick="updateSLOPE_VALUE()" id="slope_value" type="range" min="0" max="0.1" step="0.00001" value="0.05767"/>
+    <label id="slope_value_label">--</label>
+    <br>
+    SHIFT_VALUE
+    <input onclick="updateSHIFT_VALUE()" id="shift_value" type="range" min="-1" max="1" step="0.0005" value="0.55"/>
+    <label id="shift_value_label">--</label>
+    <br>
+    <!-- ANTI ALIASING FUNCTION: ( <label id='slope_value_label_2'>0.56</label> / ( x - <label id='width_to_use_label_2'>0.57</label> ) ) - <label id='shift_value_label_2'>0.26</label> -->
+  </div>
   <!-- Wacom plugin -->
   <object id="wtPlugin" type="application/x-wacomtabletplugin">
     <param name="onload" value="pluginLoaded"/>
   </object>
 </body>
 
-<script type="text/javascript"/>
-  window.onload = function() {
-    console.log('hello');
-  }
-</script>
-
 <script type='text/javascript' src="ploma.r.js"></script>
-
-<script type="text/javascript"/>
-  window.onload = function() {
-    console.log('bye');
-  }
-</script>
 
 
 <script type="text/javascript">
@@ -128,12 +156,40 @@
   r[12] = 255;
   r[15] = 255;
 
+  // SLIDERS
+  function updateA_SHADE() {
+    var val = document.getElementById('a_shade').value;
+    ploma.setA_SHADE(val);
+    document.getElementById("a_shade_label").innerHTML = val;
+  }
+  function updateSTEP_VALUE() {
+    var val = document.getElementById('step_value').value;
+    ploma.setSTEP_VALUE(val);
+    document.getElementById('step_value_label').innerHTML = val;
+  }
+  function updateSLOPE_VALUE() {
+    var val = document.getElementById('slope_value').value;
+    ploma.setSLOPE_VALUE(val);
+    document.getElementById('slope_value_label').innerHTML = val;
+    document.getElementById('slope_value_label_2').innerHTML = val;
+  }
+  function updateSHIFT_VALUE() {
+    var val = document.getElementById('shift_value').value;
+    ploma.setSHIFT_VALUE(val);
+    document.getElementById('shift_value_label').innerHTML = val;
+    document.getElementById('shift_value_label_2').innerHTML = val;
+  }
+  function updateWIDTH_TO_USE() {
+    var val = document.getElementById('width_to_use').value;
+    ploma.setWIDTH_TO_USE(val);
+    document.getElementById('width_to_use_label').innerHTML = val;
+    document.getElementById('width_to_use_label_2').innerHTML = val;
+  }
+
   /////////////
   // ONLOAD
   /////////////
   window.onload = function() {
-
-    console.log('hello?');
 
     // load DOM elements
     canvas = document.getElementById('canvas');
@@ -186,6 +242,17 @@
         texture.innerHTML = "N";
       } else {
         texture.innerHTML = "T";
+      }
+    }
+
+    ////////////
+    // KEYBOARD
+    ////////////
+    window.onkeydown = function(e) {
+      // 'A' to toggle antialiasing function sliders
+      if(e.keyCode === 65) {
+        var hidden = (document.getElementById("sliders").style["display"] === "none");
+        document.getElementById("sliders").style["display"] = hidden ? "inline" : "none";
       }
     }
 
@@ -270,6 +337,27 @@
         );
       }
     //} 
+
+    // HACK
+    ploma.toggleTexture();
+    if (texture.innerHTML === "T") {
+      texture.innerHTML = "N";
+    } else {
+      texture.innerHTML = "T";
+    }
+    ploma.setA_SHADE(document.getElementById('a_shade').value);
+    ploma.setSTEP_VALUE(document.getElementById('step_value').value);
+    ploma.setSLOPE_VALUE(document.getElementById('slope_value').value);
+    ploma.setSHIFT_VALUE(document.getElementById('shift_value').value);
+    ploma.setWIDTH_TO_USE(document.getElementById('width_to_use').value);
+    document.getElementById('a_shade_label').innerHTML = document.getElementById('a_shade').value;
+    document.getElementById('step_value_label').innerHTML = document.getElementById('step_value').value;
+    document.getElementById('slope_value_label').innerHTML = document.getElementById('slope_value').value;
+    document.getElementById('shift_value_label').innerHTML = document.getElementById('shift_value').value;
+    document.getElementById('width_to_use_label').innerHTML = document.getElementById('width_to_use').value;
+    document.getElementById('slope_value_label_2').innerHTML = document.getElementById('slope_value').value;
+    document.getElementById('shift_value_label_2').innerHTML = document.getElementById('shift_value').value;
+    document.getElementById('width_to_use_label_2').innerHTML = document.getElementById('width_to_use').value;
   }
 
 </script>
