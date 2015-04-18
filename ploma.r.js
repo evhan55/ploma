@@ -623,7 +623,7 @@ var Ploma = function(canvas) {
 
         // Antialiasing
         //var test = 0.11 + 0.045*(p_p*p_p);
-        a = applyRendering ? (0.34 / (dist - 0.40)) - 0.18 : (0.1 / (dist - p_p)) - 0.07;
+        a = applyRendering ? (0.38 / (dist - 0.40)) - 0.22 : (0.1 / (dist - p_p)) - 0.07;
 
         // Spike
         if(dist < width) {
@@ -647,7 +647,7 @@ var Ploma = function(canvas) {
         var textureValue = inkTextureImageDataGrays[x + y * inkTextureImage.width];
 
         // Apply texture
-        textureValue *= 0.43;
+        textureValue *= 0.45;
         //if(a === 1) {
           a *= applyRendering ? textureValue : 1;
         //}
