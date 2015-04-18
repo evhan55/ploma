@@ -303,7 +303,7 @@ var Ploma = function(canvas) {
   var filterWeight = 0.5;
   var filterWeightInverse = 1 - filterWeight;
   var stepOffset = 0.0;
-  var stepInterval = 0.47;
+  var stepInterval = 0.75;
   var penR = 22;
   var penG = 8;
   var penB = 42;
@@ -548,7 +548,7 @@ var Ploma = function(canvas) {
 
     var width = 0.0;
     width = calculateWidth(point.p);
-    width = -0.1;
+    width = 0.25;
 
     /////////////////////
     // LOOP
@@ -623,7 +623,7 @@ var Ploma = function(canvas) {
 
         // Antialiasing
         //var test = 0.11 + 0.045*(p_p*p_p);
-        a = applyRendering ? (0.55 / (dist - width)) - 0.39 : (0.35 / (dist - width)) - 0.17;
+        a = applyRendering ? (0.55 / (dist - width)) - 0.39 : (0.40 / (dist - width)) - 0.21;
 
         // Spike
         if(dist < width) {
