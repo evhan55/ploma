@@ -711,10 +711,10 @@ var Ploma = function(canvas) {
         textureSampleStep = (textureSampleStep === textureSampleLocations.length - 1) ? 0 : (textureSampleStep + 1);
 
         // Scale texture a bit
-        if(t < 0.2) {
-          t *= 0.5;
-        }
-        t *= map(p_p, 0, 1, 0.5, 1.4);
+        //if(t < 0.2) {
+        //  t *= 0.5;
+        //}
+        //t *= map(p_p, 0, 1, 0.5, 1.4);
         //if(t < 0.1) {
         //  t *= 0.9;
         //} else {
