@@ -54,6 +54,7 @@
   }
   .sliders label {
     cursor: none;
+    background: white;
   }
   #mode {
     left: 10px;
@@ -103,25 +104,25 @@
   <div id="cursor" class="button noselect"><!--<img src="http://www.iconsdb.com/icons/download/white/plus-6-24.png"/>--></div>
   <div id="texture" class="button noselect">-</div>
   <a id="download" download="PlomaImage.png">Download as image</a>
-  <div id="sliders" class="sliders">
-    A_SHADE
-    <input onclick="updateA_SHADE()" id="a_shade" type="range" min="0" max="1" step="0.001" value="0.707"/>
+  <div id="sliders" class="sliders noselect">
+    <!--<span style="background:rgba(255, 255, 255, 0.8); padding:5px; border-radius: 5px;">-->A_SHADE
+    <input oninput="updateA_SHADE()" id="a_shade" type="range" min="0" max="1" step="0.001" value="0.834"/>
     <label id="a_shade_label">--</label>
     <br>
     STEP_VALUE
-    <input onclick="updateSTEP_VALUE()" id="step_value" type="range" min="0.1" max="4" step="0.001" value="0.833"/>
+    <input oninput="updateSTEP_VALUE()" id="step_value" type="range" min="0.1" max="4" step="0.001" value="0.833"/>
     <label id="step_value_label">--</label>
     <br>
     WIDTH_TO_USE
-    <input onclick="updateWIDTH_TO_USE()" id="width_to_use" type="range" min="-7" max="2" step="0.001" value="-1.927"/>
+    <input oninput="updateWIDTH_TO_USE()" id="width_to_use" type="range" min="-7" max="2" step="0.001" value="-1.927"/>
     <label id="width_to_use_label">--</label>
     <br>
     SLOPE_VALUE
-    <input onclick="updateSLOPE_VALUE()" id="slope_value" type="range" min="0" max="0.1" step="0.00001" value="0.0599"/>
+    <input oninput="updateSLOPE_VALUE()" id="slope_value" type="range" min="0" max="0.1" step="0.00001" value="0.0599"/>
     <label id="slope_value_label">--</label>
     <br>
     SHIFT_VALUE
-    <input onclick="updateSHIFT_VALUE()" id="shift_value" type="range" min="-1" max="1" step="0.0005" value="0.644"/>
+    <input oninput="updateSHIFT_VALUE()" id="shift_value" type="range" min="-1" max="1" step="0.0005" value="0.644"/>
     <label id="shift_value_label">--</label>
     <br>
     <!--ANTI ALIASING FUNCTION: ( <label id='slope_value_label_2'>0.56</label> / ( x - <label id='width_to_use_label_2'>0.57</label> ) ) - <label id='shift_value_label_2'>0.26</label>-->
@@ -365,12 +366,12 @@
     //} 
 
     // HACK
-    ploma.toggleTexture();
-    if (texture.innerHTML === "T") {
-      texture.innerHTML = "N";
-    } else {
-      texture.innerHTML = "T";
-    }
+    //ploma.toggleTexture();
+    //if (texture.innerHTML === "T") {
+    //  texture.innerHTML = "N";
+    //} else {
+    //  texture.innerHTML = "T";
+    //}
     ploma.setA_SHADE(document.getElementById('a_shade').value);
     ploma.setSTEP_VALUE(document.getElementById('step_value').value);
     ploma.setSLOPE_VALUE(document.getElementById('slope_value').value);
