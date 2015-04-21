@@ -37,7 +37,6 @@
     margin-top: 13px;
   }
   .sliders {
-    width: 820px;
     padding: 10px;
     position: absolute;
     top: 360px;
@@ -65,7 +64,7 @@
   }
   .sliders label.title {
     display: inline-block;
-    width: 80px;
+    width: 95px;
     font-family: sans-serif;
     color: white;
     margin-left: 8px;
@@ -77,6 +76,18 @@
     text-align: center;
     font-family: sans-serif;
     font-size: 16px;
+  }
+  #reset {
+    background: rgb(88, 88, 88);
+    border-radius: 5px;
+    padding: 7px 10px;
+    margin: 0 auto;
+    border-bottom: 1px solid #222;
+    border-left: 1px solid #222;
+  }
+  a#reset:active {
+    border-bottom: none;
+    border-left: none;
   }
   #save {
     top: 10px;
@@ -108,6 +119,44 @@
     -ms-user-select: none;
     user-select: none;
   }
+
+  .jxgbox {
+    /* for IE 7 */
+    position: relative;
+    overflow: hidden;
+    background-color: #ffffff;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #356AA0;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -ms-touch-action: none;
+    cursor: pointer;
+    margin: 0 auto;
+  }
+
+  .JXGtext {
+      /* May produce artefacts in IE. Solution: setting a color explicitly. */
+      background-color: transparent;
+      font-family: Arial, Helvetica, Geneva, sans-serif;
+      padding: 0;
+      margin: 0;
+  }
+
+  .JXGinfobox {
+      border-style: none;
+      border-width: 1px;
+      border-color: black;
+  }
+
+  .JXGimage {
+      opacity: 1.0;
+  }
+
+  .JXGimageHighlight {
+      opacity: 0.6;
+  }
+
 </style>
 </head>
 
@@ -122,30 +171,49 @@
   <div id="mode" class="button noselect"><img src="img/polyline-24-2.png"/></div>
   <a id="download" download="PlomaImage.png">Download as image</a>
   <div id="sliders" class="sliders noselect">
-    <!--<span style="background:rgba(255, 255, 255, 0.8); padding:5px; border-radius: 5px;">-->
-    <!--<label class="title">A_SHADE</label>
-    <input onchange="updateA_SHADE()" id="a_shade" type="range" min="0" max="1" step="0.001" value="0.95"/>
-    <label id="a_shade_label">--</label>
-    <br>-->
-    <!--<br>
-    <label class="title">WIDTH_TO_USE</label>
-    <input oninput="updateWIDTH_TO_USE()" id="width_to_use" type="range" min="-7" max="2" step="0.001" value="-1.927"/>
-    <label id="width_to_use_label">--</label>-->
+
+    <div id="box" class="jxgbox" style="width:600px; height:300px;"></div>
 
     <div id="function"><label id='slope_value_label_2'>0.0599</label>  * ( x - 5.6 ) ^ 2 - <label id='shift_value_label_2'>0.644</label></div>
+
     <label class="title">SLOPE</label>
-    <input onchange="updateSLOPE_VALUE()" id="slope_value" type="range" min="0" max="0.1" step="0.00001" value="0.06177"/>
+    <input onchange="updateSLOPE_VALUE()" id="slope_value" type="range" min="0" max="0.5" step="0.00001"/>
     <label id="slope_value_label">--</label>
+
     <br>
-    <label class="title">SHIFT</label>
-    <input onchange="updateSHIFT_VALUE()" id="shift_value" type="range" min="-1" max="1" step="0.0005" value="0.677"/>
+
+    <label class="title">SHIFT Y</label>
+    <input onchange="updateSHIFT_VALUE()" id="shift_value" type="range" min="-1" max="4" step="0.0005"/>
     <label id="shift_value_label">--</label>
-    <br>
+
     <hr style="background-color: #444; height: 1px; border-color: #7C7C7C;">
+
     <label class="title">STEP</label>
-    <input onchange="updateSTEP_VALUE()" id="step_value" type="range" min="0.1" max="4" step="0.001" value="0.833"/>
+    <input onchange="updateSTEP_VALUE()" id="step_value" type="range" min="0.1" max="4" step="0.001"/>
     <label id="step_value_label">--</label>
-    <!--ANTI ALIASING FUNCTION: ( <label id='slope_value_label_2'>0.56</label> / ( x - <label id='width_to_use_label_2'>0.57</label> ) ) - <label id='shift_value_label_2'>0.26</label>-->
+
+    <br>
+
+    <label class="title">INK FLOW</label>
+    <input onchange="updateA_SHADE()" id="a_shade" type="range" min="0" max="1" step="0.001"/>
+    <label id="a_shade_label">--</label>
+
+    <br>
+
+    <label class="title">THICKNESS</label>
+    <input oninput="updateWIDTH_TO_USE()" id="width_to_use" type="range" min="0" max="1.5" step="0.0005"/>
+    <label id="width_to_use_label">--</label>
+
+    <hr style="background-color: #444; height: 1px; border-color: #7C7C7C;">
+
+    <center>
+
+    <a id='reset' onclick='resetValues()'>Reset All</a>
+
+    </center>
+
+  
+
   </div>
   <!-- Wacom plugin -->
   <object id="wtPlugin" type="application/x-wacomtabletplugin">
@@ -153,6 +221,7 @@
   </object>
 </body>
 
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.3/jsxgraphcore.js"></script>
 <script type='text/javascript' src="ploma.r.js"></script>
 
 
@@ -179,6 +248,9 @@
   var w;// = 1300;
   var h;// = 1000;
   var isDrawing = false;
+
+  // Plot
+  var board;
 
   // Red Pixel
   var r = new Uint8ClampedArray(16);
@@ -208,18 +280,57 @@
     ploma.setSLOPE_VALUE(val);
     document.getElementById('slope_value_label').innerHTML = val;
     document.getElementById('slope_value_label_2').innerHTML = val;
+    updatePlot();
   }
   function updateSHIFT_VALUE() {
     var val = document.getElementById('shift_value').value;
     ploma.setSHIFT_VALUE(val);
     document.getElementById('shift_value_label').innerHTML = val;
     document.getElementById('shift_value_label_2').innerHTML = val;
+    updatePlot();
   }
   function updateWIDTH_TO_USE() {
     var val = document.getElementById('width_to_use').value;
     ploma.setWIDTH_TO_USE(val);
     document.getElementById('width_to_use_label').innerHTML = val;
-    document.getElementById('width_to_use_label_2').innerHTML = val;
+    //document.getElementById('width_to_use_label_2').innerHTML = val;
+  }
+  function resetValues() {
+    var defaultA_SHADE = 0.75;
+    var defaultSTEP_VALUE = 0.833;
+    var defaultSLOPE_VALUE = 0.06177;
+    var defaultSHIFT_VALUE = 0.677;
+    var defaultWIDTH_TO_USE = 1.056;
+    document.getElementById('a_shade').value = defaultA_SHADE;
+    document.getElementById('step_value').value = defaultSTEP_VALUE;
+    document.getElementById('slope_value').value = defaultSLOPE_VALUE;
+    document.getElementById('shift_value').value = defaultSHIFT_VALUE;
+    document.getElementById('width_to_use').value = defaultWIDTH_TO_USE;
+    ploma.setA_SHADE(document.getElementById('a_shade').value);
+    ploma.setSTEP_VALUE(document.getElementById('step_value').value);
+    ploma.setSLOPE_VALUE(document.getElementById('slope_value').value);
+    ploma.setSHIFT_VALUE(document.getElementById('shift_value').value);
+    ploma.setWIDTH_TO_USE(document.getElementById('width_to_use').value);
+    document.getElementById('a_shade_label').innerHTML = document.getElementById('a_shade').value;
+    document.getElementById('step_value_label').innerHTML = document.getElementById('step_value').value;
+    document.getElementById('slope_value_label').innerHTML = document.getElementById('slope_value').value;
+    document.getElementById('shift_value_label').innerHTML = document.getElementById('shift_value').value;
+    document.getElementById('width_to_use_label').innerHTML = document.getElementById('width_to_use').value;
+    document.getElementById('slope_value_label_2').innerHTML = document.getElementById('slope_value').value;
+    document.getElementById('shift_value_label_2').innerHTML = document.getElementById('shift_value').value;
+    //document.getElementById('width_to_use_label_2').innerHTML = document.getElementById('width_to_use').value;
+    updatePlot();
+  }
+
+  // PLOT
+  function updatePlot() {
+    if(board) {
+      JXG.JSXGraph.freeBoard(board);
+    }
+    board = JXG.JSXGraph.initBoard('box',{originX:200, originY:200, unitX:0.5, unitY:0.5, axis:true, zoomfactor: 150, showCopyright: false});
+    var slope = document.getElementById('slope_value').value;
+    var shift = document.getElementById('shift_value').value;
+    var curve = board.create('functiongraph',[function(x){return (slope * (x - 5.6) * (x - 5.6) - shift);}, -30, 30]);
   }
 
   /////////////
@@ -247,6 +358,10 @@
     ploma = new Ploma(canvas);
     ploma.clear();
     extendStroke = ploma.extendStroke;
+
+    // reset slider and plot values
+    resetValues();
+    updatePlot();
 
     ////////////
     // BUTTONS
@@ -304,6 +419,7 @@
       if(e.keyCode === 65) {
         var hidden = document.getElementById("sliders").offsetParent === null;
         document.getElementById("sliders").style["display"] = hidden ? "inline" : "none";
+        board.fullUpdate();
       }
       if(e.keyCode === 83) {
         document.getElementById('download').click();
@@ -393,26 +509,7 @@
       }
     //} 
 
-    // HACK
-    //ploma.toggleTexture();
-    //if (texture.innerHTML === "T") {
-    //  texture.innerHTML = "N";
-    //} else {
-    //  texture.innerHTML = "T";
-    //}
-    //ploma.setA_SHADE(document.getElementById('a_shade').value);
-    ploma.setSTEP_VALUE(document.getElementById('step_value').value);
-    ploma.setSLOPE_VALUE(document.getElementById('slope_value').value);
-    ploma.setSHIFT_VALUE(document.getElementById('shift_value').value);
-    //ploma.setWIDTH_TO_USE(document.getElementById('width_to_use').value);
-    //document.getElementById('a_shade_label').innerHTML = document.getElementById('a_shade').value;
-    document.getElementById('step_value_label').innerHTML = document.getElementById('step_value').value;
-    document.getElementById('slope_value_label').innerHTML = document.getElementById('slope_value').value;
-    document.getElementById('shift_value_label').innerHTML = document.getElementById('shift_value').value;
-    //document.getElementById('width_to_use_label').innerHTML = document.getElementById('width_to_use').value;
-    document.getElementById('slope_value_label_2').innerHTML = document.getElementById('slope_value').value;
-    document.getElementById('shift_value_label_2').innerHTML = document.getElementById('shift_value').value;
-    //document.getElementById('width_to_use_label_2').innerHTML = document.getElementById('width_to_use').value;
+
   }
 
 </script>
