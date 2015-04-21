@@ -593,13 +593,13 @@ var Ploma = function(canvas) {
       width = map(p, 0.45, 0.8, 4.4, 5.1);
     }
     if((p >= 0.8) && (p < 0.95)) {
-      width = map(p, 0.8, 0.95, 5.1, 5.2);
+      width = map(p, 0.8, 0.95, 5.1, 5.3);
     }
     if((p >= 0.95) && (p <= 1)) {
-      width = map(p, 0.95, 1, 5.2, 5.4);
+      width = map(p, 0.95, 1, 5.3, 5.6);
     }
     if(p > 1) { // Possible output from bezier
-      width = 5.4;
+      width = 5.6;
     }
 
     return width;
