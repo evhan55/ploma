@@ -579,7 +579,7 @@ var Ploma = function(canvas) {
   //
   function calculateWidth(p) {
     var width = 0.0;
-    //console.log(p);
+    console.log(p);
 
     var f = WIDTH_TO_USE;
 
@@ -587,22 +587,22 @@ var Ploma = function(canvas) {
       width = 0.2*f;
     }
     if(p < 0.2) {
-      width = map(p, 0, 0.2, 0.2*f, 3.3*f);
+      width = map(p, 0, 0.2, 0.2*f, 2.0*f);
     } 
     if((p >= 0.2) && (p < 0.45)) {
-      width = map(p, 0.2, 0.45, 3.3*f, 4.4*f);
+      width = map(p, 0.2, 0.45, 2.0*f, 3.90*f);
     }
     if((p >= 0.45) && (p < 0.8)) {
-      width = map(p, 0.45, 0.8, 4.4*f, 5*f);
+      width = map(p, 0.45, 0.8, 3.90*f, 4.90*f);
     }
     if((p >= 0.8) && (p < 0.97)) {
-      width = map(p, 0.8, 0.95, 5*f, 5.15*f);
+      width = map(p, 0.8, 0.95, 4.90*f, 5.05*f);
     }
-    if((p >= 0.97) && (p <= 1)) {
-      width = map(p, 0.95, 1, 5.15*f, 5.40*f);
+    if((p >= 0.97) && (p < 1)) {
+      width = map(p, 0.95, 1, 5.05*f, 5.05*f);
     }
-    if(p > 1) { // Possible output from bezier
-      width = 5.40*f;
+    if(p >= 1) { // Possible output from bezier
+      width = 5.45*f;
     }
 
     return width;
@@ -709,24 +709,19 @@ var Ploma = function(canvas) {
         if (a >= 1) a = 1;
 
         // Clamp alpha by ink flow
-        //A_SHADE = A_SHADE *0.9;
-        var flow = (p_p > 0.5) ? A_SHADE : A_SHADE * map(p_p, 0, 1, 0.2, 0.4);
-        //console.log('shade: ' + A_SHADE);
+        var flow = (p_p > 0.5) ? A_SHADE : A_SHADE * map(p_p, 0, 0.5, 0, 0.3);
         if(a > flow) {
           a = flow;
         }
 
-        // Get texture sample at medium-to-heavy touches
-        //var t = map(p_p, 0, 0.4, 0, 1);
+        // Get texture sample
         var t = inkTextureSamples[textureSampleStep];
         textureSampleStep = (textureSampleStep === textureSampleLocations.length - 1) ? 0 : (textureSampleStep + 1);
+
+        // Zero-out the texture for light touches
         if(p_p < 0.4) {
           t = 0.5;
         }
-        //if(p_p > 0.4) {
-        //  t = inkTextureSamples[textureSampleStep];
-        //  textureSampleStep = (textureSampleStep === textureSampleLocations.length - 1) ? 0 : (textureSampleStep + 1);
-        //}
 
         // Apply texture
         //a *= applyRendering ? t : 1;
@@ -736,14 +731,14 @@ var Ploma = function(canvas) {
         var g = 1;
         //var prob = 1 - p_p*p_p*p_p*p_p; // 1 - x^4
         //g = Math.floor(Math.random() * prob * 2) === 0 ? g : 1;
-        if(p_p < 0.55) {
-          if(Math.floor(Math.random() * map(p_p, 0, 0.55, 3.5, 6.5)) === 0) {
+        if(p_p < 0.6) {
+          if(Math.floor(Math.random() * map(p_p, 0, 0.6, 0, 2)) === 0) {
             //g = Math.random()*map(p_p, 0, 0.4, 0, 0);
-            g = 0;
+            g = map(p_p, 0, 0.5, 0, 0.2);
           }
         }
         //a *= applyRendering ? g : 1;
-        a *= g;
+        //a *= g;
 
         // Blending vars
         invA = 1 - a;
