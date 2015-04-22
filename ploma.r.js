@@ -579,15 +579,15 @@ var Ploma = function(canvas) {
   //
   function calculateWidth(p) {
     var width = 0.0;
-    console.log(p);
+    //console.log(p);
 
     var f = WIDTH_TO_USE;
 
     if(p < 0) { // Possible output from bezier
-      width = 0.2*f;
+      width = 0.8*f;
     }
     if(p < 0.2) {
-      width = map(p, 0, 0.2, 0.2*f, 2.0*f);
+      width = map(p, 0, 0.2, 0.8*f, 2.0*f);
     } 
     if((p >= 0.2) && (p < 0.45)) {
       width = map(p, 0.2, 0.45, 2.0*f, 3.90*f);
@@ -596,14 +596,16 @@ var Ploma = function(canvas) {
       width = map(p, 0.45, 0.8, 3.90*f, 4.90*f);
     }
     if((p >= 0.8) && (p < 0.97)) {
-      width = map(p, 0.8, 0.95, 4.90*f, 5.05*f);
+      width = map(p, 0.8, 0.95, 4.90*f, 4.95*f);
     }
     if((p >= 0.97) && (p < 1)) {
-      width = map(p, 0.95, 1, 5.05*f, 5.05*f);
+      width = map(p, 0.95, 1, 4.95*f, 4.95*f);
     }
     if(p >= 1) { // Possible output from bezier
-      width = 5.45*f;
+      width = 5.25*f;
     }
+
+    //width = 5.2*f;
 
     return width;
   }
@@ -697,7 +699,13 @@ var Ploma = function(canvas) {
         idx_0 = idx_0_i + j * w_4;
 
         // Antialiasing
-        a = SLOPE_VALUE * (dist - width) * (dist - width) - SHIFT_VALUE
+        //var sl = map(p_p, 0, 1, SLOPE_VALUE/2, SLOPE_VALUE);
+        //var sh = map(p_p, 0, 1, SHIFT_VALUE/3.5, SHIFT_VALUE);
+        //var sl = (p_p < 0.4) ? SLOPE_VALUE/2 : SLOPE_VALUE;
+        //var sh = (p_p < 0.4) ? SHIFT_VALUE/3.5 : SHIFT_VALUE;
+        var sl = SLOPE_VALUE;
+        var sh = SHIFT_VALUE;
+        a = sl * (dist - width) * (dist - width) - sh;
 
         // Dip
         if(dist > width) {
@@ -706,7 +714,7 @@ var Ploma = function(canvas) {
         
         // Clamp alpha
         if (a < 0) a = 0;
-        if (a >= 1) a = 1;
+        //if (a >= 1) a = 1;
 
         // Clamp alpha by ink flow
         var flow = (p_p > 0.5) ? A_SHADE : A_SHADE * map(p_p, 0, 0.5, 0, 0.3);
@@ -719,25 +727,23 @@ var Ploma = function(canvas) {
         textureSampleStep = (textureSampleStep === textureSampleLocations.length - 1) ? 0 : (textureSampleStep + 1);
 
         // Zero-out the texture for light touches
-        if(p_p < 0.4) {
+        if(p_p < 0.6) {
           t = 0.5;
         }
 
         // Apply texture
-        //a *= applyRendering ? t : 1;
-        a *= t;
+        a *= applyRendering ? t : 1;
+        //a *= t;
 
         // Apply grain
         var g = 1;
-        //var prob = 1 - p_p*p_p*p_p*p_p; // 1 - x^4
-        //g = Math.floor(Math.random() * prob * 2) === 0 ? g : 1;
         if(p_p < 0.6) {
-          if(Math.floor(Math.random() * map(p_p, 0, 0.6, 0, 2)) === 0) {
-            //g = Math.random()*map(p_p, 0, 0.4, 0, 0);
-            g = map(p_p, 0, 0.5, 0, 0.2);
+          if(Math.floor(Math.random() * map(p_p, 0, 0.6, 0, 3)) === 0) {
+            g = map(p_p, 0, 0.6, 0, 0.3);
+            //g = 0;
           }
         }
-        //a *= applyRendering ? g : 1;
+        a *= applyRendering ? g : 1;
         //a *= g;
 
         // Blending vars

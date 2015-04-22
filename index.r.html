@@ -195,13 +195,13 @@
     <br>
 
     <label class="title">INK FLOW</label>
-    <input onchange="updateA_SHADE()" id="a_shade" type="range" min="0" max="1" step="0.001"/>
+    <input onchange="updateA_SHADE()" id="a_shade" type="range" min="0" max="3" step="0.001"/>
     <label id="a_shade_label">--</label>
 
     <br>
 
     <label class="title">THICKNESS</label>
-    <input oninput="updateWIDTH_TO_USE()" id="width_to_use" type="range" min="0" max="1.5" step="0.0005"/>
+    <input onchange="updateWIDTH_TO_USE()" id="width_to_use" type="range" min="0.8" max="1.5" step="0.0005"/>
     <label id="width_to_use_label">--</label>
 
     <hr style="background-color: #444; height: 1px; border-color: #7C7C7C;">
@@ -296,10 +296,10 @@
     //document.getElementById('width_to_use_label_2').innerHTML = val;
   }
   function resetValues() {
-    var defaultA_SHADE = 0.75;
-    var defaultSTEP_VALUE = 0.833;
     var defaultSLOPE_VALUE = 0.06177;
     var defaultSHIFT_VALUE = 0.677;
+    var defaultSTEP_VALUE = 0.833;
+    var defaultA_SHADE = 1.234;
     var defaultWIDTH_TO_USE = 1.056;
     document.getElementById('a_shade').value = defaultA_SHADE;
     document.getElementById('step_value').value = defaultSTEP_VALUE;
