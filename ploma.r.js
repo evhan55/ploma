@@ -584,13 +584,13 @@ var Ploma = function(canvas) {
     var f = WIDTH_TO_USE;
 
     if(p < 0) { // Possible output from bezier
-      width =2.5*f;
+      width = 2.9*f;
     }
     if(p < 0.2) {
-      width = map(p, 0, 0.2, 2.5*f, 4*f);
+      width = map(p, 0, 0.2, 2.9*f, 4.4*f);
     } 
     if((p >= 0.2) && (p < 0.45)) {
-      width = map(p, 0.2, 0.45, 4*f, 4.8*f);
+      width = map(p, 0.2, 0.45, 4.4*f, 4.8*f);
     }
     if((p >= 0.45) && (p < 0.8)) {
       width = map(p, 0.45, 0.8, 4.8*f, 5*f);
@@ -599,10 +599,10 @@ var Ploma = function(canvas) {
       width = map(p, 0.8, 0.95, 5*f, 5.15*f);
     }
     if((p >= 0.97) && (p <= 1)) {
-      width = map(p, 0.95, 1, 5.15*f, 5.40*f);
+      width = map(p, 0.95, 1, 5.15*f, 5.30*f);
     }
     if(p > 1) { // Possible output from bezier
-      width = 5.40*f;
+      width = 5.30*f;
     }
 
     return width;
@@ -711,16 +711,17 @@ var Ploma = function(canvas) {
 
         // Clamp alpha by ink flow
         //A_SHADE = A_SHADE *0.9;
-        //var flow = (p_p > 0.5) ? A_SHADE : A_SHADE * map(p_p, 0, 1, 0.2, 0.4);
+        var flow = (p_p > 0.5) ? 1 : 1 * map(p_p, 0, 0.5, 0, 1);
         //console.log('shade: ' + A_SHADE);
-        //if(a > A_SHADE) {
-        //  a = A_SHADE;
-        //}
+        if(a > flow) {
+          a = flow;
+        }
 
         // Get texture sample at medium-to-heavy touches
         //var t = map(p_p, 0, 0.4, 0, 1);
         var t = inkTextureSamples[textureSampleStep];
         textureSampleStep = (textureSampleStep === textureSampleLocations.length - 1) ? 0 : (textureSampleStep + 1);
+        t *= A_SHADE;
         //if(p_p < 0.4) {
         //  t = 0.5;
         //}
@@ -731,6 +732,13 @@ var Ploma = function(canvas) {
 
         // Apply texture
         //a *= applyRendering ? t : 1;
+        if(p_p < 0.3) {
+          t = 0.5;
+          if(Math.floor(Math.random() * map(p_p, 0, 0.3, 2.5, 3.5)) === 0) {
+            t *= Math.random()*map(p_p, 0, 0.3, 0, 0.5);
+            //g = 0;
+          }
+        }
         a *= t;
 
         // Apply grain
@@ -744,7 +752,7 @@ var Ploma = function(canvas) {
           }
         }
         //a *= applyRendering ? g : 1;
-        a *= g;
+        //a *= g;
 
         // Blending vars
         invA = 1 - a;

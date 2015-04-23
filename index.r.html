@@ -28,7 +28,7 @@
     font-size: 24px;
     background: rgba(50, 50, 50, 0.9);
     color: white;
-    cursor: pointer;
+    cursor: none;
     border-radius: 2px;
     line-height: 50px;
     text-align: center;
@@ -195,7 +195,7 @@
     <br>
 
     <label class="title">INK FLOW</label>
-    <input onchange="updateA_SHADE()" id="a_shade" type="range" min="0" max="1" step="0.001"/>
+    <input onchange="updateA_SHADE()" id="a_shade" type="range" min="0" max="3" step="0.001"/>
     <label id="a_shade_label">--</label>
 
     <br>
@@ -296,7 +296,7 @@
     //document.getElementById('width_to_use_label_2').innerHTML = val;
   }
   function resetValues() {
-    var defaultA_SHADE = 0.75;
+    var defaultA_SHADE = 0.95;
     var defaultSTEP_VALUE = 0.833;
     var defaultSLOPE_VALUE = 0.08565; //0.06177;
     var defaultSHIFT_VALUE = 0.9925; //0.677;
@@ -330,7 +330,8 @@
     board = JXG.JSXGraph.initBoard('box',{originX:200, originY:200, unitX:0.5, unitY:0.5, axis:true, zoomfactor: 150, showCopyright: false});
     var slope = document.getElementById('slope_value').value;
     var shift = document.getElementById('shift_value').value;
-    var curve = board.create('functiongraph',[function(x){return (slope * (x - 5.6) * (x - 5.6) - shift);}, -30, 30]);
+    var curve = board.create('functiongraph',[function(x){return (slope * (x - 5.6) * (x - 5.6) - shift);}, 0, 5.6]);
+    var line = board.create('functiongraph', [function(x){return 1;}, -30, 30]);
   }
 
   /////////////
@@ -366,7 +367,8 @@
     ////////////
     // BUTTONS
     ////////////
-    mode.onclick = function(e) {
+    mode.onmousedown = function(e) {
+      e.preventDefault();
       sampling = (sampling === 2) ? 0 : sampling + 1;
       ploma.setSample(sampling);
       if(sampling === 0){
@@ -379,10 +381,12 @@
         }
       }
     }
-    clear.onclick = function(e) {
+    clear.onmousedown = function(e) {
+      e.preventDefault();
       ploma.clear();
     }
-    cursor.onclick = function(e) {
+    cursor.onmousedown = function(e) {
+      e.preventDefault();
       // TODO: UPDATE CHECKBOX OR IMAGE ON BUTTON
       if(canvas.style.cursor === 'none') {
         canvas.style.cursor = 'crosshair';
@@ -392,7 +396,8 @@
         cursor.innerHTML = '<img src="img/cursor-24-75.png"/>';
       }
     }
-    texture.onclick = function(e) {
+    texture.onmousedown = function(e) {
+      e.preventDefault();
       ploma.toggleTexture();
       console.log(texture.innerHTML);
       if (texture.innerHTML === '<img src="img/delicious-24.png">') {
@@ -402,7 +407,8 @@
       }
     }
     // Saving images must be done via an <a> tag
-    save.onclick = function(e) {
+    save.onmousedown = function(e) {
+      e.preventDefault();
       document.getElementById('download').click();
     }
     var downloadImage = function() {
