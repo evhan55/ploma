@@ -1,0 +1,46 @@
+- Process Raw Input Points:
+	- Read raw input points on stylus move
+	- Filter (average) to reduce hardware noise
+- Calculate Bezier:
+	- Use a one-point look-ahead for 3-point cubic bezier calculation: [two points] + 1 lookahead 
+- Even Stepping:
+	- Once a bezier equation is determined for these two points: subdivide into even steps, following from the previous Bezier's most recent step
+
+Step size
+
+
+
+input points -> Scamper -> even points along curve
+
+var scamper = new Scamper({
+	sample: 2,
+	stepSize: 0.3
+});
+
+beginStroke(x, y, p)
+	scamper.newStroke();
+	scamper.addPoint(x, y, p);
+
+extendStroke(x, y, p)
+	scamper.addPoint(x, y, p);
+	if(scamper.getPoints)
+		draw them
+
+endStroke(x, y, p)
+	scamper.addPoint(x, y, p);
+	if(scamper.getPoints)
+		draw them
+
+
+-------
+Scamper
+-------
+
+Scamper({sample: n, steps: n})
+newStroke
+addPoint
+getPoints
+
+calculateFilteredPoint
+createBezier
+calculateStepPoints

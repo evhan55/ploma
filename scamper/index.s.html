@@ -10,7 +10,7 @@
     height: 100%;
   }
   canvas#canvas {
-    cursor: none;
+    cursor: crosshair;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -101,9 +101,6 @@
   #texture {
     top: 220px;
   }
-  #mode {
-    top: 290px;
-  }
   #download {
     position: absolute;
     top: 100px;
@@ -166,9 +163,8 @@
   <!-- Buttons -->
   <div id="save" class="button noselect"><img src="img/save-24.png"/></div>
   <div id="clear" class="button noselect"><img src="img/blank-file-24.png"/></div>
-  <div id="cursor" class="button noselect"><img src="img/cursor-24-75.png"/></div>
+  <div id="cursor" class="button noselect"><img src="img/cursor-24.png"/></div>
   <div id="texture" class="button noselect"><img src="img/delicious-24.png"/></div>
-  <div id="mode" class="button noselect"><img src="img/polyline-24-2.png"/></div>
   <a id="download" download="PlomaImage.png">Download as image</a>
   <div id="sliders" class="sliders noselect">
 
@@ -222,7 +218,8 @@
 </body>
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.3/jsxgraphcore.js"></script>
-<script type='text/javascript' src="ploma.js"></script>
+<script type='text/javascript' src="scamper.js"></script>
+<script type='text/javascript' src="ploma.s.js"></script>
 
 
 <script type="text/javascript">
@@ -233,7 +230,6 @@
 
   // DOM
   var canvas;
-  var mode;
   var save;
   var clear;
   var cursor;
@@ -243,7 +239,6 @@
   var extendStroke;
 
   // State
-  var sampling = 2;
   var ploma = null;
   var w;// = 1300;
   var h;// = 1000;
@@ -251,18 +246,6 @@
 
   // Plot
   var board;
-
-  // Red Pixel
-  var r = new Uint8ClampedArray(16);
-  var rid;
-  r[0] = 255;
-  r[3] = 255;
-  r[4] = 255;
-  r[7] = 255;
-  r[8] = 255;
-  r[11] = 255;
-  r[12] = 255;
-  r[15] = 255;
 
   // SLIDERS
   function updateA_SHADE() {
@@ -343,17 +326,12 @@
     canvas = document.getElementById('canvas');
     canvas.setAttribute('width', window.innerWidth);
     canvas.setAttribute('height', window.innerHeight);
-    mode = document.getElementById('mode');
     save = document.getElementById('save');
     clear = document.getElementById('clear');
     cursor = document.getElementById('cursor');
     texture = document.getElementById('texture');
     plugin = document.getElementById('wtPlugin');
     penAPI = plugin.penAPI;
-
-    // populate red pixel
-    rid = canvas.getContext('2d').createImageData(2, 2);
-    rid.data.set(r);
 
     // load Ploma onto canvas and clear it
     ploma = new Ploma(canvas);
@@ -367,20 +345,6 @@
     ////////////
     // BUTTONS
     ////////////
-    mode.onmousedown = function(e) {
-      e.preventDefault();
-      sampling = (sampling === 2) ? 0 : sampling + 1;
-      ploma.setSample(sampling);
-      if(sampling === 0){
-        mode.innerHTML = '<img src="img/polyline-24-50.png"/>';
-      } else {
-        if(sampling === 1) {
-          mode.innerHTML = '<img src="img/polyline-24.png"/>';
-        } else {
-          mode.innerHTML = '<img src="img/polyline-24-2.png"/>';
-        }
-      }
-    }
     clear.onmousedown = function(e) {
       e.preventDefault();
       ploma.clear();
@@ -440,80 +404,33 @@
       ploma.resize(window.innerWidth, window.innerHeight);
     }
 
-    // bind device input events
-    /*if(window.PointerEvent) {
-      ///////////////////////////////////
-      // POINTER EVENT
-      ///////////////////////////////////
-      canvas.onpointerdown = function(e) {
-        ploma.beginStroke(
-          e.clientX,
-          e.clientY,
-          e.pressure
-        );
-        isDrawing = true;
-      }
-      canvas.onpointermove = function(e) {
-        if (!isDrawing) return;
-        ploma.extendStroke(
-          e.clientX,
-          e.clientY,
-          e.pressure
-        );
-      }
-      canvas.onpointerup = function(e) {
-        ploma.endStroke(
-          e.clientX,
-          e.clientY,
-          e.pressure
-        );
-        isDrawing = false;
-      }
-    } else {*/
-      ///////////////////////////////////
-      // MOUSE EVENT
-      ///////////////////////////////////
-      canvas.onmousedown = function(e) {
-        isDrawing = true;
-        if (sampling === 0) return;
-        ploma.beginStroke(
-          e.clientX,
-          e.clientY,
-          penAPI.pressure ? penAPI.pressure : 0.6
-        );
-      }
-      canvas.onmousemove = function(e) {
-        if (!isDrawing) return;
-        //elapsed = Date.now();
-        if (sampling === 0) {
-          //console.log(Date.now() - elapsed);
-          canvas.getContext('2d').putImageData(
-            rid,
-            e.clientX,
-            e.clientY,
-            0,
-            0,
-            2,
-            2
-          );
-          return;
-        }
-        ploma.extendStroke(
-          e.clientX,
-          e.clientY,
-          penAPI.pressure ? penAPI.pressure : 0.6
-        );
-      }
-      canvas.onmouseup = function(e) {
-        isDrawing = false;
-        if (sampling === 0) return;
-        ploma.endStroke(
-          e.clientX,
-          e.clientY,
-          penAPI.pressure ? penAPI.pressure : 0.6
-        );
-      }
-    //} 
+    ///////////////////////////////////
+    // MOUSE EVENT
+    ///////////////////////////////////
+    canvas.onmousedown = function(e) {
+      isDrawing = true;
+      ploma.beginStroke(
+        e.clientX,
+        e.clientY,
+        penAPI.pressure ? penAPI.pressure : 0.6
+      );
+    }
+    canvas.onmousemove = function(e) {
+      if (!isDrawing) return;
+      ploma.extendStroke(
+        e.clientX,
+        e.clientY,
+        penAPI.pressure ? penAPI.pressure : 0.6
+      );
+    }
+    canvas.onmouseup = function(e) {
+      isDrawing = false;
+      ploma.extendStroke(
+        e.clientX,
+        e.clientY,
+        penAPI.pressure ? penAPI.pressure : 0.6
+      );
+    }
 
 
   }
