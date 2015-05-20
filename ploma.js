@@ -51,7 +51,7 @@ var Ploma = function(canvas) {
 
   this.rerender = function(){
     // Deep copy the raw strokes
-    var originalStrokes = this.strokes();
+    var originalStrokes = this.getStrokes();
     var capturedRawStrokes = [];
     for(var i = 0; i < originalStrokes.length; i++) {
       capturedRawStrokes.push(originalStrokes[i]);
@@ -221,7 +221,7 @@ var Ploma = function(canvas) {
   }
 
   // ------------------------------------------
-  // strokes
+  // getStrokes
   //
   // Returns an array of all strokes that have
   // been recorded, each stroke itself is an
@@ -233,7 +233,7 @@ var Ploma = function(canvas) {
   //   ...
   // ]
   //
-  this.strokes = function() {
+  this.getStrokes = function() {
     var strokes = [];
     for(var i = 0; i < rawStrokes.length; i++){
       var stroke = [];
@@ -244,6 +244,46 @@ var Ploma = function(canvas) {
     }
     return strokes;
   };
+
+  // ------------------------------------------
+  // setStrokes
+  //
+  // Sets the strokes to the input array,
+  // expected as:
+  //
+  // [
+  //   [{x, y, p}, {x, y, p}, ...],
+  //   [{x, y, p}, {x, y, p}, ...],
+  //   ...
+  // ]
+  //
+  this.setStrokes = function(strokes) {
+    // Clear and set rendering to false
+    this.clear();
+    //applyRendering = !applyRendering;
+
+    // Redraw all the strokes
+    for(var i = 0; i < strokes.length; i++) {
+      var stroke = strokes[i];
+      this.beginStroke(
+        stroke[0].x,
+        stroke[0].y,
+        stroke[0].p
+      );
+      for(var j = 1; j < stroke.length-1; j++) {
+        this.extendStroke(
+          stroke[j].x,
+          stroke[j].y,
+          stroke[j].p
+        );
+      }
+      this.endStroke(
+        stroke[stroke.length-1].x,
+        stroke[stroke.length-1].y,
+        stroke[stroke.length-1].p
+      );
+    }
+  }
 
   // ------------------------------------------
   // curStroke
