@@ -392,12 +392,11 @@ var Ploma = function(canvas) {
   imageDataData = imageData.data;
 
   // TESTING
-  var STEP_VALUE = 2;
-  var SLOPE_VALUE = 0.56;
-  var SHIFT_VALUE = 0.26;
-  var A_SHADE = 0.85;
-  var WIDTH_TO_USE = 0.57;
-  // END TESTING
+  var STEP_VALUE = 0.833;
+  var SLOPE_VALUE = 0.08565;
+  var SHIFT_VALUE = 0.9925;
+  var A_SHADE = 0.95;
+  var WIDTH_TO_USE = 1.056;
 
   // State
   var rawStrokes = [];
