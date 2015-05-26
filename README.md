@@ -12,6 +12,10 @@ DEMO                                    | BLOG
 
 ## Usage
 
+```html
+<script type='text/javascript' src="/* YOUR PATH HERE */ploma.js"></script>
+```
+
 ```js
 var canvas = /* YOUR <CANVAS> ELEMENT */;
 var isDrawing = false;
