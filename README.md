@@ -10,6 +10,35 @@ DEMO                                    | BLOG
 2. **Open** `index.html` in a WebKit browser
 3. **Draw** on canvas with a Wacom pen or check **Use Mouse** to use a mouse
 
+## Usage
+
+```js
+var canvas = /* YOUR <CANVAS> ELEMENT */;
+var isDrawing = false;
+
+var ploma = new Ploma(canvas);
+ploma.clear();
+
+canvas.onmousedown = function(e) {
+  isDrawing = true;
+  ploma.beginStroke(e.clientX, e.clientY, 1);
+}
+
+canvas.onmousemove = function(e) {
+  if (!isDrawing) return;
+  ploma.extendStroke(e.clientX, e.clientY, 1);
+}
+
+canvas.onmouseup = function(e) {
+  isDrawing = false;
+  ploma.endStroke(e.clientX, e.clientY, 1);
+}
+```
+
+#### Full Example
+
+Full example usage of Ploma can be found in [index.html](https://github.com/evhan55/ploma/blob/master/index.html)
+
 ## API
 
 A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) object element in your HTML.  
@@ -60,35 +89,6 @@ A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen 
   <td>Returns the current stroke of points that have been stored since the last mouse down as an array of point JSON objects.<br><code>[{x, y, p}, {x, y, p}, ...]</code></td>
 </tr>
 </table>
-
-#### Example Usage
-
-```js
-var canvas = /* YOUR <CANVAS> ELEMENT */;
-var isDrawing = false;
-
-var ploma = new Ploma(canvas);
-ploma.clear();
-
-canvas.onmousedown = function(e) {
-  isDrawing = true;
-  ploma.beginStroke(e.clientX, e.clientY, 1);
-}
-
-canvas.onmousemove = function(e) {
-  if (!isDrawing) return;
-  ploma.extendStroke(e.clientX, e.clientY, 1);
-}
-
-canvas.onmouseup = function(e) {
-  isDrawing = false;
-  ploma.endStroke(e.clientX, e.clientY, 1);
-}
-```
-
-#### Full Example
-
-Full example usage of Ploma can be found in [index.html](https://github.com/evhan55/ploma/blob/master/index.html)
 
 ## TODO
 
