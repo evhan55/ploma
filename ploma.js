@@ -53,6 +53,7 @@ var Ploma = function(canvas) {
     lastControlPoint = null;
     stepOffset = 0.0;
     pointCounter = 0;
+    textureSampleStep = 0;
   };
 
   // ------------------------------------------
