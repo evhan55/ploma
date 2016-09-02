@@ -15,7 +15,7 @@ Viewpoints Research Institute
 TODO: License
 */
 
-"use strict"; // for strict mode
+'use strict'; // for strict mode
 
 // ------------------------------------------
 // Ploma
@@ -360,7 +360,7 @@ window.Ploma = function(canvas) {
 	// Generate Texture Samples
 	var textureSampleLocations = [];
 	var inkTextureImageDataGrays = [];
-	var inkTextureImage = getImageFromBase64(inkTextureBase64(), "jpeg")
+	var inkTextureImage = getImageFromBase64(inkTextureBase64(), 'jpeg')
 	var inkTextureSamples = new Float32Array(textureSamplesLength);
 	getSamplesFromImage(inkTextureImage, inkTextureSamples);
 
