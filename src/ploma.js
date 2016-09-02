@@ -126,10 +126,7 @@ window.Ploma = function(canvas) {
 					curRawSampledStroke[len - 2],
 					curRawSampledStroke[len - 1]
 				);
-				//if(fpoint) {
-					// Push sampled, filtered, point
-					curFilteredStroke.push(fpoint);
-				//}
+				curFilteredStroke.push(fpoint);
 			}
 
 			// Redraw sampled and filtered
@@ -314,7 +311,6 @@ window.Ploma = function(canvas) {
 	//////////////////////////////////////////////
 
 	// DOM
-	var canvas = canvas;
 	var w = 0;
 	var h = 0;
 	var w_4 = 0;
@@ -322,7 +318,7 @@ window.Ploma = function(canvas) {
 	var imageData = null;
 	var imageDataData = new Uint8ClampedArray(w * h);
 	//var paperColor = 'rgb(240, 235, 219)';
-	var paperColor = 'rgb(255, 255, 246)'; // light
+	// var paperColor = 'rgb(255, 255, 246)'; // light
 	var paperColor = 'rgb(240, 235, 219)'; // dark
 	//var paperColor = 'rgb(250, 240, 230)';
 	//var paperColor = 'rgb(245, 230, 218)';
@@ -359,7 +355,6 @@ window.Ploma = function(canvas) {
 
 	// Generate Texture Samples
 	var textureSampleLocations = [];
-	var inkTextureImageDataGrays = [];
 	var inkTextureImage = getImageFromBase64(inkTextureBase64(), 'jpeg');
 	var inkTextureSamples = new Float32Array(textureSamplesLength);
 	getSamplesFromImage(inkTextureImage, inkTextureSamples);
@@ -613,22 +608,18 @@ window.Ploma = function(canvas) {
 		var dx = 0.0;
 		var dy = 0.0;
 		var dist = 0.0;
-		var t = 0.0;
 		var a = 0.0;
 		var invA = 0.0;
 		var idx_0 = 0;
 		var idx_1 = 0;
 		var idx_2 = 0;
-		var idx_3 = 0;
 		var idx_0_i = 0;
 		var oldR = 0.0;
 		var oldG = 0.0;
 		var oldB = 0.0;
-		var oldA = 0.0;
 		var newR = 0.0;
 		var newG = 0.0;
 		var newB = 0.0;
-		var newA = 0.0;
 
 		p_x = point.x;
 		p_y = point.y;
@@ -696,26 +687,13 @@ window.Ploma = function(canvas) {
 				invA = 1 - a;
 				idx_1 = idx_0 + 1;
 				idx_2 = idx_0 + 2;
-				idx_3 = idx_0 + 3;
 				oldR = id[idx_0];
 				oldG = id[idx_1];
 				oldB = id[idx_2];
-				oldA = id[idx_3] / 255;
 
-				// Transparent vs. opaque background
-				//if(oldA === 1) {
-					newR = penR * a + oldR * invA;
-					newG = penG * a + oldG * invA;
-					newB = penB * a + oldB * invA;
-				/*} else {
-					newA = a + oldA * invA;
-					newR = (penR * a + oldR * oldA * invA) / newA;
-					newG = (penG * a + oldG * oldA * invA) / newA;
-					newB = (penB * a + oldB * oldA * invA) / newA;
-					newA = newA * 255;
-					// Set new A
-					id[idx_3] = newA;
-				}*/
+				newR = penR * a + oldR * invA;
+				newG = penG * a + oldG * invA;
+				newB = penB * a + oldB * invA;
 
 				// Set new RGB
 				id[idx_0] = newR;
@@ -766,8 +744,6 @@ window.Ploma = function(canvas) {
 			imageDataGrays.push(1 - imageData[i]/255);
 		}
 
-		inkTextureImageDataGrays = imageDataGrays;
-
 		// Read samples from mirrored-and-tiled grays
 		for (let i = 0; i < textureSamplesLength; i++) {
 			// Get normalized pixel within texture
@@ -802,7 +778,7 @@ window.Ploma = function(canvas) {
 //
 // [{x, y, p}, {x, y, p}, ...]
 //
-Ploma.getStrokeImageData = function(inputStroke) {
+window.Ploma.getStrokeImageData = function(inputStroke) {
 	// Make a local copy
 	var stroke = [];
 	for(var i = 0; i < inputStroke.length; i++) {
@@ -817,8 +793,8 @@ Ploma.getStrokeImageData = function(inputStroke) {
 	var miny = Infinity;
 	var maxx = 0;
 	var maxy = 0;
-	for(var i = 0; i < stroke.length; i++) {
-		var point = stroke[i];
+	for(let i = 0; i < stroke.length; i++) {
+		let point = stroke[i];
 		minx = Math.min(minx, point.x);
 		miny = Math.min(miny, point.y);
 		maxx = Math.max(maxx, point.x);
@@ -830,14 +806,14 @@ Ploma.getStrokeImageData = function(inputStroke) {
 	canvas.setAttribute('height', Math.ceil(h));
 
 	// Shift points to new origin
-	for(var i = 0; i < stroke.length; i++) {
-		var point = stroke[i];
+	for(let i = 0; i < stroke.length; i++) {
+		let point = stroke[i];
 		point.x = point.x - minx + 4;
 		point.y = point.y - miny + 4;
 	}
 
 	// Instantiate Ploma on this new canvas
-	var ploma = new Ploma(canvas);
+	var ploma = new window.Ploma(canvas);
 
 	// Draw stroke onto temp canvas
 	ploma.beginStroke(
@@ -845,7 +821,7 @@ Ploma.getStrokeImageData = function(inputStroke) {
 		stroke[0].y,
 		stroke[0].p
 	);
-	for(var i = 1; i < stroke.length - 1; i++) {
+	for(let i = 1; i < stroke.length - 1; i++) {
 		ploma.extendStroke(
 			stroke[i].x,
 			stroke[i].y,
