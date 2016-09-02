@@ -7,7 +7,9 @@ var config = {
 	entry: APP_DIR + '/ploma.js',
 	output: {
 		path: BUILD_DIR,
-		filename: 'ploma.bundle.js'
+		filename: 'ploma.js',
+		libraryTarget: 'var',
+		library: 'Ploma'
 	},
 	module : {
 		loaders : [
