@@ -6,8 +6,8 @@
 *.exe
 *.o
 *.so
-*.bundle.js
-*.bundle.js.map
+ploma.js
+ploma.js.map
 
 # Package Manager files #
 ############
