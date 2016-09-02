@@ -130,7 +130,9 @@
     cursor = document.getElementById('cursor');
     texture = document.getElementById('texture');
     plugin = document.getElementById('wtPlugin');
-    penAPI = plugin.penAPI;
+    penAPI = plugin.penAPI || {
+      pressure: 0.9
+    };
     //mode.innerHTML = sampling;
     //texture.innerHTML = "T";
 
