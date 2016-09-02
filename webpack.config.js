@@ -7,7 +7,7 @@ var config = {
 	entry: APP_DIR + '/ploma.js',
 	output: {
 		path: BUILD_DIR,
-		filename: 'ploma.js',
+		filename: 'BallpointPen.js',
 		libraryTarget: 'var',
 		library: 'Ploma'
 	},
