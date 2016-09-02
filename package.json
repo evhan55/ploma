@@ -4,6 +4,9 @@
   "description": "High-fidelity ballpoint pen rendering for pressure sensitive tablets http://plomaproject.tumblr.com",
   "main": "ploma.js",
   "scripts": {
+    "build": "webpack -p",
+    "watch": "webpack -d --watch",
+    "lint": "eslint . --ext .js --ignore-path .gitignore"
   },
   "repository": {
     "type": "git",
@@ -14,5 +17,17 @@
   "bugs": {
     "url": "https://github.com/evhan55/ploma/issues"
   },
-  "homepage": "http://plomaproject.tumblr.com"
+  "homepage": "http://plomaproject.tumblr.com",
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-core": "^6.14.0",
+    "babel-eslint": "^6.1.2",
+    "babel-loader": "^6.2.5",
+    "babel-preset-es2015": "^6.14.0",
+    "eslint": "^3.4.0",
+    "webpack": "^1.13.2"
+  },
+  "dependencies": {
+    "lodash": "^4.15.0"
+  }
 }

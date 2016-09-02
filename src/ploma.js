@@ -1,3 +1,5 @@
+import { last } from 'lodash';
+
 /*
 Ploma - High-fidelity ballpoint pen rendering for tablets with pressure-sensitive styluses
 v0.4
@@ -20,7 +22,7 @@ TODO: License
 // an HTML <canvas> Element element to render
 // strokes onto.
 //
-var Ploma = function(canvas) {
+window.Ploma = function(canvas) {
 
   //////////////////////////////////////////////
   // PUBLIC
@@ -517,7 +519,7 @@ var Ploma = function(canvas) {
     if (stepPoints.length == 0) // We didn't step at all along this Bezier
       stepOffset = stepOffset + p0.getDistance(p3);
     else
-      stepOffset = stepPoints.last().getDistance(p3);
+      stepOffset = last(stepPoints).getDistance(p3);
 
     return stepPoints;
   }
@@ -773,9 +775,6 @@ var Ploma = function(canvas) {
   // ------------------------------------------
   // UTILS
   //
-  Array.prototype.last = function(){
-    return this[this.length - 1];
-  }
 
   function map(value, valueMin, valueMax, from, to) {
     var ratio = (value - valueMin) / (valueMax - valueMin);

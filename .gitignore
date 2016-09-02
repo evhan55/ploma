@@ -6,6 +6,12 @@
 *.exe
 *.o
 *.so
+*.bundle.js
+*.bundle.js.map
+
+# Package Manager files #
+############
+node_modules
 
 # Packages #
 ############
@@ -35,7 +41,6 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
-
 
 # IDE generated files #
 ######################
