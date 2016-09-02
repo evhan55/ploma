@@ -1,5 +1,6 @@
 import { last } from 'lodash';
 import { map } from './utils';
+import { paperColorDark, penR, penG, penB } from './constants';
 import Point from './Point';
 
 /*
@@ -29,11 +30,6 @@ var ctx = null;
 var imageData = null;
 var canvas = null;
 var imageDataData = new Uint8ClampedArray(w * h);
-//var paperColor = 'rgb(240, 235, 219)';
-// var paperColor = 'rgb(255, 255, 246)'; // light
-var paperColor = 'rgb(240, 235, 219)'; // dark
-//var paperColor = 'rgb(250, 240, 230)';
-//var paperColor = 'rgb(245, 230, 218)';
 
 // State
 var rawStrokes = [];
@@ -52,9 +48,6 @@ var filterWeight = 0.5;
 var filterWeightInverse = 1 - filterWeight;
 var stepOffset = 0.0;
 var stepInterval = 0.3;
-var penR = 25;
-var penG = 8;
-var penB = 45;
 var pointCounter = 0;
 var sample = 2;
 var applyRendering = true;
@@ -97,7 +90,7 @@ export class BallpointPen {
 	clear() {
 		// Clear canvas
 		ctx.clearRect(0, 0, w, h);
-		ctx.fillStyle = paperColor;
+		ctx.fillStyle = paperColorDark;
 		ctx.globalAlpha = 1;
 		ctx.fillRect(0, 0, w, h);
 		imageData = ctx.getImageData(0, 0, w, h);
