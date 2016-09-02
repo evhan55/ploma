@@ -1,4 +1,5 @@
 import { last } from 'lodash';
+import { map } from './utils';
 
 /*
 Ploma - High-fidelity ballpoint pen rendering for tablets with pressure-sensitive styluses
@@ -770,15 +771,6 @@ window.Ploma = function(canvas) {
       y: this.y,
       p: this.p
     };
-  }
-
-  // ------------------------------------------
-  // UTILS
-  //
-
-  function map(value, valueMin, valueMax, from, to) {
-    var ratio = (value - valueMin) / (valueMax - valueMin);
-    return from + ratio * (to - from);
   }
 
   // ------------------------------------------
