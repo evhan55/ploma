@@ -10,3 +10,5 @@ export const filterWeight = 0.5;
 export const filterWeightInverse = 1 - filterWeight;
 export const stepInterval = 0.3;
 export const defaultSample = 2;
+
+export const textureSamplesLength = 1e5;

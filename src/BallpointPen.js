@@ -1,6 +1,6 @@
 import { last } from 'lodash';
 import { map } from './utils';
-import { paperColorDark, penR, penG, penB, filterWeight, filterWeightInverse, stepInterval, defaultSample } from './constants';
+import { paperColorDark, penR, penG, penB, filterWeight, filterWeightInverse, stepInterval, defaultSample, textureSamplesLength } from './constants';
 import Point from './Point';
 
 /*
@@ -34,7 +34,6 @@ var rawStrokes = [];
 var curRawSampledStroke = [];
 var curFilteredStroke = [];
 var textureSampleStep = 0;
-var textureSamplesLength = 1e5;
 var lastControlPoint = null;
 var stepOffset = 0.0;
 var pointCounter = 0;
