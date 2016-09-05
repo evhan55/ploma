@@ -31,7 +31,6 @@ var canvas = null;
 
 // State
 var rawStrokes = [];
-var curRawStroke = [];
 var curRawSampledStroke = [];
 var filteredStrokes = [];
 var curFilteredStroke = [];
@@ -89,7 +88,6 @@ export class BallpointPen {
 
 		// Reset data
 		rawStrokes = [];
-		curRawStroke = [];
 		curRawSampledStroke = [];
 		filteredStrokes = [];
 		curFilteredStroke = [];
@@ -109,8 +107,7 @@ export class BallpointPen {
 		var point = new Point(x,y,p);
 		pointCounter++;
 
-		curRawStroke = [point];
-		rawStrokes.push(curRawStroke);
+		rawStrokes.push([point]);
 		curFilteredStroke = [point];
 		filteredStrokes.push(curFilteredStroke);
 		curRawSampledStroke = [point];
@@ -141,7 +138,7 @@ export class BallpointPen {
 		//if(curRawStroke.last().equals(point)) {
 			//return; // ignore dupes TODO: ??
 		//}
-		curRawStroke.push(point);
+		last(rawStrokes).push(point);
 
 		//
 		// Sampled and filtered
@@ -183,7 +180,7 @@ export class BallpointPen {
 
 		// Keep the last point as is for now
 		// TODO: Try to address the "tapering on mouseup" issue
-		curRawStroke.push(point);
+		last(rawStrokes).push(point);
 		curRawSampledStroke.push(point);
 		curFilteredStroke.push(point);
 
@@ -267,8 +264,8 @@ export class BallpointPen {
 	//
 	curStroke() {
 		var curStroke = [];
-		for(var i = 0; i < curRawStroke.length; i++) {
-			curStroke.push(curRawStroke[i].asObj());
+		for(var i = 0; i < last(rawStrokes).length; i++) {
+			curStroke.push(last(rawStrokes)[i].asObj());
 		}
 		return curStroke;
 	}
