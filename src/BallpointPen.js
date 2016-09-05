@@ -1,6 +1,6 @@
 import { last } from 'lodash';
 import { map } from './utils';
-import { paperColorDark, penR, penG, penB, filterWeight, filterWeightInverse, stepInterval } from './constants';
+import { paperColorDark, penR, penG, penB, filterWeight, filterWeightInverse, stepInterval, defaultSample } from './constants';
 import Point from './Point';
 
 /*
@@ -38,7 +38,7 @@ var textureSamplesLength = 1e5;
 var lastControlPoint = null;
 var stepOffset = 0.0;
 var pointCounter = 0;
-var sample = 2;
+var sample;
 var applyRendering = true;
 
 // Generate Texture Samples
@@ -63,6 +63,7 @@ export class BallpointPen {
 		ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
 		imageData = ctx.getImageData(0, 0, w, h);
+		sample = defaultSample;
 	}
 
 	//////////////////////////////////////////////
