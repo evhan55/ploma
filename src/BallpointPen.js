@@ -28,7 +28,6 @@ var h = 0;
 var ctx = null;
 var imageData = null;
 var canvas = null;
-var imageDataData = new Uint8ClampedArray(w * h);
 
 // State
 var rawStrokes = [];
@@ -69,7 +68,6 @@ export class BallpointPen {
 		ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
 		imageData = ctx.getImageData(0, 0, w, h);
-		imageDataData = imageData.data;
 	}
 
 	//////////////////////////////////////////////
@@ -88,7 +86,6 @@ export class BallpointPen {
 		ctx.globalAlpha = 1;
 		ctx.fillRect(0, 0, w, h);
 		imageData = ctx.getImageData(0, 0, w, h);
-		imageDataData = imageData.data;
 
 		// Reset data
 		rawStrokes = [];
@@ -121,7 +118,6 @@ export class BallpointPen {
 		// Get the latest canvas pixels in case
 		// they've changed since the last stroke
 		imageData = ctx.getImageData(0, 0, w, h);
-		imageDataData = imageData.data;
 
 		// Reset step offset for new stroke
 		stepOffset = stepInterval;	
@@ -492,7 +488,7 @@ function createAndDrawBezier(pt0, pt1, pt2) {
 	// Step along curve and draw step
 	var stepPoints = calculateStepPoints(p0, p1, p2, p3);
 	for(var i = 0; i < stepPoints.length; i++) {
-		drawStep(imageDataData, stepPoints[i]);
+		drawStep(imageData.data, stepPoints[i]);
 	}
 
 	// Calculate redraw bounds
