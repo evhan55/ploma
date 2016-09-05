@@ -40,9 +40,7 @@ var pointCounter;
 var sample;
 
 // Generate Texture Samples
-var textureSampleLocations = [];
-var inkTextureImage = getImageFromBase64(inkTextureBase64, 'jpeg');
-getSamplesFromImage(inkTextureImage, inkTextureSamples);
+var textureSampleLocations = getSampleLocations();
 
 // ------------------------------------------
 // Ploma
@@ -579,16 +577,16 @@ function getImageDataFromImage(img) {
 	canvas.width = img.width;
 	canvas.height = img.height;
 	ctx.drawImage(img, 0, 0);
-	imageData = ctx.getImageData(0, 0, img.width, img.height).data;
-
-	return imageData;
+	return ctx.getImageData(0, 0, img.width, img.height).data;
 }
 
-function getSamplesFromImage(img, samples) {
+function getSampleLocations() {
+	var img = getImageFromBase64(inkTextureBase64, 'jpeg');
 	var imageData = getImageDataFromImage(img);
 	var imageDataGrays = [];
 	var textureOffsetX = 0;
 	var textureOffsetY = 0;
+	var textureSampleLocations = [];
 
 	// Read grays from image
 	for(var i = 0; i < imageData.length; i+=4) {
@@ -606,7 +604,7 @@ function getSamplesFromImage(img, samples) {
 		var y = Math.floor(t * (img.height - 1));
 		textureSampleLocations.push({x: x, y: y});
 		var d = imageDataGrays[x + y * img.width];
-		samples[i] = d;
+		inkTextureSamples[i] = d;
 		//samples[i] = 100 + Math.random()*155;
 		
 		// Step texture offset randomly [-1, 1]
@@ -614,6 +612,7 @@ function getSamplesFromImage(img, samples) {
 		textureOffsetY += (Math.random() * 2 | 0) === 1 ? -1 : 1;
 	}
 
+	return textureSampleLocations;
 }
 
 
