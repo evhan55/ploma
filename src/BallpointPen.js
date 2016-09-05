@@ -1,6 +1,6 @@
 import { last } from 'lodash';
 import { map } from './utils';
-import { paperColorDark, penR, penG, penB, filterWeight, filterWeightInverse, stepInterval, defaultSample, textureSamplesLength } from './constants';
+import { paperColorDark, penR, penG, penB, filterWeight, filterWeightInverse, stepInterval, defaultSample, textureSamplesLength, inkTextureSamples } from './constants';
 import Point from './Point';
 
 /*
@@ -42,7 +42,6 @@ var sample;
 // Generate Texture Samples
 var textureSampleLocations = [];
 var inkTextureImage = getImageFromBase64(inkTextureBase64(), 'jpeg');
-var inkTextureSamples = new Float32Array(textureSamplesLength);
 getSamplesFromImage(inkTextureImage, inkTextureSamples);
 
 // ------------------------------------------

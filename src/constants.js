@@ -12,3 +12,4 @@ export const stepInterval = 0.3;
 export const defaultSample = 2;
 
 export const textureSamplesLength = 1e5;
+export const inkTextureSamples = new Float32Array(textureSamplesLength);
