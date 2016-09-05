@@ -36,10 +36,6 @@ var curRawStroke = [];
 var curRawSampledStroke = [];
 var filteredStrokes = [];
 var curFilteredStroke = [];
-var minx = 0.0;
-var maxx = 0.0;
-var miny = 0.0;
-var maxy = 0.0;
 var textureSampleStep = 0;
 var textureSamplesLength = 1e5;
 var lastControlPoint = null;
@@ -100,10 +96,6 @@ export class BallpointPen {
 		curRawSampledStroke = [];
 		filteredStrokes = [];
 		curFilteredStroke = [];
-		minx = 0.0;
-		maxx = 0.0;
-		miny = 0.0;
-		maxy = 0.0;
 		lastControlPoint = null;
 		stepOffset = 0.0;
 		pointCounter = 0;
@@ -510,10 +502,10 @@ function createAndDrawBezier(pt0, pt1, pt2) {
 	var p1_y = p1.y;
 	var p2_x = p2.x;
 	var p2_y = p2.y;
-	minx = Math.min(p0_x, p1_x, p2_x, p3_x);
-	miny = Math.min(p0_y, p1_y, p2_y, p3_y);
-	maxx = Math.max(p0_x, p1_x, p2_x, p3_x);
-	maxy = Math.max(p0_y, p1_y, p2_y, p3_y);
+	var minx = Math.min(p0_x, p1_x, p2_x, p3_x);
+	var miny = Math.min(p0_y, p1_y, p2_y, p3_y);
+	var maxx = Math.max(p0_x, p1_x, p2_x, p3_x);
+	var maxy = Math.max(p0_y, p1_y, p2_y, p3_y);
 
 	// Put image using a crude dirty rect
 	//elapsed = Date.now() - elapsed;
