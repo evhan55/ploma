@@ -25,7 +25,6 @@ TODO: License
 // DOM
 var w = 0;
 var h = 0;
-var w_4 = 0;
 var ctx = null;
 var imageData = null;
 var canvas = null;
@@ -71,7 +70,6 @@ export class BallpointPen {
 		canvas = passedCanvas;
 		w = canvas.getAttribute('width');
 		h = canvas.getAttribute('height');
-		w_4 = w * 4;
 		ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
 		imageData = ctx.getImageData(0, 0, w, h);
@@ -307,7 +305,6 @@ export class BallpointPen {
 		this.canvas.setAttribute('height', b);
 		w = this.canvas.getAttribute('width');
 		h = this.canvas.getAttribute('height');
-		w_4 = w*4;
 		this.clear();
 	}
 
@@ -784,7 +781,7 @@ function drawStep(id, point) {
 			dist = Math.sqrt(dx * dx + dy * dy);
 
 			// Byte-index
-			idx_0 = idx_0_i + j * w_4;
+			idx_0 = idx_0_i + j * ( w * 4 );
 
 			// Antialiasing
 			//a = 5 * ((0.3 / (dist - width)) - 0.085);
