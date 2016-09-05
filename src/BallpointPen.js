@@ -1,6 +1,6 @@
 import { last } from 'lodash';
 import { map } from './utils';
-import { paperColorDark, penR, penG, penB, filterWeight, filterWeightInverse } from './constants';
+import { paperColorDark, penR, penG, penB, filterWeight, filterWeightInverse, stepInterval } from './constants';
 import Point from './Point';
 
 /*
@@ -37,7 +37,6 @@ var textureSampleStep = 0;
 var textureSamplesLength = 1e5;
 var lastControlPoint = null;
 var stepOffset = 0.0;
-var stepInterval = 0.3;
 var pointCounter = 0;
 var sample = 2;
 var applyRendering = true;

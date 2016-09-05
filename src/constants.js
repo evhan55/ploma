@@ -8,3 +8,4 @@ export const penB = 45;
 
 export const filterWeight = 0.5;
 export const filterWeightInverse = 1 - filterWeight;
+export const stepInterval = 0.3;
