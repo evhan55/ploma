@@ -32,7 +32,6 @@ var canvas = null;
 // State
 var rawStrokes = [];
 var curRawSampledStroke = [];
-var filteredStrokes = [];
 var curFilteredStroke = [];
 var textureSampleStep = 0;
 var textureSamplesLength = 1e5;
@@ -89,7 +88,6 @@ export class BallpointPen {
 		// Reset data
 		rawStrokes = [];
 		curRawSampledStroke = [];
-		filteredStrokes = [];
 		curFilteredStroke = [];
 		lastControlPoint = null;
 		stepOffset = 0.0;
@@ -109,7 +107,6 @@ export class BallpointPen {
 
 		rawStrokes.push([point]);
 		curFilteredStroke = [point];
-		filteredStrokes.push(curFilteredStroke);
 		curRawSampledStroke = [point];
 
 		// Get the latest canvas pixels in case
