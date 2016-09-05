@@ -301,10 +301,10 @@ export class BallpointPen {
 	// and height.
 	//
 	resize(a, b) {
-		this.canvas.setAttribute('width', a);
-		this.canvas.setAttribute('height', b);
-		w = this.canvas.getAttribute('width');
-		h = this.canvas.getAttribute('height');
+		canvas.setAttribute('width', a);
+		canvas.setAttribute('height', b);
+		w = canvas.getAttribute('width');
+		h = canvas.getAttribute('height');
 		this.clear();
 	}
 
