@@ -5,3 +5,6 @@ export const paperColorDark = 'rgb(240, 235, 219)';
 export const penR = 25;
 export const penG = 8;
 export const penB = 45;
+
+export const filterWeight = 0.5;
+export const filterWeightInverse = 1 - filterWeight;
