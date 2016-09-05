@@ -39,7 +39,6 @@ var lastControlPoint = null;
 var stepOffset = 0.0;
 var pointCounter = 0;
 var sample;
-var applyRendering = true;
 
 // Generate Texture Samples
 var textureSampleLocations = [];
@@ -304,7 +303,6 @@ export class BallpointPen {
 
 		// Clear and set rendering to false
 		//this.clear();
-		applyRendering = !applyRendering;
 
 		// Redraw all the strokes
 		/*for(var i = 0; i < capturedRawStrokes.length; i++) {
