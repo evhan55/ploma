@@ -47,7 +47,6 @@ window.onload = function () {
 
 	// load Ploma onto canvas and clear it
 	ploma = new Ploma.BallpointPen(canvas);
-	ploma.clear();
 
 	////////////
 	// BUTTONS
