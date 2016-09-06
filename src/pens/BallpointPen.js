@@ -1,5 +1,5 @@
 import Pen from '../modules/Pen';
-import { merge } from 'lodash';
+import merge from 'lodash/merge';
 
 'use strict';
 

@@ -1,6 +1,10 @@
-'use strict';
-window.onload = function () {
-	var Ploma = window.Ploma;
+
+require([
+	// Load our app module and pass it to our definition function
+	'../index.js'
+], function(
+	Ploma
+){
 
 	// DOM
 	var canvas;
@@ -38,6 +42,7 @@ window.onload = function () {
 	penAPI = plugin.penAPI || {
 		pressure: 0.9
 	};
+
 	//mode.innerHTML = sampling;
 	//texture.innerHTML = "T";
 
@@ -46,7 +51,7 @@ window.onload = function () {
 	rid.data.set(r);
 
 	// load Ploma onto canvas and clear it
-	ploma = new Ploma.BallpointPen(canvas);
+	ploma = new Ploma.BlueBallpointPen(canvas);
 
 	////////////
 	// BUTTONS
@@ -120,4 +125,5 @@ window.onload = function () {
 			penAPI.pressure ? penAPI.pressure : 0.9
 		);
 	};
-};
+
+});

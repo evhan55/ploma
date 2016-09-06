@@ -1,6 +1,6 @@
 import Point from './Point';
 import Texture from './Texture';
-import { last } from 'lodash';
+import last from 'lodash/last';
 
 var canvas;
 var ctx;

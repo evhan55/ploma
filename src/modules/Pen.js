@@ -1,4 +1,5 @@
-import { last, merge } from 'lodash';
+import last from 'lodash/last';
+import merge from 'lodash/merge';
 import { paperColorDark, defaultFilterWeight, defaultSample, inkTextureBase64, defaultPenColor, defaultStepInterval } from './constants';
 import Point from './Point';
 import BezierDrawer from './BezierDrawer';

@@ -1,4 +1,4 @@
-import { BallpointPen } from './BallpointPen';
+import BallpointPen from './BallpointPen';
 
 'use strict';
 

@@ -11,5 +11,7 @@ Viewpoints Research Institute
 TODO: License
 */
 
-export { BallpointPen } from './Pens/BallpointPen';
-export { BlueBallpointPen } from './Pens/BlueBallpointPen';
+import BallpointPen from './Pens/BallpointPen';
+import BlueBallpointPen from './Pens/BlueBallpointPen';
+
+export { BlueBallpointPen, BallpointPen };
