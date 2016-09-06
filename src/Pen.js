@@ -363,7 +363,7 @@ export default class Pen {
 		}
 
 		// Instantiate Ploma on this new canvas
-		var ploma = new BallpointPen(canvas);
+		var ploma = new Pen(canvas);
 
 		// Draw stroke onto temp canvas
 		ploma.beginStroke(
