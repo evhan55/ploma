@@ -1,5 +1,5 @@
 import { last } from 'lodash';
-import { paperColorDark, filterWeight, filterWeightInverse, defaultSample, inkTextureBase64 } from './constants';
+import { paperColorDark, filterWeight, filterWeightInverse, defaultSample, inkTextureBase64, ballpointPenColor } from './constants';
 import Point from './Point';
 import BezierDrawer from './BezierDrawer';
 
@@ -40,7 +40,7 @@ export class BallpointPen {
 		ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
 		sample = defaultSample;
-		bezierDrawer = new BezierDrawer(canvas, inkTextureBase64);
+		bezierDrawer = new BezierDrawer(canvas, inkTextureBase64, ballpointPenColor);
 		this.clear();
 	}
 

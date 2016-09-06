@@ -2,9 +2,11 @@
 export const paperColorDark = 'rgb(240, 235, 219)';
 // export const paperColorMedium = 'rgb(250, 240, 230)';
 
-export const penR = 25;
-export const penG = 8;
-export const penB = 45;
+export const ballpointPenColor = {
+	r: 25,
+	g: 8,
+	b: 45
+};
 
 export const filterWeight = 0.5;
 export const filterWeightInverse = 1 - filterWeight;
