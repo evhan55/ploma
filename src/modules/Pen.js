@@ -1,5 +1,10 @@
 import last from 'lodash/last';
 import merge from 'lodash/merge';
+import forEach from 'lodash/forEach';
+import cloneDeep from 'lodash/cloneDeep';
+import first from 'lodash/first';
+import tail from 'lodash/tail';
+import initial from 'lodash/initial';
 import { paperColorDark, defaultFilterWeight, defaultSample, inkTextureBase64, defaultPenColor, defaultStepInterval } from './constants';
 import Point from './Point';
 import BezierDrawer from './BezierDrawer';
@@ -274,8 +279,29 @@ export default class DefaultPen {
 		canvas.setAttribute('height', b);
 		w = canvas.getAttribute('width');
 		h = canvas.getAttribute('height');
+		let oldStrokes = cloneDeep(rawStrokes);
 		this.clear();
+		this.drawStrokes(oldStrokes);
 	}
+
+	drawStrokes(strokes) {
+		forEach(strokes, (stroke) => {
+			this.drawStroke(stroke);
+		});
+	}
+
+	drawStroke(points) {
+		if (points.length >= 3) {
+			let firstPoint = first(points);
+			this.beginStroke(firstPoint.x, firstPoint.y, firstPoint.p);
+			forEach(tail(initial(points)), (point) => {
+				this.extendStroke(point.x, point.y, point.p);
+			});
+			let lastPoint = last(points);
+			this.endStroke(lastPoint.x, lastPoint.y, lastPoint.p);			
+		}
+	}
+
 
 	// ------------------------------------------
 	// toggleTexture
