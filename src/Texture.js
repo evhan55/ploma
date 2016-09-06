@@ -1,10 +1,12 @@
-import { inkTextureSamples, textureSamplesLength, inkTextureBase64 } from './constants';
+import { inkTextureSamples, textureSamplesLength } from './constants';
 
 var textureSampleLocations;
 var textureSampleStep;
+var inkTextureBase;
 
 export class Texture {
-	constructor() {
+	constructor(passedInkTextureBase) {
+		inkTextureBase = passedInkTextureBase;
 		textureSampleLocations = getSampleLocations();
 		this.clear();
 	}
@@ -22,7 +24,7 @@ export class Texture {
 }
 
 function getSampleLocations() {
-	var img = getImageFromBase64(inkTextureBase64, 'jpeg');
+	var img = getImageFromBase64(inkTextureBase, 'jpeg');
 	var imageData = getImageDataFromImage(img);
 	var imageDataGrays = [];
 	var textureOffsetX = 0;
