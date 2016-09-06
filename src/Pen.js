@@ -1,5 +1,5 @@
-import { last } from 'lodash';
-import { paperColorDefault, defaultFilterWeight, defaultSample, inkTextureBase64, defaultPenColor, defaultStepInterval } from './constants';
+import { last, merge } from 'lodash';
+import { paperColorDark, defaultFilterWeight, defaultSample, inkTextureBase64, defaultPenColor, defaultStepInterval } from './constants';
 import Point from './Point';
 import BezierDrawer from './BezierDrawer';
 
@@ -35,13 +35,13 @@ var bezierDrawer;
 //
 export default class Pen {
 
-	constructor(passedCanvas) {
+	constructor(passedCanvas, optConfig) {
 		canvas = passedCanvas;
 		w = canvas.getAttribute('width');
 		h = canvas.getAttribute('height');
 		ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
-		var config = this.getConfiguration();
+		var config = this.getConfiguration(optConfig || {});
 		sample = config.sample;
 		paperColor = config.paperColor;
 		filterWeight = config.filterWeight;
@@ -49,15 +49,16 @@ export default class Pen {
 		this.clear();
 	}
 
-	getConfiguration() {
-		return {
+	getConfiguration(config) {
+		let defaultConfig = {
 			sample: defaultSample,
 			inkTextureBase: inkTextureBase64,
 			penColor: defaultPenColor,
-			paperColor: paperColorDefault,
+			paperColor: paperColorDark,
 			filterWeight: defaultFilterWeight,
 			stepInterval: defaultStepInterval
 		};
+		return merge(defaultConfig, config);
 	}
 
 	//////////////////////////////////////////////

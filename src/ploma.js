@@ -12,3 +12,4 @@ TODO: License
 */
 
 export { BallpointPen } from './BallpointPen';
+export { BlueBallpointPen } from './BlueBallpointPen';

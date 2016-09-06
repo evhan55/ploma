@@ -1,18 +1,8 @@
 // export const paperColorLight = 'rgb(255, 255, 246)';
 export const paperColorDark = 'rgb(240, 235, 219)';
-export const paperColorDefault = 'rgb(250, 240, 230)';
 // export const paperColorMedium = 'rgb(250, 240, 230)';
 
-export const ballpointPenColor = {
-	r: 25,
-	g: 8,
-	b: 45
-};
-export const defaultPenColor = {
-	r: 0,
-	g: 0,
-	b: 0
-};
+export const defaultPenColor = { r: 0, g: 0, b: 0 };
 
 export const defaultFilterWeight = 0.5;
 export const defaultStepInterval = 0.3;
