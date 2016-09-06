@@ -2,7 +2,7 @@ import { BallpointPen } from './BallpointPen';
 
 'use strict';
 
-export class BlueBallpointPen extends BallpointPen {
+export default class BlueBallpointPen extends BallpointPen {
 
 	constructor(canvas) {
 		super(canvas, {

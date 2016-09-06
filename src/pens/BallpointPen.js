@@ -1,9 +1,9 @@
-import Pen from './Pen';
+import Pen from '../modules/Pen';
 import { merge } from 'lodash';
 
 'use strict';
 
-export class BallpointPen extends Pen {
+export default class BallpointPen extends Pen {
 
 	constructor(canvas, config) {
 		let ballpointConfig = merge({

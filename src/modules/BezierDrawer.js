@@ -1,6 +1,5 @@
 import Point from './Point';
 import Texture from './Texture';
-import { map } from './utils';
 import { last } from 'lodash';
 
 var canvas;
@@ -223,6 +222,11 @@ function calculateWidth(p) {
 	}
 
 	return width;
+}
+
+function map(value, valueMin, valueMax, from, to) {
+	let ratio = (value - valueMin) / (valueMax - valueMin);
+	return from + ratio * (to - from);
 }
 
 // ------------------------------------------

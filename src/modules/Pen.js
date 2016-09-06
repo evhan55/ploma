@@ -33,7 +33,7 @@ var bezierDrawer;
 // an HTML <canvas> Element element to render
 // strokes onto.
 //
-export default class Pen {
+export default class DefaultPen {
 
 	constructor(passedCanvas, optConfig) {
 		canvas = passedCanvas;
@@ -363,7 +363,7 @@ export default class Pen {
 		}
 
 		// Instantiate Ploma on this new canvas
-		var ploma = new Pen(canvas);
+		var ploma = new DefaultPen(canvas);
 
 		// Draw stroke onto temp canvas
 		ploma.beginStroke(
