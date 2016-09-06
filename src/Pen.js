@@ -1,5 +1,5 @@
 import { last } from 'lodash';
-import { paperColorDark, filterWeight, filterWeightInverse, defaultSample, inkTextureBase64, defaultPenColor } from './constants';
+import { paperColorDefault, defaultFilterWeight, defaultSample, inkTextureBase64, defaultPenColor, defaultStepInterval } from './constants';
 import Point from './Point';
 import BezierDrawer from './BezierDrawer';
 
@@ -31,7 +31,7 @@ var bezierDrawer;
 // an HTML <canvas> Element element to render
 // strokes onto.
 //
-export class Pen {
+export default class Pen {
 
 	constructor(passedCanvas) {
 		canvas = passedCanvas;
@@ -40,7 +40,7 @@ export class Pen {
 		ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
 		sample = this.getSampleRate();
-		bezierDrawer = new BezierDrawer(canvas, this.getTextureBase(), this.getPenColor());
+		bezierDrawer = new BezierDrawer(canvas, this.getTextureBase(), this.getPenColor(), this.getStepInterval());
 		this.clear();
 	}
 
@@ -59,6 +59,19 @@ export class Pen {
 		return defaultPenColor;
 	}
 
+	// Overwrite to configure
+	getPaperColor() {
+		return paperColorDefault;
+	}
+
+	getFilterWeight() {
+		return defaultFilterWeight;
+	}
+
+	getStepInterval() {
+		return defaultStepInterval;
+	}
+
 	//////////////////////////////////////////////
 	// PUBLIC
 	//////////////////////////////////////////////
@@ -71,7 +84,7 @@ export class Pen {
 	clear() {
 		// Clear canvas
 		ctx.clearRect(0, 0, w, h);
-		ctx.fillStyle = paperColorDark;
+		ctx.fillStyle = this.getPaperColor();
 		ctx.globalAlpha = 1;
 		ctx.fillRect(0, 0, w, h);
 
@@ -138,7 +151,8 @@ export class Pen {
 				var fpoint = calculateFilteredPoint(
 					curRawSampledStroke[len - 3],
 					curRawSampledStroke[len - 2],
-					curRawSampledStroke[len - 1]
+					curRawSampledStroke[len - 1],
+					this.getFilterWeight()
 				);
 				curFilteredStroke.push(fpoint);
 			}
@@ -415,15 +429,15 @@ function redraw() {
 // Returns a filtered, sanitized version of 
 // point p2 between points p1 and p3.
 //
-function calculateFilteredPoint(p1, p2, p3) {
+function calculateFilteredPoint(p1, p2, p3, filterWeight) {
 	//if (p1 == null || p2 == null || p3 == null)
 	//  return null; // Not enough points yet to filter
 
 	var m = p1.getMidPt(p3);
 
 	return new Point(
-		filterWeight * p2.x + filterWeightInverse * m.x,
-		filterWeight * p2.y + filterWeightInverse * m.y,
-		filterWeight * p2.p + filterWeightInverse * m.p
+		filterWeight * p2.x + (1 - filterWeight) * m.x,
+		filterWeight * p2.y + (1 - filterWeight) * m.y,
+		filterWeight * p2.p + (1 - filterWeight) * m.p
 	);
 }

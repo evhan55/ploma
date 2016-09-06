@@ -1,5 +1,6 @@
 // export const paperColorLight = 'rgb(255, 255, 246)';
 export const paperColorDark = 'rgb(240, 235, 219)';
+export const paperColorDefault = 'rgb(250, 240, 230)';
 // export const paperColorMedium = 'rgb(250, 240, 230)';
 
 export const ballpointPenColor = {
@@ -13,9 +14,8 @@ export const defaultPenColor = {
 	b: 0
 };
 
-export const filterWeight = 0.5;
-export const filterWeightInverse = 1 - filterWeight;
-export const stepInterval = 0.3;
+export const defaultFilterWeight = 0.5;
+export const defaultStepInterval = 0.3;
 export const defaultSample = 2;
 
 export const textureSamplesLength = 1e5;

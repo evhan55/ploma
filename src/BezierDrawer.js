@@ -1,6 +1,5 @@
 import Point from './Point';
 import Texture from './Texture';
-import { stepInterval } from './constants';
 import { map } from './utils';
 import { last } from 'lodash';
 
@@ -12,17 +11,19 @@ var imageData;
 var w;
 var h;
 var stepOffset;
+var stepInterval;
 var penR, penG, penB;
 
 export default class BezierDrawer {
 
-	constructor(passedCanvas, passedInkTextureBase, passedPenColor) {
+	constructor(passedCanvas, passedInkTextureBase, passedPenColor, passedStepInterval) {
 		canvas = passedCanvas;
 		ctx = canvas.getContext('2d');
 		texture = new Texture(passedInkTextureBase);
 		penR = passedPenColor.r;
 		penG = passedPenColor.g;
 		penB = passedPenColor.b;
+		stepInterval = passedStepInterval;
 		this.reset();
 	}
 
