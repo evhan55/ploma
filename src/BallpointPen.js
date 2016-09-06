@@ -39,9 +39,21 @@ export class BallpointPen {
 		h = canvas.getAttribute('height');
 		ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
-		sample = defaultSample;
-		bezierDrawer = new BezierDrawer(canvas, inkTextureBase64, ballpointPenColor);
+		sample = this.getSampleRate();
+		bezierDrawer = new BezierDrawer(canvas, this.getTextureBase(), this.getPenColor());
 		this.clear();
+	}
+
+	getSampleRate() {
+		return defaultSample;
+	}
+
+	getTextureBase() {
+		return inkTextureBase64;
+	}
+
+	getPenColor() {
+		return ballpointPenColor;
 	}
 
 	//////////////////////////////////////////////
