@@ -7,6 +7,11 @@ export const ballpointPenColor = {
 	g: 8,
 	b: 45
 };
+export const defaultPenColor = {
+	r: 0,
+	g: 0,
+	b: 0
+};
 
 export const filterWeight = 0.5;
 export const filterWeightInverse = 1 - filterWeight;
