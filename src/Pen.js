@@ -21,6 +21,8 @@ var curRawSampledStroke;
 var curFilteredStroke;
 var pointCounter;
 var sample;
+var paperColor;
+var filterWeight;
 
 var bezierDrawer;
 
@@ -39,37 +41,23 @@ export default class Pen {
 		h = canvas.getAttribute('height');
 		ctx = canvas.getContext('2d');
 		ctx.imageSmoothingEnabled = false;
-		sample = this.getSampleRate();
-		bezierDrawer = new BezierDrawer(canvas, this.getTextureBase(), this.getPenColor(), this.getStepInterval());
+		var config = this.getConfiguration();
+		sample = config.sample;
+		paperColor = config.paperColor;
+		filterWeight = config.filterWeight;
+		bezierDrawer = new BezierDrawer(canvas, config.inkTextureBase, config.penColor, config.stepInterval);
 		this.clear();
 	}
 
-	// Overwrite to configure
-	getSampleRate() {
-		return defaultSample;
-	}
-
-	// Overwrite to configure
-	getTextureBase() {
-		return inkTextureBase64;
-	}
-
-	// Overwrite to configure
-	getPenColor() {
-		return defaultPenColor;
-	}
-
-	// Overwrite to configure
-	getPaperColor() {
-		return paperColorDefault;
-	}
-
-	getFilterWeight() {
-		return defaultFilterWeight;
-	}
-
-	getStepInterval() {
-		return defaultStepInterval;
+	getConfiguration() {
+		return {
+			sample: defaultSample,
+			inkTextureBase: inkTextureBase64,
+			penColor: defaultPenColor,
+			paperColor: paperColorDefault,
+			filterWeight: defaultFilterWeight,
+			stepInterval: defaultStepInterval
+		};
 	}
 
 	//////////////////////////////////////////////
@@ -84,7 +72,7 @@ export default class Pen {
 	clear() {
 		// Clear canvas
 		ctx.clearRect(0, 0, w, h);
-		ctx.fillStyle = this.getPaperColor();
+		ctx.fillStyle = paperColor;
 		ctx.globalAlpha = 1;
 		ctx.fillRect(0, 0, w, h);
 
@@ -152,7 +140,7 @@ export default class Pen {
 					curRawSampledStroke[len - 3],
 					curRawSampledStroke[len - 2],
 					curRawSampledStroke[len - 1],
-					this.getFilterWeight()
+					filterWeight
 				);
 				curFilteredStroke.push(fpoint);
 			}
