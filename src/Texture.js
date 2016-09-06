@@ -4,7 +4,7 @@ var textureSampleLocations;
 var textureSampleStep;
 var inkTextureBase;
 
-export class Texture {
+export default class Texture {
 	constructor(passedInkTextureBase) {
 		inkTextureBase = passedInkTextureBase;
 		textureSampleLocations = getSampleLocations();
