@@ -608,7 +608,7 @@ function calculateWidth(p) {
 // Draws a 5x5 pixel grid at a step point
 // with proper antialiasing and texture.
 //
-function drawStep(id, point) {
+function drawStep(imageDataData, point) {
 
 	/////////////////////
 	// PRE-LOOP
@@ -710,18 +710,18 @@ function drawStep(id, point) {
 			invA = 1 - a;
 			idx_1 = idx_0 + 1;
 			idx_2 = idx_0 + 2;
-			oldR = id[idx_0];
-			oldG = id[idx_1];
-			oldB = id[idx_2];
+			oldR = imageDataData[idx_0];
+			oldG = imageDataData[idx_1];
+			oldB = imageDataData[idx_2];
 
 			newR = penR * a + oldR * invA;
 			newG = penG * a + oldG * invA;
 			newB = penB * a + oldB * invA;
 
 			// Set new RGB
-			id[idx_0] = newR;
-			id[idx_1] = newG;
-			id[idx_2] = newB;
+			imageDataData[idx_0] = newR;
+			imageDataData[idx_1] = newG;
+			imageDataData[idx_2] = newB;
 
 		}
 	}
