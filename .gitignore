@@ -25,6 +25,7 @@ node_modules
 *.rar
 *.tar
 *.zip
+*.tgz
 
 # Logs and databases #
 ######################
