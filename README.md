@@ -2,7 +2,7 @@
 
 DEMO                                    | BLOG
 --------------------------------------- | ---------------------------------------------------------
-[Launch demo](http://evhan55.github.io) | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)
+[Launch demo](http://evhan55.github.io/ploma/demo/index.html) | [plomaproject.tumblr.com](http://plomaproject.tumblr.com)
 
 ## Running the demo (for Wacom tablets)
 
@@ -41,18 +41,20 @@ canvas.onmouseup = function(e) {
 
 #### Full Example
 
-Full example usage of Ploma can be found in [index.html](https://github.com/evhan55/ploma/blob/master/index.html)
+Full example usage of Ploma can be found in [index.js](https://github.com/athomschke/ploma/blob/master/demo/js/main.js)
 
 ## API
 
-A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) object element in your HTML.  
+A Ploma Pen instance expects an `HTML <canvas> Element` for rendering ballpoint pen strokes given input points.  Strokes are rendered using `beginStroke`, `extendStroke`, and `endStroke` which accept a single point's data: x-coordinate, y-coordinate and a pressure value ranging from 0-1.  Pressure values can come from any input device you have access to. For Wacom tablets, pressure values can be obtained using the [Wacom web plugin](http://us.wacom.com/en/developerrelations/web/) object element in your HTML. 
 
 ### Class
 
+Once imported into a project, the Ploma library provides a number of pens, the most elaborate being the Ploma.BallpointPen. All inherit from Ploma.Pen.
+
 <table>
 <tr>
-  <td width="30%"><code>Ploma(canvas)</code></td>
-  <td width="70%">Constructor for Ploma instances.  Accepts an <code>HTML &lt;canvas&gt; Element</code> element to render strokes onto.</td>
+  <td width="30%"><code>Ploma.Pen(canvas)</code></td>
+  <td width="70%">Constructor for Pen instances.  Accepts an <code>HTML &lt;canvas&gt; Element</code> element to render strokes onto.</td>
 </tr>
 <tr>
   <td><code>getStrokeImageData(strokes)</code></td>
@@ -93,6 +95,21 @@ A Ploma instance expects an `HTML <canvas> Element` for rendering ballpoint pen 
   <td>Returns the current stroke of points that have been stored since the last mouse down as an array of point JSON objects.<br><code>[{x, y, p}, {x, y, p}, ...]</code></td>
 </tr>
 </table>
+
+## Developer guide
+
+Ploma uses [node package manager](https://www.npmjs.com/) in order to manage its dependencies. Once npm is installed, you're ready to go.
+
+In order to make changes to the Ploma library, follow these steps:
+
+1. Clone into https://github.com/evhan55/ploma.git
+2. Run 'npm install' in the root directory
+2. Run 'npm build' in the root directory
+3. Open [path to root directory]/demo/index.html in your browser to run the demo
+
+Plomas core functionality can be found in [path to root directory]/src/modules. Examples for pens, especially the BallpointPen, are available at [path to root directory]/pens. The library exports are described in [path to root directory]/src/ploma.js
+
+Ploma uses webpack to bundle the sources into [path to root directory]/index.js. The ECMAScrip 6 compatible code is transpiled with babel.
 
 ## TODO
 

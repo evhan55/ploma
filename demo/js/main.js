@@ -51,7 +51,7 @@ require([
 	rid.data.set(r);
 
 	// load Ploma onto canvas and clear it
-	ploma = new Ploma.BlueBallpointPen(canvas);
+	ploma = new Ploma.BallpointPen(canvas);
 
 	////////////
 	// BUTTONS
