@@ -118,6 +118,15 @@
   /////////////
   // ONLOAD
   /////////////
+
+  function get_pressure() {
+    if(penAPI.pressure) {
+        return penAPI.pressure;
+    }
+    var t = new Date().getTime()/1000;
+    return 0.5 + Math.sqrt((1 + Math.sin(t)) / 2)/2;
+  }
+
   window.onload = function() {
 
     // load DOM elements
@@ -130,7 +139,7 @@
     cursor = document.getElementById('cursor');
     texture = document.getElementById('texture');
     plugin = document.getElementById('wtPlugin');
-    penAPI = plugin.penAPI;
+    penAPI = plugin.penAPI || {};
     //mode.innerHTML = sampling;
     //texture.innerHTML = "T";
 
@@ -222,7 +231,7 @@
         ploma.beginStroke(
           e.clientX,
           e.clientY,
-          penAPI.pressure ? penAPI.pressure : 0.9
+          get_pressure()
         );
       }
       canvas.onmousemove = function(e) {
@@ -244,7 +253,7 @@
         ploma.extendStroke(
           e.clientX,
           e.clientY,
-          penAPI.pressure ? penAPI.pressure : 0.9
+          get_pressure()
         );
       }
       canvas.onmouseup = function(e) {
@@ -253,7 +262,7 @@
         ploma.endStroke(
           e.clientX,
           e.clientY,
-          penAPI.pressure ? penAPI.pressure : 0.9
+          get_pressure()
         );
       }
     //} 
